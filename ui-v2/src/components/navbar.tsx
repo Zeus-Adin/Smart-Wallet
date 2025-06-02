@@ -15,6 +15,7 @@ import {
 } from "../components/ui/dropdown-menu.tsx"
 import { Badge } from "../components/ui/badge.tsx"
 import { ConnectWalletButton } from "../components/connect-wallet-button.tsx"
+import { StacksNetworks } from "@stacks/network"
 
 export function Navbar() {
   const { authenticated, handleSignOut, userData, loading } = useAuth()
@@ -29,6 +30,8 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  console.log({ userData })
 
   return (
     <>
@@ -54,7 +57,7 @@ export function Navbar() {
               <span className="font-bold text-xl ml-2 crypto-gradient-text">Smart Wallet</span>
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="#">
+              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/feat">
                 Features
               </Link>
               <Link className="text-sm font-medium hover:text-primary transition-colors" to="/docs">
@@ -76,7 +79,19 @@ export function Navbar() {
                   </Link>
                 </div>
               </div>
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="#">
+              <div className="relative group">
+                <button className="flex items-center text-sm font-medium hover:text-primary transition-colors">
+                  Network <ChevronDown className="h-4 w-4 ml-1 opacity-70" />
+                </button>
+                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-900 border border-gray-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                  {StacksNetworks.map((network) => (
+                    <Link className="block px-4 py-2 text-sm hover:bg-gray-800 capitalize" to={`?network=${network}`}>
+                      {network}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/about">
                 About
               </Link>
             </nav>
@@ -101,9 +116,9 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar className="h-10 w-10 border-2 border-primary/20">
-                        <AvatarImage src="/placeholder.svg" alt={userData?.profile?.name || "User"} />
+                        <AvatarImage src={userData?.bnsnames?.cached_thumbnail_image} alt={userData?.bnsnames?.[0]?.full_name || "User"} />
                         <AvatarFallback className="bg-gray-800">
-                          {userData?.profile?.name?.charAt(0) || "U"}
+                          {userData?.bnsnames?.[0]?.full_name.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -111,11 +126,9 @@ export function Navbar() {
                   <DropdownMenuContent className="w-56 mt-1 crypto-card" align="end" forceMount>
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userData?.profile?.name || "User"}</p>
+                        <p className="text-sm font-medium leading-none">{userData?.bnsnames?.[0]?.full_name || "User"}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          {userData?.profile?.stxAddress?.mainnet
-                            ? `${userData.profile.stxAddress.mainnet.slice(0, 6)}...${userData.profile.stxAddress.mainnet.slice(-4)}`
-                            : "No address"}
+                          {userData?.addresses?.stx?.[0]?.address.slice(0, 4)}...${userData?.addresses?.stx?.[0]?.address.slice(-4)}
                         </p>
                       </div>
                     </DropdownMenuLabel>

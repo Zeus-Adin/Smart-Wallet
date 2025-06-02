@@ -3,21 +3,17 @@
 import { useState } from "react"
 import { Button } from "../components/ui/button"
 import { useAuth } from "../lib/auth-provider"
-import { useNavigate } from "react-router-dom"
 
 export function ConnectWalletButton() {
   const { handleSignIn, loading } = useAuth()
   const [isConnecting, setIsConnecting] = useState(false)
-  const router = useNavigate()
 
   const onClick = async () => {
     if (loading || isConnecting) return
 
     setIsConnecting(true)
     try {
-      await handleSignIn()
-      // Redirect to dashboard after successful sign-in
-      router("/dashboard")
+      handleSignIn()
     } catch (error) {
       console.error("Failed to connect wallet:", error)
     } finally {
