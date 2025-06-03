@@ -1,17 +1,23 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { disconnect, isConnected, getLocalStorage, request } from "@stacks/connect"
-import axios, { type AxiosResponse } from "axios"
+import { defaultUrlFromNetwork, StacksNetworks, type StacksNetworkName } from '@stacks/network'
+import axios from "axios"
 import type { AddressEntry } from "@stacks/connect/dist/types/methods"
+import { useSearchParams } from "react-router-dom"
 
 type Accounts = {
   stx: Omit<AddressEntry, "publicKey">[]
   btc: Omit<AddressEntry, "publicKey">[]
 } | undefined
 
+type Cs = {
+  found: boolean
+  result?: Record<string, unknown>
+}
+
 export type UsersData = {
   addresses: Accounts | undefined
   bnsnames: any
-  sws: any
 }
 
 interface AuthContextType {
@@ -20,8 +26,9 @@ interface AuthContextType {
   loading: boolean
   handleSignIn: () => void
   handleSignOut: () => void
-  handleSWS: (contractId: string) => void
+  handleCs: (address: string | undefined, contractId: string) => Promise<Cs>
   handleGetName: (address: string) => any
+  handleGetClientConfig: (address: string) => { network?: string, chain?: string, api?: string, explorer?: string }
 }
 
 export const smartWalletContractName: string = 'smart-wallet';
@@ -32,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UsersData | undefined>(undefined)
   const [authenticated, setAuthenticated] = useState<boolean>(false)
   const [loading, setLoading] = useState(true)
+  const [searchParams] = useSearchParams();
 
   // Check if user is already authenticated (from localStorage)
   useEffect(() => {
@@ -46,8 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isConnected()) {
           const data: Accounts = getLocalStorage()?.addresses
           const bnsnames = await handleGetName(data?.stx[0]?.address);
-          const swsres = await handleSWS(`${data?.stx?.[0]?.address}.${smartWalletContractName}`)
-          setUserData({ addresses: data, bnsnames, sws: swsres })
+          setUserData({ addresses: data, bnsnames })
           setAuthenticated(isConnected())
         }
       } catch (error) {
@@ -62,25 +69,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer)
   }, [])
 
-  const handleGetName = async (address: string | undefined) => {
-    if (!address) return
+  const handleGetClientConfig = (address: string | undefined) => {
+    const network: StacksNetworkName = searchParams.get("network") || address?.startsWith('SP') ? 'mainnet' : 'testnet'
+    const api: string | undefined = searchParams.get("api") || defaultUrlFromNetwork(network)
+    const chain: string | undefined = searchParams.get("chain") || 'mannet'
+    const explorer: string | undefined = searchParams.get("explorer") || 'https://explorer.hiro.so/'
+    return { network, chain, api, explorer }
+  }
 
-    let namesres = await axios.get(`https://api.bnsv2.com/names/address/${address}/valid`)
-    namesres = namesres?.data?.names
-    let namemetares = await handleGetNftMeta('SP2QEZ06AGJ3RKJPBV14SY1V5BBFNAW33D96YPGZF.BNS-V2', 1)
+  const handleGetName = async (address: string | undefined) => {
+    let namesres, namemetares
+
+    try {
+      namesres = await axios.get(`https://api.bnsv2.com/names/address/${address}/valid`)
+      namesres = namesres?.data?.names
+      const bnsname_contract = address?.startsWith('SP') ? 'SP2QEZ06AGJ3RKJPBV14SY1V5BBFNAW33D96YPGZF.BNS-V2' : 'ST2QEZ06AGJ3RKJPBV14SY1V5BBFNAW33D9SZJQ0M.BNS-V2'
+      namemetares = await handleGetNftMeta(address, bnsname_contract, 1)
+    } catch (error) {
+      console.log({ error })
+    }
     return { ...namesres, ...namemetares }
   }
 
-  const handleGetNftMeta = async (contract: string, id: number) => {
-    const res = (await axios.get(`https://api.hiro.so/metadata/v1/nft/${contract}/${id}`)).data
-    console.log({ res })
-    return res?.metadata
+  const handleGetNftMeta = async (address: string | undefined, contract: string, id: number) => {
+    let response
+
+    try {
+      const { api } = handleGetClientConfig(address)
+      const res = (await axios.get(`${api}/metadata/v1/nft/${contract}/${id}`)).data
+      response = res?.metadata
+    } catch (error) {
+      console.log({ error })
+    }
+    return response
   }
 
-  const handleSWS = async (contractId: string) => {
-    let contractInfo = (await axios.get(`https://api.hiro.so/extended/v2/smart-contracts/status?contract_id=${contractId}`)).data
-    contractInfo = contractInfo?.[contractId]
-    console.log({ contractInfo })
+  const handleCs = async (address: string | undefined, contractId: string) => {
+    let contractInfo
+
+    try {
+      const { api } = handleGetClientConfig(address)
+      contractInfo = (await axios.get(`${api}/extended/v2/smart-contracts/status?contract_id=${contractId}`)).data
+      contractInfo = contractInfo?.[contractId]
+    } catch (error) {
+      console.log({ error })
+    }
     return { found: contractInfo?.found, ...contractInfo?.result }
   }
 
@@ -91,8 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(async () => {
         const addresses: Accounts = getLocalStorage()?.addresses
         const bnsnames = await handleGetName(addresses?.stx?.[0]?.address);
-        const swsres = await handleSWS(`${addresses?.stx?.[0]?.address}.${smartWalletContractName}`)
-        setUserData({ addresses, bnsnames: bnsnames, sws: swsres })
+        setUserData({ addresses, bnsnames: bnsnames })
         setAuthenticated(isConnected())
       })
       .catch((e) => {
@@ -123,8 +155,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         handleSignIn,
         handleSignOut,
-        handleSWS,
-        handleGetName
+        handleCs,
+        handleGetName,
+        handleGetClientConfig
       }}
     >
       {children}

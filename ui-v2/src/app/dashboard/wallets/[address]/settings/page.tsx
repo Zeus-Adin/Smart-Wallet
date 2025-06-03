@@ -1,25 +1,25 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Shield, Users, Wallet, Trash2, AlertTriangle, Info, Lock, UserPlus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import ProtectedRoute from "@/components/protected-route"
-import { Navbar } from "@/components/navbar"
+import { Button } from "../../../../../components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../..//components/ui/card"
+import { Input } from "../../../../..//components/ui/input"
+import { Label } from "../../../../..//components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../..//components/ui/tabs"
+import { Alert, AlertDescription, AlertTitle } from "../../../../..//components/ui/alert"
+import { Badge } from "../../../../..//components/ui/badge"
+import { Textarea } from "../../../../..//components/ui/textarea"
+import ProtectedRoute from "../../../../..//components/protected-route"
+import { Navbar } from "../../../../..//components/navbar"
 
-// Mock wallet data
+
 const mockWallets = [
   {
     id: "1",
     name: "Personal Wallet",
-    address: "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",
+    address: "STT4SQP5RC1BFAJEQKBHZMXQ8NQ7G118F0XRWTMV.smart-wallet",
     balance: "125.75 STX",
     usdBalance: "$156.25",
     type: "Personal",
@@ -28,7 +28,7 @@ const mockWallets = [
     admins: [
       {
         name: "Primary Owner",
-        address: "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",
+        address: "STT4SQP5RC1BFAJEQKBHZMXQ8NQ7G118F0XRWTMV.smart-wallet",
         role: "Owner",
         added: "Apr 5, 2025",
       },
@@ -90,9 +90,9 @@ const mockWallets = [
   },
 ]
 
-export default function WalletSettings({ params }) {
-  const router = useRouter()
-  const { id } = params
+export default function WalletSettings() {
+  const router = useNavigate()
+  const { address } = useParams<{ address: string }>()
   const [wallet, setWallet] = useState(null)
   const [walletName, setWalletName] = useState("")
   const [dailyLimit, setDailyLimit] = useState("")
@@ -103,7 +103,8 @@ export default function WalletSettings({ params }) {
 
   useEffect(() => {
     // Find the wallet with the matching ID
-    const foundWallet = mockWallets.find((w) => w.id === id)
+    const foundWallet = mockWallets.find((w) => w.address === address)
+    console.log({ foundWallet, address, mockWallets })
     if (foundWallet) {
       setWallet(foundWallet)
       setWalletName(foundWallet.name)
@@ -111,9 +112,9 @@ export default function WalletSettings({ params }) {
       setRecoveryAddress(foundWallet.recoveryAddress)
     } else {
       // If wallet not found, redirect to no-wallets page
-      router.push("/dashboard/no-wallets")
+      // router("/dashboard/no-wallets")
     }
-  }, [id, router])
+  }, [address, router])
 
   const handleSaveGeneral = () => {
     setIsUpdating(true)
@@ -198,7 +199,7 @@ export default function WalletSettings({ params }) {
             <Button
               variant="ghost"
               className="mb-2 text-gray-400 hover:text-white"
-              onClick={() => router.push(`/dashboard/wallets/${id}`)}
+              onClick={() => router(`/dashboard/wallets/${address}`)}
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Wallet
             </Button>

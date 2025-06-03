@@ -92,7 +92,7 @@ export default function WalletDashboard() {
   const [copied, setCopied] = useState(false)
   const { userData } = useAuth()
 
-  console.log({ userData })
+  console.log({ userData, address })
 
   useEffect(() => {
     // Find the wallet with the matching ID
@@ -100,8 +100,8 @@ export default function WalletDashboard() {
   }, [userData])
 
   const copyToClipboard = () => {
-    if (wallet?.address) {
-      navigator.clipboard.writeText(wallet.address)
+    if (address) {
+      navigator.clipboard.writeText(address)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -109,17 +109,19 @@ export default function WalletDashboard() {
 
   if (!wallet) {
     return (
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-8 bg-black crypto-blur-bg">
-          <div className="text-center">
-            <div className="inline-block rounded-full bg-gray-800 p-3 mb-4">
-              <Wallet className="h-6 w-6 text-gray-400" />
+      <ProtectedRoute>
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-8 bg-black crypto-blur-bg">
+            <div className="text-center">
+              <div className="inline-block rounded-full bg-gray-800 p-3 mb-4">
+                <Wallet className="h-6 w-6 text-gray-400" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Loading wallet...</h2>
             </div>
-            <h2 className="text-xl font-bold mb-2">Loading wallet...</h2>
-          </div>
-        </main>
-      </div>
+          </main>
+        </div>
+      </ProtectedRoute>
     )
   }
 
@@ -130,9 +132,9 @@ export default function WalletDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{wallet.name}</h1>
+              <h1 className="text-2xl font-bold">{wallet?.addresses?.stx?.[0]?.symbol}</h1>
               <Badge variant="outline" className="bg-gray-800 text-gray-300 border-gray-700">
-                {wallet.type}
+                {wallet?.addresses?.stx?.[0]?.symbol}
               </Badge>
             </div>
             <p className="text-gray-400">Manage your assets and transactions</p>
@@ -185,7 +187,7 @@ export default function WalletDashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-sm font-bold truncate max-w-[180px]">{wallet.address}</div>
+                <div className="text-sm font-bold truncate max-w-[180px]">{address}</div>
                 <Button variant="ghost" size="icon" onClick={copyToClipboard} className="hover:bg-gray-800">
                   {copied ? <span className="text-xs text-primary">Copied!</span> : <Copy className="h-4 w-4" />}
                 </Button>

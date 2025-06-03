@@ -6,10 +6,11 @@ import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card"
 import ProtectedRoute from "../../../components/protected-route"
 import { Navbar } from "../../../components/navbar"
+import { useAuth } from "../../../lib/auth-provider"
 
 export default function NoWallets() {
   const router = useNavigate()
-
+  const { userData } = useAuth()
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen flex-col">
@@ -22,7 +23,7 @@ export default function NoWallets() {
               </div>
               <CardTitle className="text-2xl">No Smart Wallets</CardTitle>
               <CardDescription>
-                You don't have any smart wallets yet. Create your first smart wallet to get started.
+                You don't have any smart wallets associated to this address({userData?.addresses?.stx?.[0]?.address.slice(0, 4)}...{userData?.addresses?.stx?.[0]?.address.slice(-4)}) yet. Create your first smart wallet to get started.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-center">

@@ -85,7 +85,7 @@ export function Navbar() {
                 </button>
                 <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-900 border border-gray-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                   {StacksNetworks.map((network) => (
-                    <Link className="block px-4 py-2 text-sm hover:bg-gray-800 capitalize" to={`?network=${network}`}>
+                    <Link className="block px-4 py-2 text-sm hover:bg-gray-800 capitalize" to={`?network=${network}`} key={network}>
                       {network}
                     </Link>
                   ))}
@@ -128,7 +128,7 @@ export function Navbar() {
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{userData?.bnsnames?.[0]?.full_name || "User"}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          {userData?.addresses?.stx?.[0]?.address.slice(0, 4)}...${userData?.addresses?.stx?.[0]?.address.slice(-4)}
+                          {userData?.addresses?.stx?.[0]?.address.slice(0, 4)}...{userData?.addresses?.stx?.[0]?.address.slice(-4)}
                         </p>
                       </div>
                     </DropdownMenuLabel>
