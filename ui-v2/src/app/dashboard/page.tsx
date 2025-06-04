@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Wallet } from "lucide-react"
@@ -10,12 +8,12 @@ import ProtectedRoute from "../../components/protected-route"
 export default function Dashboard() {
   const router = useNavigate()
   const { address } = useParams<{ address: string }>()
-  const { userData, handleCs } = useAuth
+  const { userData, handleCCS } = useAuth()
 
   useEffect(() => {
     const init_cc = async () => {
       const usca = `${userData?.addresses?.stx?.[0]?.address}.${smartWalletContractName}`
-      const sws = await handleCs(address, `${address || usca}`) || { found: false }
+      const sws = await handleCCS(address, `${address || usca}`) || { found: false }
       console.log({ address, sws, usca, checking: address || usca })
       if (sws?.found) {
         router(`/dashboard/wallets/${address || usca}`)

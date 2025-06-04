@@ -14,32 +14,56 @@ import ProtectedRoute from "../../../components/protected-route"
 import { Navbar } from "../../../components/navbar"
 import { presetContracts } from "../../../lib/constants"
 import { useAuth } from "../../../lib/auth-provider"
+import { useTx } from "../../../lib/tx-provider"
+import type { DeployContractParams } from "@stacks/connect/dist/types/methods"
+import axios from "axios"
 
 export default function CreateWallet() {
   const router = useNavigate()
   const [selectedPreset, setSelectedPreset] = useState(presetContracts[0])
+
+  // Configure Values
   const [walletName, setWalletName] = useState("")
   const [signers, setSigners] = useState(1)
   const [threshold, setThreshold] = useState(1)
-  const [isDeploying, setIsDeploying] = useState(false)
 
-  const { userData } = useAuth()
+  const [isDeploying, setIsDeploying] = useState(false)
+  const { userData, handleGetClientConfig } = useAuth()
+  const { handleContractDeploy } = useTx()
 
   const handlePresetSelect = (preset: any) => {
-    console.log('clicked:', { preset })
     setSelectedPreset(preset)
     setSigners(preset.signers)
     setThreshold(preset.threshold)
   }
 
-  const handleDeploy = () => {
-    setIsDeploying(true)
+  const handleDeploy = async () => {
+    const sp = selectedPreset;
 
-    // Simulate deployment delay
+    if (!sp?.contractName || !sp?.contractSrc) {
+      console.error("Missing contract name or source");
+      return;
+    }
+
+    const name: string = sp.contractName;
+    const clarityCode: string = (await axios.get(sp.contractSrc)).data;
+    setIsDeploying(true);
+
     setTimeout(() => {
+      try {
+        const params: DeployContractParams = {
+          name,
+          clarityCode
+        };
+        handleContractDeploy(params);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        // cleanup here
+      }
+    }, 2000);
+  };
 
-    }, 2000)
-  }
 
   return (
     <ProtectedRoute>
@@ -63,7 +87,7 @@ export default function CreateWallet() {
               <TabsTrigger value="contract" className="crypto-tab data-[state=active]:crypto-tab-active">
                 Contracts
               </TabsTrigger>
-              <TabsTrigger value="custom" className="crypto-tab data-[state=active]:crypto-tab-active">
+              <TabsTrigger disabled={!selectedPreset?.customConfig} value="custom" className="crypto-tab data-[state=active]:crypto-tab-active">
                 Custom Configuration
               </TabsTrigger>
             </TabsList>
@@ -203,21 +227,25 @@ export default function CreateWallet() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Configuration:</span>
-                    <span className="font-medium">{selectedPreset.name}</span>
+                    <span className="font-medium text-white">{selectedPreset.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Signers:</span>
-                    <span>{signers}</span>
+                    <span className="text-gray-400">Type:</span>
+                    <span className="text-white">{selectedPreset.contractName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Network:</span>
+                    <span className="text-white">{handleGetClientConfig(userData?.addresses?.stx?.[0]?.address)?.network}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Required signatures:</span>
-                    <span>
-                      {threshold} of {signers}
+                    <span className="text-white">
+                      {selectedPreset.threshold} of {selectedPreset.signers}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Deployment fee:</span>
-                    <span>0.01 STX</span>
+                    <span className="text-gray-400">Deployment by:</span>
+                    <span className="text-white text-wrap">{userData?.addresses?.stx?.[0]?.address}</span>
                   </div>
                 </div>
               </CardContent>

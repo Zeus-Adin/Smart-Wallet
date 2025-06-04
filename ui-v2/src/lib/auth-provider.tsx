@@ -26,9 +26,9 @@ interface AuthContextType {
   loading: boolean
   handleSignIn: () => void
   handleSignOut: () => void
-  handleCs: (address: string | undefined, contractId: string) => Promise<Cs>
+  handleCCS: (address: string | undefined, contractId: string) => Promise<Cs>
   handleGetName: (address: string) => any
-  handleGetClientConfig: (address: string) => { network?: string, chain?: string, api?: string, explorer?: string }
+  handleGetClientConfig: (address: string | undefined) => { network?: string, chain?: string, api?: string, explorer?: string }
 }
 
 export const smartWalletContractName: string = 'smart-wallet';
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return response
   }
 
-  const handleCs = async (address: string | undefined, contractId: string) => {
+  const handleCCS = async (address: string | undefined, contractId: string) => {
     let contractInfo
 
     try {
@@ -155,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         handleSignIn,
         handleSignOut,
-        handleCs,
+        handleCCS,
         handleGetName,
         handleGetClientConfig
       }}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Copy, ExternalLink, RefreshCw, Shield, Wallet, ArrowUpRight, ArrowDownRight, Clock, ChevronRight, BarChart3, Zap, Layers, Settings, PlusCircle, ChevronDown, } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
@@ -131,7 +131,7 @@ export default function WalletDashboard() {
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 bg-black crypto-blur-bg">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-white/30">
               <h1 className="text-2xl font-bold">{wallet?.addresses?.stx?.[0]?.symbol}</h1>
               <Badge variant="outline" className="bg-gray-800 text-gray-300 border-gray-700">
                 {wallet?.addresses?.stx?.[0]?.symbol}

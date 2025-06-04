@@ -5,6 +5,7 @@ import WalletDashboard from "./dashboard/wallets/[address]/page";
 import NoWallets from "./dashboard/no-wallets/page";
 import CreateWallet from "./dashboard/create-wallet/page";
 import WalletSettings from "./dashboard/wallets/[address]/settings/page";
+import { TxProvider } from "../lib/tx-provider";
 
 export function PageRoutes() {
     return (
@@ -14,7 +15,7 @@ export function PageRoutes() {
             <Route path="/dashboard/wallets/:address" element={<WalletDashboard />} />
             <Route path="/dashboard/wallets/:address/settings" element={<WalletSettings />} />
             <Route path="/dashboard/no-wallets" element={<NoWallets />} />
-            <Route path="/dashboard/create-wallet" element={<CreateWallet />} />
+            <Route path="/dashboard/create-wallet" element={<TxProvider><CreateWallet /></TxProvider>} />
         </Routes>
     )
 }
