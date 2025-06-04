@@ -5,7 +5,7 @@ export type presetType = {
     signers: number
     threshold: number
     features: string[]
-    recommended: true
+    recommended: boolean
     state: string
     extension: boolean
     deployable: boolean
@@ -14,8 +14,11 @@ export type presetType = {
     customConfig: boolean
 }
 
+export const sbtcMainnetAddress = 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token'
+export const sbtcTestnetAddress = 'SN69P7RZRKK8ERQCCABHT2JWKB2S4DHH9H74231T.sbtc-token'
+
 // Preset user deployable contracts
-export const presetContracts = [
+export const presetContracts: presetType[] = [
     {
         id: "personal",
         name: "Personal Wallet",
@@ -24,7 +27,7 @@ export const presetContracts = [
         threshold: 1,
         features: ["Single signature", "Low complexity", "Quick setup", "Enhanced security", "Shareable control"],
         recommended: true,
-        state: null,
+        state: '',
         extension: false,
         deployable: true,
 
@@ -40,10 +43,13 @@ export const presetContracts = [
         threshold: 2,
         features: ["Multiple signers", "Enhanced security", "Shared control"],
         recommended: false,
-        state: null,
+        state: 'null',
         extension: false,
         deployable: false,
-        customConfig: true
+
+        contractName: 'smart-wallet',
+        contractSrc: '/smart-wallet.clar',
+        customConfig: true,
     },
     {
         id: "business",
@@ -53,9 +59,12 @@ export const presetContracts = [
         threshold: 3,
         features: ["Multiple admins", "Spending limits", "Transaction policies"],
         recommended: false,
-        state: null,
+        state: '',
         extension: true,
         deployable: false,
+
+        contractName: 'ext-delegate-stx-pox-4',
+        contractSrc: '/ext-delegate-stx-pox-4.clar',
         customConfig: true
     },
     {
@@ -66,7 +75,7 @@ export const presetContracts = [
         threshold: 1,
         features: ["Single signature", "Enhanced security", "Yeild"],
         recommended: false,
-        state: null,
+        state: '',
         extension: true,
         deployable: true,
 

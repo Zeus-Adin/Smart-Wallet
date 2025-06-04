@@ -12,8 +12,9 @@ import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/a
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
 import { Badge } from "../../../../components/ui/badge"
 import ProtectedRoute from "../../../../components/protected-route"
-import { useAuth, type UsersData } from "../../../../lib/auth-provider"
+import { useAuth, type Balance, type UsersData } from "../../../../lib/auth-provider"
 import { Navbar } from "../../../../components/navbar"
+import { presetContracts } from "../../../../lib/constants"
 
 // Mock wallet data
 type WalletType = "Personal" | "Multi-Signature"
@@ -89,15 +90,27 @@ export default function WalletDashboard() {
   const router = useNavigate()
   const { address } = useParams<{ address: string }>();
   const [wallet, setWallet] = useState<UsersData | undefined>(undefined)
+  const [walletBalance, setWalletBalance] = useState<Balance>()
   const [copied, setCopied] = useState(false)
-  const { userData } = useAuth()
-
-  console.log({ userData, address })
+  const { userData, balance, handleGetBalance, getRates } = useAuth()
 
   useEffect(() => {
     // Find the wallet with the matching ID
-    setWallet(userData)
-  }, [userData])
+    const initWallet = async () => {
+      if (address) {
+        handleGetBalance(address, '', 0)
+        setWallet(userData)
+      }
+    }
+    initWallet()
+    getRates()
+
+  }, [userData, address])
+
+  useEffect(() => {
+    console.log({ balance });
+    setWalletBalance(balance)
+  }, [balance])
 
   const copyToClipboard = () => {
     if (address) {
@@ -132,7 +145,7 @@ export default function WalletDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
             <div className="flex items-center gap-2 text-white/30">
-              <h1 className="text-2xl font-bold">{wallet?.addresses?.stx?.[0]?.symbol}</h1>
+              <h1 className="text-2xl font-bold">{mockWallets[0]?.name}</h1>
               <Badge variant="outline" className="bg-gray-800 text-gray-300 border-gray-700">
                 {wallet?.addresses?.stx?.[0]?.symbol}
               </Badge>
@@ -142,7 +155,7 @@ export default function WalletDashboard() {
           <div className="mt-4 md:mt-0 flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="crypto-button-outline">
+                <Button variant="outline" className="crypto-button-outline text-white/30">
                   Switch Wallet <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -154,13 +167,13 @@ export default function WalletDashboard() {
                     onClick={() => router(`/dashboard/wallets/${w.id}`)}
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">{w.name}</span>
+                      <span className="font-medium text-white/30">{w.name}</span>
                       <span className="text-xs text-gray-400">{w.balance}</span>
                     </div>
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuItem
-                  className="cursor-pointer border-t border-gray-800 mt-1 pt-1"
+                  className="cursor-pointer border-t border-gray-800 mt-1 pt-1 text-white/30"
                   onClick={() => router("/dashboard/create-wallet")}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
@@ -171,7 +184,7 @@ export default function WalletDashboard() {
 
             <Button
               variant="outline"
-              className="crypto-button-outline"
+              className="crypto-button-outline text-white/30"
               onClick={() => router(`/dashboard/wallets/${address}/settings`)}
             >
               <Settings className="mr-2 h-4 w-4" /> Settings
@@ -182,14 +195,14 @@ export default function WalletDashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card className="crypto-card-highlight hover-scale">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Wallet Address</CardTitle>
+              <CardTitle className="text-sm font-medium text-white/30">Wallet Address</CardTitle>
               <Wallet className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-sm font-bold truncate max-w-[180px]">{address}</div>
+                <div className="text-sm font-bold truncate max-w-[180px] text-gray-400">{address}</div>
                 <Button variant="ghost" size="icon" onClick={copyToClipboard} className="hover:bg-gray-800">
-                  {copied ? <span className="text-xs text-primary">Copied!</span> : <Copy className="h-4 w-4" />}
+                  {copied ? <span className="text-xs text-primary">Copied!</span> : <Copy className="h-4 w-4 text-white" />}
                 </Button>
               </div>
               <div className="mt-2 flex items-center gap-2">
@@ -197,7 +210,7 @@ export default function WalletDashboard() {
                   Active
                 </Badge>
                 <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-                  {wallet.threshold} of {wallet.signers} Signatures
+                  {presetContracts[0]?.threshold} of {presetContracts[0]?.signers} Signatures
                 </Badge>
               </div>
             </CardContent>
@@ -205,12 +218,13 @@ export default function WalletDashboard() {
 
           <Card className="crypto-card-highlight hover-scale">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+              <CardTitle className="text-sm font-medium text-white/30">Total Balance</CardTitle>
               <BarChart3 className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold crypto-gradient-text">{wallet.balance}</div>
-              <p className="text-xs text-gray-400 mt-1">≈ {wallet.usdBalance} USD</p>
+              <div className="text-2xl font-bold crypto-gradient-text">{walletBalance?.stxBalance?.actual_balance} {walletBalance?.stxBalance?.symbol}</div>
+              <p className="text-xs text-gray-400 mt-2">≈ {walletBalance?.sbtcBalance?.balance} sBTC</p>
+              <p className="text-xs text-gray-400 mt-2">≈ {wallet.usdBalance} USD</p>
               <div className="mt-2 flex items-center">
                 <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
                   <Zap className="h-3 w-3 mr-1" /> Earn 5% APY
@@ -237,12 +251,15 @@ export default function WalletDashboard() {
         </div>
 
         <Tabs defaultValue="assets" className="space-y-4">
-          <TabsList className="crypto-tab-list grid w-full grid-cols-4 bg-gray-900/50 p-1 rounded-lg">
+          <TabsList className="crypto-tab-list grid w-full grid-cols-5 bg-gray-900/50 p-1 rounded-lg">
             <TabsTrigger value="assets" className="crypto-tab data-[state=active]:crypto-tab-active">
               Assets
             </TabsTrigger>
             <TabsTrigger value="send" className="crypto-tab data-[state=active]:crypto-tab-active">
               Send
+            </TabsTrigger>
+            <TabsTrigger value="extension" className="crypto-tab data-[state=active]:crypto-tab-active">
+              Extension
             </TabsTrigger>
             <TabsTrigger value="activity" className="crypto-tab data-[state=active]:crypto-tab-active">
               Activity
@@ -260,7 +277,7 @@ export default function WalletDashboard() {
                     <CardTitle>Your Assets</CardTitle>
                     <CardDescription>View and manage all assets in your Smart Wallet.</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" className="crypto-button-outline">
+                  <Button variant="outline" size="sm" className="crypto-button-outline text-white/30">
                     <RefreshCw className="h-4 w-4 mr-2" /> Refresh
                   </Button>
                 </div>

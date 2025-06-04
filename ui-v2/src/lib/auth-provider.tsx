@@ -4,11 +4,19 @@ import { defaultUrlFromNetwork, StacksNetworks, type StacksNetworkName } from '@
 import axios from "axios"
 import type { AddressEntry } from "@stacks/connect/dist/types/methods"
 import { useSearchParams } from "react-router-dom"
+import { sbtcMainnetAddress, sbtcTestnetAddress } from "./constants"
 
 type Accounts = {
   stx: Omit<AddressEntry, "publicKey">[]
   btc: Omit<AddressEntry, "publicKey">[]
 } | undefined
+
+export type Balance = {
+  stxBalance: any
+  ftBalance: any
+  sbtcBalance: any
+  nftBalance: any
+}
 
 type Cs = {
   found: boolean
@@ -22,12 +30,16 @@ export type UsersData = {
 
 interface AuthContextType {
   userData: UsersData | undefined
+  balance: Balance | undefined
   authenticated: boolean
   loading: boolean
   handleSignIn: () => void
   handleSignOut: () => void
+  handleGetBalance: (address: string, asset_identifiers: string | undefined, offset: number) => Promise<void>
+  getRates: () => Promise<any>
   handleCCS: (address: string | undefined, contractId: string) => Promise<Cs>
   handleGetName: (address: string) => any
+  handleGetMeta: (address: string | undefined, asset_identifiers: string, id: number, asset: 'ft' | 'nft') => Promise<any>
   handleGetClientConfig: (address: string | undefined) => { network?: string, chain?: string, api?: string, explorer?: string }
 }
 
@@ -37,6 +49,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UsersData | undefined>(undefined)
+  const [balance, setBalance] = useState<Balance>()
   const [authenticated, setAuthenticated] = useState<boolean>(false)
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams();
@@ -84,20 +97,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       namesres = await axios.get(`https://api.bnsv2.com/names/address/${address}/valid`)
       namesres = namesres?.data?.names
       const bnsname_contract = address?.startsWith('SP') ? 'SP2QEZ06AGJ3RKJPBV14SY1V5BBFNAW33D96YPGZF.BNS-V2' : 'ST2QEZ06AGJ3RKJPBV14SY1V5BBFNAW33D9SZJQ0M.BNS-V2'
-      namemetares = await handleGetNftMeta(address, bnsname_contract, 1)
+      namemetares = await handleGetMeta(address, bnsname_contract, 1, 'nft')
     } catch (error) {
       console.log({ error })
     }
     return { ...namesres, ...namemetares }
   }
 
-  const handleGetNftMeta = async (address: string | undefined, contract: string, id: number) => {
+  const handleGetMeta = async (address: string | undefined, asset_identifiers: string, id: number, asset: 'ft' | 'nft') => {
     let response
-
     try {
       const { api } = handleGetClientConfig(address)
-      const res = (await axios.get(`${api}/metadata/v1/nft/${contract}/${id}`)).data
-      response = res?.metadata
+      console.log({ address, asset_identifiers, id, asset, url: `${api}/metadata/v1/${asset}/${asset_identifiers}` })
+      let res
+      if (asset === 'ft') {
+        res = (await axios.get(`${api}/metadata/v1/${asset}/${asset_identifiers}`)).data
+        response = res
+      } else {
+        res = (await axios.get(`${api}/metadata/v1/${asset}/${asset_identifiers}/${id}`)).data
+        response = res?.metadata
+      }
     } catch (error) {
       console.log({ error })
     }
@@ -147,16 +166,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const handleGetBalance = async (address: string, asset_identifiers: string | undefined, offset: number) => {
+    const { api, network } = handleGetClientConfig(address)
+    const isMainnet = network === 'mainnet'
+    const stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
+    const stxDecimal = 1000000
+    const sbtcBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft/${isMainnet ? sbtcMainnetAddress : sbtcTestnetAddress}?offset=${offset}`))?.data
+    const sbtcMeta = await handleGetMeta(address, isMainnet ? sbtcMainnetAddress : sbtcTestnetAddress, 0, 'ft')
+    const ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
+    const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
+    setBalance({
+      stxBalance: { ...stxBalance, decimal: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' },
+      sbtcBalance: { ...sbtcBalance, ...sbtcMeta },
+      ftBalance,
+      nftBalance
+    })
+  }
+
+  const getRates = async () => {
+    console.log({ window })
+    const response = (await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd')).data;
+    const formattedData = response.reduce((acc: any, item: any) => {
+      if (!acc || !item) return
+      acc[item.symbol] = item;
+      return acc;
+    }, {});
+    return formattedData;
+  }
+
   return (
     <AuthContext.Provider
       value={{
         userData,
+        balance,
         authenticated,
         loading,
         handleSignIn,
         handleSignOut,
+        handleGetBalance,
+        getRates,
         handleCCS,
         handleGetName,
+        handleGetMeta,
         handleGetClientConfig
       }}
     >
