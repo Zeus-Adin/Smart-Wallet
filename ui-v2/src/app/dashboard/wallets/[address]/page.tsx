@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { Copy, ExternalLink, RefreshCw, Shield, Wallet, ArrowUpRight, ArrowDownRight, Clock, ChevronRight, BarChart3, Zap, Layers, Settings, PlusCircle, ChevronDown, } from "lucide-react"
+import { Copy, ExternalLink, Shield, Wallet, ArrowUpRight, ArrowDownRight, Clock, BarChart3, Zap, Settings, PlusCircle, ChevronDown, } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
-import { Input } from "../../../../components/ui/input"
-import { Label } from "../../../../components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/alert"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
 import { Badge } from "../../../../components/ui/badge"
@@ -15,6 +13,11 @@ import ProtectedRoute from "../../../../components/protected-route"
 import { useAuth, type Balance, type UsersData } from "../../../../lib/auth-provider"
 import { Navbar } from "../../../../components/navbar"
 import { presetContracts } from "../../../../lib/constants"
+import { useTx } from "../../../../lib/tx-provider"
+import SendTab from "./sendtab"
+import AssetsTab from "./assetstab"
+import ExtensionTab from "./extensiontab"
+import Activities from "./activities"
 
 // Mock wallet data
 type WalletType = "Personal" | "Multi-Signature"
@@ -61,56 +64,44 @@ const mockWallets: Wallet[] = [
     threshold: 1,
   },
 ]
-// Mock transaction data
-const mockTransactions = [
-  {
-    type: "receive",
-    amount: "0.25 STX",
-    from: "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",
-    date: "2 hours ago",
-    status: "completed",
-  },
-  {
-    type: "send",
-    amount: "0.1 STX",
-    to: "SP1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE",
-    date: "1 day ago",
-    status: "completed",
-  },
-  {
-    type: "receive",
-    amount: "10 MNO",
-    from: "SP2X0TZ59D5SZ8ACQ6PEHZ72CZQB8XFGDYB5SKE5Z",
-    date: "3 days ago",
-    status: "completed",
-  },
-]
 
 export default function WalletDashboard() {
   const router = useNavigate()
   const { address } = useParams<{ address: string }>();
   const [wallet, setWallet] = useState<UsersData | undefined>(undefined)
   const [walletBalance, setWalletBalance] = useState<Balance>()
-  const [copied, setCopied] = useState(false)
-  const { userData, balance, handleGetBalance, getRates } = useAuth()
+  const [walletAssets, setWalletAssets] = useState<any[]>([])
+  const [walletTx, setWalletTx] = useState<[]>([])
 
-  useEffect(() => {
-    // Find the wallet with the matching ID
-    const initWallet = async () => {
-      if (address) {
-        handleGetBalance(address, '', 0)
-        setWallet(userData)
-      }
+
+  const [copied, setCopied] = useState(false)
+  const { userData, balance, rates, handleGetBalance, getRates } = useAuth()
+  const { swTx, handleGetSwTx } = useTx()
+
+  // Find the wallet with the matching ID
+  const refresh = async () => {
+    if (address) {
+      handleGetBalance(address, '', 0)
+      setWallet(userData)
     }
-    initWallet()
+  }
+  useEffect(() => {
+    console.log({ address })
+    refresh()
+    if (address) handleGetSwTx(address, 0)
     getRates()
 
   }, [userData, address])
 
   useEffect(() => {
-    console.log({ balance });
     setWalletBalance(balance)
-  }, [balance])
+    const allBalances = [
+      balance?.stxBalance,
+      ...(balance?.ftBalance ?? []),
+    ];
+    console.log({ allBalances, balance })
+    setWalletAssets(allBalances)
+  }, [balance, rates])
 
   const copyToClipboard = () => {
     if (address) {
@@ -118,6 +109,17 @@ export default function WalletDashboard() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
+  }
+
+  function stringToColor(str?: string): string {
+    if (!str) return "hsl(0, 0%, 60%)"; // default neutral gray
+
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 70%, 50%)`; // bright and vibrant
   }
 
   if (!wallet) {
@@ -223,11 +225,11 @@ export default function WalletDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold crypto-gradient-text">{walletBalance?.stxBalance?.actual_balance} {walletBalance?.stxBalance?.symbol}</div>
-              <p className="text-xs text-gray-400 mt-2">≈ {walletBalance?.sbtcBalance?.balance} sBTC</p>
-              <p className="text-xs text-gray-400 mt-2">≈ {wallet.usdBalance} USD</p>
+              <p className="text-xs text-gray-400 mt-2">≈ {walletBalance?.sbtcBalance?.balance ?? 0 / walletBalance?.sbtcBalance?.decimal} sBTC</p>
+              <p className="text-xs text-gray-400 mt-2"> ≈ {(Number(walletBalance?.stxBalance.actual_balance) * rates?.['stx'].current_price)?.toFixed(4)} USD</p>
               <div className="mt-2 flex items-center">
                 <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-                  <Zap className="h-3 w-3 mr-1" /> Earn 5% APY
+                  <Zap className="h-3 w-3 mr-1" /> Rate {rates?.['stx'].current_price ?? 0.00} | USD
                 </Badge>
               </div>
             </CardContent>
@@ -269,263 +271,11 @@ export default function WalletDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assets" className="space-y-4">
-            <Card className="crypto-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Your Assets</CardTitle>
-                    <CardDescription>View and manage all assets in your Smart Wallet.</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" className="crypto-button-outline text-white/30">
-                    <RefreshCw className="h-4 w-4 mr-2" /> Refresh
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between rounded-lg border border-gray-800 p-4 hover:border-gray-700 transition-colors crypto-card-glow">
-                    <div className="flex items-center">
-                      <div className="token-icon token-icon-stx mr-3">
-                        <span className="text-primary font-bold">STX</span>
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="font-medium">Stacks</div>
-                        <div className="text-sm text-gray-400">STX</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">{wallet.balance}</div>
-                      <div className="text-sm text-gray-400">≈ {wallet.usdBalance}</div>
-                    </div>
-                  </div>
+          <AssetsTab />
+          <SendTab />
+          <ExtensionTab />
+          <Activities txHistory={walletTx} />
 
-                  <div className="flex items-center justify-between rounded-lg border border-gray-800 p-4 hover:border-gray-700 transition-colors crypto-card-glow">
-                    <div className="flex items-center">
-                      <div className="token-icon token-icon-mno mr-3">
-                        <span className="text-blue-400 font-bold">MNO</span>
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="font-medium">Micro-Nothing</div>
-                        <div className="text-sm text-gray-400">MNO</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">10 MNO</div>
-                      <div className="text-sm text-gray-400">≈ $0.50</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-lg border border-gray-800 p-4 hover:border-gray-700 transition-colors crypto-card-glow">
-                    <div className="flex items-center">
-                      <div className="token-icon token-icon-btc mr-3">
-                        <span className="text-yellow-500 font-bold">BTC</span>
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="font-medium">Bitcoin</div>
-                        <div className="text-sm text-gray-400">BTC</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">0.001 BTC</div>
-                      <div className="text-sm text-gray-400">≈ $45.20</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-lg border border-gray-800 p-4 hover:border-gray-700 transition-colors crypto-card-glow">
-                    <div className="flex items-center">
-                      <div className="token-icon mr-3">
-                        <Layers className="h-5 w-5 text-purple-400" />
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="font-medium">NFT Collectibles</div>
-                        <div className="text-sm text-gray-400">Digital Assets</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">2 Items</div>
-                      <Button variant="ghost" size="sm" className="text-primary">
-                        View <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full crypto-button">
-                  <Wallet className="mr-2 h-4 w-4" /> Deposit Assets
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="send" className="space-y-4">
-            <Card className="crypto-card">
-              <CardHeader>
-                <CardTitle>Send Assets</CardTitle>
-                <CardDescription>Transfer assets from your Smart Wallet to another address.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="asset">Asset</Label>
-                  <select
-                    id="asset"
-                    className="flex h-10 w-full rounded-md border border-gray-800 bg-gray-900 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 crypto-input"
-                  >
-                    <option value="stx">STX (Stacks)</option>
-                    <option value="mno">MNO (Micro-Nothing)</option>
-                    <option value="btc">BTC (Bitcoin)</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Amount</Label>
-                  <div className="relative">
-                    <Input id="amount" placeholder="0.00" type="number" className="crypto-input pr-16" />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-sm font-medium text-gray-400">
-                      STX
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-400 flex justify-between">
-                    <span>Available: {wallet.balance}</span>
-                    <button className="text-primary hover:underline">Max</button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="recipient">Recipient Address</Label>
-                  <Input id="recipient" placeholder="Enter STX address" className="crypto-input" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="memo">Memo (Optional)</Label>
-                  <Input id="memo" placeholder="Add a note to this transaction" className="crypto-input" />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-2">
-                <div className="w-full p-3 rounded-lg bg-gray-900 mb-2">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-400">Network Fee</span>
-                    <span>0.0001 STX</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Total Amount</span>
-                    <span className="font-medium">0.0001 STX</span>
-                  </div>
-                </div>
-                <Button className="w-full crypto-button">Send Transaction</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="activity" className="space-y-4">
-            <Card className="crypto-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>View your recent transactions and activity.</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" className="crypto-button-outline">
-                    <ExternalLink className="h-4 w-4 mr-2" /> Explorer
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockTransactions.map((tx, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors"
-                    >
-                      <div className="flex items-center">
-                        <div
-                          className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${tx.type === "receive" ? "bg-green-500/20" : "bg-blue-500/20"
-                            }`}
-                        >
-                          {tx.type === "receive" ? (
-                            <ArrowDownRight className="h-4 w-4 text-green-400" />
-                          ) : (
-                            <ArrowUpRight className="h-4 w-4 text-blue-400" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-medium">{tx.type === "receive" ? "Received" : "Sent"}</div>
-                          <div className="text-xs text-gray-400">
-                            {tx.type === "receive"
-                              ? `From: ${tx.from.slice(0, 6)}...${tx.from.slice(-4)}`
-                              : `To: ${tx.to.slice(0, 6)}...${tx.to.slice(-4)}`}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`font-medium ${tx.type === "receive" ? "text-green-400" : ""}`}>
-                          {tx.type === "receive" ? "+" : "-"}
-                          {tx.amount}
-                        </div>
-                        <div className="flex items-center text-xs text-gray-400">
-                          <Clock className="h-3 w-3 mr-1" /> {tx.date}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full crypto-button-outline">
-                  View All Transactions
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="info" className="space-y-4">
-            <Card className="crypto-card">
-              <CardHeader>
-                <CardTitle>Wallet Information</CardTitle>
-                <CardDescription>Details about your smart wallet configuration</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Wallet Name:</span>
-                    <span className="font-medium">{wallet.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Wallet Type:</span>
-                    <span>{wallet.type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Signers:</span>
-                    <span>{wallet.signers}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Required signatures:</span>
-                    <span>
-                      {wallet.threshold} of {wallet.signers}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Creation Date:</span>
-                    <span>April 5, 2025</span>
-                  </div>
-                </div>
-                <Alert className="bg-gray-900 border-gray-800">
-                  <Shield className="h-4 w-4 text-primary" />
-                  <AlertTitle>Security Status</AlertTitle>
-                  <AlertDescription className="text-gray-400">
-                    Your wallet is protected with {wallet.threshold} of {wallet.signers} multi-signature security.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  className="w-full crypto-button-outline"
-                  onClick={() => router(`/dashboard/wallets/${address}/settings`)}
-                >
-                  <Settings className="mr-2 h-4 w-4" /> Manage Wallet Settings
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
         </Tabs>
       </main>
     </div>

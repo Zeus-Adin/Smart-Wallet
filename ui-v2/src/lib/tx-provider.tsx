@@ -1,21 +1,23 @@
 import { request } from "@stacks/connect"
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { } from "@stacks/transactions"
+import { makeContractCall, StacksTransactionWire, type ContractCallPayload, type SignedContractCallOptions } from "@stacks/transactions"
 import type { CallContractParams, DeployContractParams, TransferFungibleParams, TransferNonFungibleParams, TransferStxParams } from "@stacks/connect/dist/types/methods"
+import axios from "axios"
+import { useAuth } from "./auth-provider"
+import { fetchFeeEstimate } from '@stacks/transactions'
 
 interface TxContextType {
     userData: object | null
     authenticated: boolean
-    handleStxSend: (params: TransferStxParams) => Promise<any>
-    handleFtSend: (params: TransferFungibleParams) => Promise<any>
-    handleNftSend: (params: TransferNonFungibleParams) => Promise<any>
-    handleContractDeploy: (params: DeployContractParams) => Promise<any>
-    handleContractCall: (params: CallContractParams) => Promise<any>
-}
-
-type PendingTx = {
-    txId: string,
-    tx_status: string
+    swTx: []
+    eFees: bigint | number
+    handleGetSwTx: (address: string, offset: number) => Promise<void>
+    handleStxSend: (params: TransferStxParams) => Promise<void>
+    handleFtSend: (params: TransferFungibleParams) => Promise<void>
+    handleNftSend: (params: TransferNonFungibleParams) => Promise<void>
+    handleContractDeploy: (params: DeployContractParams) => Promise<void>
+    handleContractCall: (params: CallContractParams) => Promise<void>
+    handleGetTxEstimates: (address: string, params: SignedContractCallOptions) => Promise<void>
 }
 
 const TxContext = createContext<TxContextType | undefined>(undefined)
@@ -23,7 +25,9 @@ const TxContext = createContext<TxContextType | undefined>(undefined)
 export function TxProvider({ children }: { children: ReactNode }) {
     const [userData, setUserData] = useState<object | null>(null)
     const [authenticated, setAuthenticated] = useState<boolean>(false)
-    const [] = useState<PendingTx[]>([])
+    const [swTx, setSwTx] = useState<[]>([])
+    const [eFees, setEFees] = useState<bigint | number>(0)
+    const { handleGetClientConfig } = useAuth()
 
     const handleStxSend = async (params: TransferStxParams) => {
         request('stx_transferStx', params)
@@ -51,16 +55,38 @@ export function TxProvider({ children }: { children: ReactNode }) {
             .catch((e) => { console.log({ e }) })
     }
 
+    const handleGetSwTx = async (address: string, offset: number) => {
+        const { api } = handleGetClientConfig(address)
+        axios.get(`${api}/extended/v2/addresses/${address}/transactions?offset=${offset}`)
+            .then((res) => {
+                setSwTx(res.data.results)
+            })
+            .catch((e) => {
+                console.log({ e })
+            })
+    }
+
+    const handleGetTxEstimates = async (address: string, params: SignedContractCallOptions) => {
+        const { network } = handleGetClientConfig(address)
+        const tx = await makeContractCall(params)
+        const res = await fetchFeeEstimate({ transaction: tx, network })
+        console.log({ res, network, address, params })
+    }
+
     return (
         <TxContext.Provider
             value={{
                 userData,
                 authenticated,
+                swTx,
+                eFees,
+                handleGetSwTx,
                 handleStxSend,
                 handleFtSend,
                 handleNftSend,
                 handleContractDeploy,
-                handleContractCall
+                handleContractCall,
+                handleGetTxEstimates
             }}
         >
             {children}

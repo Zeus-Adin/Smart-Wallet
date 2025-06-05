@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { disconnect, isConnected, getLocalStorage, request } from "@stacks/connect"
-import { defaultUrlFromNetwork, StacksNetworks, type StacksNetworkName } from '@stacks/network'
+import { disconnect, isConnected, getLocalStorage, request, type StacksProvider } from "@stacks/connect"
+import { defaultUrlFromNetwork, StacksNetworks, type StacksNetwork, type StacksNetworkName } from '@stacks/network'
 import axios from "axios"
 import type { AddressEntry } from "@stacks/connect/dist/types/methods"
 import { useSearchParams } from "react-router-dom"
 import { sbtcMainnetAddress, sbtcTestnetAddress } from "./constants"
+import type { NetworkInterfaceBase } from "os"
 
 type Accounts = {
   stx: Omit<AddressEntry, "publicKey">[]
@@ -16,6 +17,14 @@ export type Balance = {
   ftBalance: any
   sbtcBalance: any
   nftBalance: any
+}
+
+export interface Token {
+  symbol: string;
+  name: string;
+  balance: number;
+  decimal: number
+  [key: string]: any;
 }
 
 type Cs = {
@@ -31,6 +40,7 @@ export type UsersData = {
 interface AuthContextType {
   userData: UsersData | undefined
   balance: Balance | undefined
+  rates: any
   authenticated: boolean
   loading: boolean
   handleSignIn: () => void
@@ -40,7 +50,7 @@ interface AuthContextType {
   handleCCS: (address: string | undefined, contractId: string) => Promise<Cs>
   handleGetName: (address: string) => any
   handleGetMeta: (address: string | undefined, asset_identifiers: string, id: number, asset: 'ft' | 'nft') => Promise<any>
-  handleGetClientConfig: (address: string | undefined) => { network?: string, chain?: string, api?: string, explorer?: string }
+  handleGetClientConfig: (address: string | undefined) => { network?: StacksNetworkName, chain?: string, api?: string, explorer?: string }
 }
 
 export const smartWalletContractName: string = 'smart-wallet';
@@ -50,6 +60,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UsersData | undefined>(undefined)
   const [balance, setBalance] = useState<Balance>()
+  const [rates, setRates] = useState<any>()
   const [authenticated, setAuthenticated] = useState<boolean>(false)
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams();
@@ -174,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sbtcBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft/${isMainnet ? sbtcMainnetAddress : sbtcTestnetAddress}?offset=${offset}`))?.data
     const sbtcMeta = await handleGetMeta(address, isMainnet ? sbtcMainnetAddress : sbtcTestnetAddress, 0, 'ft')
     const ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
+    console.log({ ftBalance, sbtcBalance })
     const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
     setBalance({
       stxBalance: { ...stxBalance, decimal: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' },
@@ -184,14 +196,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const getRates = async () => {
-    console.log({ window })
     const response = (await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd')).data;
     const formattedData = response.reduce((acc: any, item: any) => {
       if (!acc || !item) return
       acc[item.symbol] = item;
       return acc;
     }, {});
-    return formattedData;
+    setRates(formattedData)
   }
 
   return (
@@ -199,6 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         userData,
         balance,
+        rates,
         authenticated,
         loading,
         handleSignIn,
