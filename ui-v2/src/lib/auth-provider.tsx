@@ -1,41 +1,10 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { disconnect, isConnected, getLocalStorage, request, type StacksProvider } from "@stacks/connect"
-import { defaultUrlFromNetwork, StacksNetworks, type StacksNetwork, type StacksNetworkName } from '@stacks/network'
+import { disconnect, isConnected, getLocalStorage, request } from "@stacks/connect"
+import { defaultUrlFromNetwork, type StacksNetworkName } from '@stacks/network'
 import axios from "axios"
-import type { AddressEntry } from "@stacks/connect/dist/types/methods"
 import { useSearchParams } from "react-router-dom"
 import { sbtcMainnetAddress, sbtcTestnetAddress } from "./constants"
-import type { NetworkInterfaceBase } from "os"
-
-type Accounts = {
-  stx: Omit<AddressEntry, "publicKey">[]
-  btc: Omit<AddressEntry, "publicKey">[]
-} | undefined
-
-export type Balance = {
-  stxBalance: any
-  ftBalance: any
-  sbtcBalance: any
-  nftBalance: any
-}
-
-export interface Token {
-  symbol: string;
-  name: string;
-  balance: number;
-  decimal: number
-  [key: string]: any;
-}
-
-type Cs = {
-  found: boolean
-  result?: Record<string, unknown>
-}
-
-export type UsersData = {
-  addresses: Accounts | undefined
-  bnsnames: any
-}
+import type { Accounts, Balance, Cs, UsersData } from "./types"
 
 interface AuthContextType {
   userData: UsersData | undefined
@@ -47,14 +16,11 @@ interface AuthContextType {
   handleSignOut: () => void
   handleGetBalance: (address: string, asset_identifiers: string | undefined, offset: number) => Promise<void>
   getRates: () => Promise<any>
-  handleCCS: (address: string | undefined, contractId: string) => Promise<Cs>
+  handleCCS: (address: string | undefined, contractId: string, txinfo: boolean) => Promise<Cs>
   handleGetName: (address: string) => any
   handleGetMeta: (address: string | undefined, asset_identifiers: string, id: number, asset: 'ft' | 'nft') => Promise<any>
   handleGetClientConfig: (address: string | undefined) => { network?: StacksNetworkName, chain?: string, api?: string, explorer?: string }
 }
-
-export const smartWalletContractName: string = 'smart-wallet';
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -134,17 +100,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return response
   }
 
-  const handleCCS = async (address: string | undefined, contractId: string) => {
+  const handleCCS = async (address: string | undefined, contractId: string, txinfo: boolean) => {
     let contractInfo
 
     try {
       const { api } = handleGetClientConfig(address)
       contractInfo = (await axios.get(`${api}/extended/v2/smart-contracts/status?contract_id=${contractId}`)).data
       contractInfo = contractInfo?.[contractId]
+      if (contractInfo?.result && txinfo) {
+        const tx_info = (await axios.get(`${api}/extended/v1/tx/${contractInfo?.result?.tx_id}`)).data
+        contractInfo = { ...contractInfo, tx_info }
+      }
     } catch (error) {
       console.log({ error })
     }
-    return { found: contractInfo?.found, ...contractInfo?.result }
+    return contractInfo
   }
 
   const handleSignIn = async () => {

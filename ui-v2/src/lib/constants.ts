@@ -1,22 +1,9 @@
-export type presetType = {
-    id: string
-    name: string
-    description: string
-    signers: number
-    threshold: number
-    features: string[]
-    recommended: boolean
-    state: string
-    extension: boolean
-    deployable: boolean
-    contractName: string
-    contractSrc: string
-    customConfig: boolean
-}
+import type { presetType } from "./types"
 
 export const sbtcMainnetAddress = 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token'
 export const sbtcTestnetAddress = 'SN69P7RZRKK8ERQCCABHT2JWKB2S4DHH9H74231T.sbtc-token'
-
+export const wallet_contract_name = 'smart-wallet'
+export const delegate_extension_contract_name = 'ext-delegate-stx-pox-4'
 // Preset user deployable contracts
 export const presetContracts: presetType[] = [
     {

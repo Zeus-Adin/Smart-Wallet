@@ -10,11 +10,14 @@ import { useEffect, useState } from "react";
 export default function AssetsTab() {
     const [walletAssets, setWalletAssets] = useState<any[]>([])
     const { address } = useParams<{ address: string }>();
+    const [refreshing, setRefreshing] = useState<boolean>(false)
     const { userData, balance, rates, handleGetBalance, getRates } = useAuth()
 
     const refresh = async () => {
+        setRefreshing(true)
         if (address) {
-            handleGetBalance(address, '', 0)
+            await handleGetBalance(address, '', 0)
+            setRefreshing(false)
         }
     }
 
@@ -44,11 +47,12 @@ export default function AssetsTab() {
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle>Your Assets</CardTitle>
+                            <CardTitle className="text-white/30">Your Assets</CardTitle>
                             <CardDescription>View and manage all assets in your Smart Wallet.</CardDescription>
                         </div>
                         <Button onClick={refresh} variant="outline" size="sm" className="crypto-button-outline text-white/30">
-                            <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+                            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                            Refresh
                         </Button>
                     </div>
                 </CardHeader>

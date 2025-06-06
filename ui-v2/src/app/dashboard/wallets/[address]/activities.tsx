@@ -1,7 +1,11 @@
-import { ArrowDownRight, ArrowUpRight, Clock, ExternalLink } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Clock, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useTx } from "../../../../lib/tx-provider";
+import type { SmartWallet } from "../../../../lib/types";
 
 // Mock transaction data
 const mockTransactions = [
@@ -28,7 +32,24 @@ const mockTransactions = [
     },
 ]
 
-export default function Activities({ txHistory: [] }) {
+export default function Activities() {
+    const { address } = useParams<SmartWallet>()
+    const [walletTx, setWalletTx] = useState<any[]>([])
+    const [refreshing, setRefreshing] = useState<boolean>(false)
+    const { swTx, handleGetSwTx } = useTx()
+
+    const refreshTx = async () => {
+        setRefreshing(true)
+        if (address) {
+            await handleGetSwTx(address, 0)
+            console.log({ address })
+            setRefreshing(false)
+        }
+    }
+
+    useEffect(() => {
+        console.log({ swTx })
+    }, [swTx])
 
     return (
         <TabsContent value="activity" className="space-y-4">
@@ -39,9 +60,15 @@ export default function Activities({ txHistory: [] }) {
                             <CardTitle>Recent Activity</CardTitle>
                             <CardDescription>View your recent transactions and activity.</CardDescription>
                         </div>
-                        <Button variant="outline" size="sm" className="crypto-button-outline text-white">
-                            <ExternalLink className="h-4 w-4 mr-2" /> Explorer
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="crypto-button-outline text-white">
+                                <ExternalLink className="h-4 w-4 mr-2" /> Explorer
+                            </Button>
+                            <Button onClick={refreshTx} variant="outline" size="sm" className="crypto-button-outline text-white/30">
+                                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                                Refresh
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -85,7 +112,7 @@ export default function Activities({ txHistory: [] }) {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button variant="outline" className="w-full crypto-button-outline">
+                    <Button variant="outline" className="w-full crypto-button-outline text-white">
                         View All Transactions
                     </Button>
                 </CardFooter>

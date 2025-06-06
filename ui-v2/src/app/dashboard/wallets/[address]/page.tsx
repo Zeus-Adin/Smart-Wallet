@@ -13,11 +13,11 @@ import ProtectedRoute from "../../../../components/protected-route"
 import { useAuth, type Balance, type UsersData } from "../../../../lib/auth-provider"
 import { Navbar } from "../../../../components/navbar"
 import { presetContracts } from "../../../../lib/constants"
-import { useTx } from "../../../../lib/tx-provider"
 import SendTab from "./sendtab"
 import AssetsTab from "./assetstab"
 import ExtensionTab from "./extensiontab"
 import Activities from "./activities"
+import InfoTab from "./infotab"
 
 // Mock wallet data
 type WalletType = "Personal" | "Multi-Signature"
@@ -71,12 +71,9 @@ export default function WalletDashboard() {
   const [wallet, setWallet] = useState<UsersData | undefined>(undefined)
   const [walletBalance, setWalletBalance] = useState<Balance>()
   const [walletAssets, setWalletAssets] = useState<any[]>([])
-  const [walletTx, setWalletTx] = useState<[]>([])
-
 
   const [copied, setCopied] = useState(false)
   const { userData, balance, rates, handleGetBalance, getRates } = useAuth()
-  const { swTx, handleGetSwTx } = useTx()
 
   // Find the wallet with the matching ID
   const refresh = async () => {
@@ -86,9 +83,7 @@ export default function WalletDashboard() {
     }
   }
   useEffect(() => {
-    console.log({ address })
     refresh()
-    if (address) handleGetSwTx(address, 0)
     getRates()
 
   }, [userData, address])
@@ -237,11 +232,11 @@ export default function WalletDashboard() {
 
           <Card className="crypto-card-highlight hover-scale">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Security Status</CardTitle>
+              <CardTitle className="text-sm font-medium text-white">Security Status</CardTitle>
               <Shield className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Protected</div>
+              <div className="text-2xl font-bold text-white/30">Protected</div>
               <p className="text-xs text-gray-400 mt-1">Recovery keys configured</p>
               <div className="mt-2 flex items-center">
                 <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20">
@@ -274,8 +269,8 @@ export default function WalletDashboard() {
           <AssetsTab />
           <SendTab />
           <ExtensionTab />
-          <Activities txHistory={walletTx} />
-
+          <Activities />
+          <InfoTab />
         </Tabs>
       </main>
     </div>

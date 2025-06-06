@@ -1,6 +1,6 @@
 import { request } from "@stacks/connect"
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { makeContractCall, StacksTransactionWire, type ContractCallPayload, type SignedContractCallOptions } from "@stacks/transactions"
+import { makeContractCall, type SignedContractCallOptions } from "@stacks/transactions"
 import type { CallContractParams, DeployContractParams, TransferFungibleParams, TransferNonFungibleParams, TransferStxParams } from "@stacks/connect/dist/types/methods"
 import axios from "axios"
 import { useAuth } from "./auth-provider"

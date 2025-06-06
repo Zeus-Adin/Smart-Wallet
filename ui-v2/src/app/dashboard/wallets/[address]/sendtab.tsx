@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../../../components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "../../../../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "../../../../components/ui/card";
 import CustomDropDown from "../../../../components/ui/customdropdown";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
 import { TabsContent } from "../../../../components/ui/tabs";
-import { useAuth, type Token } from "../../../../lib/auth-provider";
+import { useAuth } from "../../../../lib/auth-provider";
 import { useParams } from "react-router-dom";
 import type { StacksNetworkName } from "@stacks/network";
-import { useTx } from "../../../../lib/tx-provider";
-import { Cl, Pc, PostConditionMode } from "@stacks/transactions";
-import type { CallContractParams } from "@stacks/connect/dist/types/methods";
+import { RefreshCw } from "lucide-react";
+import ExecuteTx from "./executetx";
+import type { Token } from "../../../../lib/types";
 
 export default function SendTab() {
     const { address } = useParams<{ address: `${string}.${string}` }>()
@@ -21,44 +21,14 @@ export default function SendTab() {
     const [network, setNetwork] = useState<StacksNetworkName>()
     const [allBalance, setAllBalance] = useState<Token[]>([])
 
-    const { balance, handleGetBalance, handleGetClientConfig } = useAuth()
-    const { eFees, handleGetTxEstimates, handleContractCall } = useTx()
-
+    const { balance, handleGetBalance } = useAuth()
+    const [refreshing, setRefreshing] = useState<boolean>(false)
     const refreshBalance = async () => {
+        setRefreshing(true)
         if (address) {
-            handleGetBalance(address, '', 0)
+            await handleGetBalance(address, '', 0)
+            setRefreshing(false)
         }
-    }
-
-    const sendTx = async () => {
-        const isStx = selectedToken?.symbol === "STX"
-        const assetId = selectedToken?.contractId
-        console.log({ isStx, assetId })
-        if (!address) return
-
-        const decimal = selectedToken?.decimal ?? 0
-        const finalAmount = amount * decimal
-        const postConditions = isStx
-            ? [Pc.principal(address).willSendLte(finalAmount).ustx()]
-            : [
-                Pc.principal(address).willSendLte(finalAmount).ft(
-                    assetId.split('::')[0],
-                    assetId.split('::')[1]
-                )
-            ]
-        const txOp: CallContractParams = {
-            contract: address,
-            functionName: isStx ? 'stx-transfer' : 'sip010-transfer',
-            functionArgs: [
-                Cl.uint(Math.round(finalAmount)),
-                Cl.principal(recipient),
-                memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
-            ],
-            network,
-            postConditions
-        }
-
-        handleContractCall(txOp)
     }
 
     useEffect(() => {
@@ -73,25 +43,22 @@ export default function SendTab() {
         setAllBalance(allBalances)
     }, [balance])
 
-    useEffect(() => {
-
-        if (!address) return
-
-    }, [selectedToken, amount, recipient, address])
-
-    useEffect(() => {
-        const { network } = handleGetClientConfig(address)
-        setNetwork(network)
-    }, [selectedToken])
-
     return (
         <TabsContent value="send" className="space-y-4">
             <Card className="crypto-card">
                 <CardHeader>
-                    <CardTitle className="text-white">Send Assets</CardTitle>
-                    <CardDescription>
-                        Transfer assets from your Smart Wallet to another address.
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="text-white/30">Send Assets</CardTitle>
+                            <CardDescription>
+                                Transfer assets from your Smart Wallet to another address.
+                            </CardDescription>
+                        </div>
+                        <Button onClick={refreshBalance} variant="outline" size="sm" className="crypto-button-outline text-white/30">
+                            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
@@ -124,7 +91,7 @@ export default function SendTab() {
                         <Input
                             id="recipient"
                             placeholder="Enter STX address"
-                            className="crypto-input"
+                            className="crypto-input text-white"
                             onChange={(e) => setRecipient(e.target.value)}
                         />
                     </div>
@@ -133,31 +100,21 @@ export default function SendTab() {
                         <Input
                             id="memo"
                             placeholder="Add a note to this transaction"
-                            className="crypto-input"
+                            className="crypto-input text-white"
                             onChange={(e) => setMemo(e.target.value)}
                         />
                     </div>
                 </CardContent>
-                <CardFooter className="flex flex-col space-y-2">
-                    <div>
-                        <h1></h1>
-                    </div>
-                    <div className="w-full p-3 rounded-lg bg-gray-900 mb-2">
-                        <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-400">Network</span>
-                            <span className="capitalize text-white">{network}</span>
-                        </div>
-                        <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-400">Network Fee</span>
-                            <span className="capitalize text-white">{eFees}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Total Amount</span>
-                            <span className="font-medium text-white">{amount} {selectedToken?.symbol}</span>
-                        </div>
-                    </div>
-                    <Button className="w-full crypto-button" onClick={sendTx}>Send Transaction</Button>
-                </CardFooter>
+                <ExecuteTx props={{
+                    action: 'sendftasset',
+                    values: {
+                        symbol: selectedToken?.symbol,
+                        amount, recipient, memo,
+                        decimal: selectedToken?.decimal,
+                        asset_address: selectedToken?.contractId?.split('::')[0],
+                        asset_name: selectedToken?.contractId?.split('::')[1],
+                    }
+                }} />
             </Card>
         </TabsContent>
     );
