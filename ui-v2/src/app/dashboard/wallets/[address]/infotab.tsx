@@ -1,4 +1,4 @@
-import { Settings, Shield } from "lucide-react";
+import { Settings, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
@@ -12,6 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 export default function InfoTab() {
     const { address } = useParams<SmartWallet>()
     const [walletInfo, setWalletInfo] = useState<Info>()
+    const [wcc_Exists, setWcc_Exists] = useState<boolean>(false)
     const { handleCCS } = useAuth()
     const router = useNavigate()
 
@@ -21,9 +22,9 @@ export default function InfoTab() {
         const date = new Date(wcc?.tx_info?.block_time_iso)
         const timeAgo = formatDistanceToNow(date, { addSuffix: true })
         const info: Info = {
-            name: address?.split('.')[1],
+            name: address?.split('.')[1].replace('-', ' '),
             deployer: wcc?.tx_info?.sender_address,
-            type: wcc?.tx_info?.tx_type,
+            type: wcc?.tx_info?.tx_type.replace('_', ' '),
             sponsored: wcc?.tx_info?.sponsored,
             creation: timeAgo,
             owner: wcc?.tx_info?.sender_address,
@@ -32,6 +33,7 @@ export default function InfoTab() {
             status: wcc?.tx_info?.tx_status,
         }
         console.log({ wcc })
+        setWcc_Exists(wcc?.found)
         setWalletInfo(info)
     }
 
@@ -76,10 +78,10 @@ export default function InfoTab() {
                         </div>
                     </div>
                     <Alert className="bg-gray-900 border-gray-800">
-                        <Shield color="#cccc" className="h-4 w-4 text-primary" />
+                        <ShieldCheck color="green" className="h-4 w-4 text-primary" />
                         <AlertTitle className="text-white/30">Security Status</AlertTitle>
                         <AlertDescription className="text-gray-400">
-                            Your wallet is protected with {walletInfo?.threshold} of {walletInfo?.signers} multi-signature security.
+                            Your account is now fully set up. You may begin using the platform and manage your account at any time.
                         </AlertDescription>
                     </Alert>
                 </CardContent>
