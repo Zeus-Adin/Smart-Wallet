@@ -15,7 +15,7 @@ export default function Dashboard() {
       const address = userData?.addresses?.stx?.[0]?.address
       const swaddress = `${address}.${smartWalletContractName}`
       const sws = await handleCCS(address, swaddress, false) || { found: false }
-      console.log({ address, swaddress, sws })
+
       if (sws?.found) {
         router(`/dashboard/wallets/${swaddress}`)
       } else {

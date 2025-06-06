@@ -30,15 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState<boolean>(false)
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams();
-
+  const network = searchParams.get('network')
   // Check if user is already authenticated (from localStorage)
   useEffect(() => {
-    if (typeof window === "undefined") {
-      setLoading(false)
-      return
-    }
-
-    // Check Auth State
+    console.log('Network state checking', { network })
     const checkAuth = async () => {
       try {
         if (isConnected()) {
@@ -54,10 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Auth State check re-ocurrence
     const timer = setTimeout(checkAuth, 500)
     return () => clearTimeout(timer)
-  }, [])
+  }, [network])
 
   const handleGetClientConfig = (address: string | undefined) => {
     const network: StacksNetworkName = searchParams.get("network") || address?.startsWith('SP') ? 'mainnet' : 'testnet'
