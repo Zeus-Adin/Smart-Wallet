@@ -17,7 +17,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     const { handleGetClientConfig } = useAuth()
     const { eFees, handleContractCall } = useTx()
     const [executing, setExecuting] = useState<boolean>(false)
-    const { userData } = useAuth()
+    const { userData, formatDecimals } = useAuth()
 
     const executeContractFtTransfer = async () => {
         let txOp: CallContractParams
@@ -26,8 +26,9 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
         if (!address || !amount || !decimal || !recipient) return
 
         const isStx = symbol === "STX"
-        const finalAmount = amount * decimal
+        let finalAmount
         if (isStx) {
+            finalAmount = amount * decimal
             setExecuting(true)
             const postConditions = [Pc.principal(address).willSendLte(finalAmount).ustx()]
             txOp = {
@@ -42,6 +43,9 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 postConditions
             }
         } else {
+            finalAmount = formatDecimals(amount, decimal, true)
+            console.log({ finalAmount, amount, decimal })
+
             if (!asset_address || !asset_name) return
             setExecuting(true)
 
@@ -50,7 +54,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 contract: address,
                 functionName: isStx ? 'stx-transfer' : 'sip010-transfer',
                 functionArgs: [
-                    Cl.uint(Math.round(finalAmount)),
+                    Cl.uint(Math.round(Number(finalAmount))),
                     Cl.principal(recipient),
                     memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
                 ],
@@ -58,6 +62,8 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 postConditions
             }
         }
+        console.log({ finalAmount, amount, decimal })
+
         await handleContractCall(txOp)
         setExecuting(false)
     }

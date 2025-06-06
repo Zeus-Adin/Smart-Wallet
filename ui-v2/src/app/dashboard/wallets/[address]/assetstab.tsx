@@ -2,16 +2,17 @@ import { ChevronRight, Layers, RefreshCw, Wallet } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../../lib/auth-provider";
 import { useEffect, useState } from "react";
 
 
 export default function AssetsTab() {
-    const [walletAssets, setWalletAssets] = useState<any[]>([])
+    const [searchParams, setSearchParams] = useSearchParams();
     const { address } = useParams<{ address: string }>();
+    const [walletAssets, setWalletAssets] = useState<any[]>([])
     const [refreshing, setRefreshing] = useState<boolean>(false)
-    const { userData, balance, rates, handleGetBalance, getRates } = useAuth()
+    const { balance, rates, handleGetBalance } = useAuth()
 
     const refresh = async () => {
         setRefreshing(true)
@@ -59,11 +60,14 @@ export default function AssetsTab() {
                 <CardContent className="space-y-4">
                     <div className="space-y-3">
 
-                        {walletAssets.map((v) => (
-                            <div className="flex items-center justify-between rounded-lg border border-gray-800 p-4 hover:border-gray-700 transition-colors crypto-card-glow">
+                        {walletAssets.map((v, id) => (
+                            <div key={id} className="flex items-center justify-between rounded-lg border border-gray-800 p-4 hover:border-gray-700 transition-colors crypto-card-glow">
                                 <div className="flex items-center">
                                     <div className="token-icon token-icon-stx mr-3">
-                                        <span className="font-bold" style={{ color: stringToColor(v?.symbol ?? 'NA') }}>{v?.symbol ?? 'NA'}</span>
+                                        {v?.image
+                                            ? <img width='100%' src={v?.image} />
+                                            : <span className="font-bold" style={{ color: stringToColor(v?.symbol ?? 'NA') }}>{v?.symbol ?? 'NA'}</span>
+                                        }
                                     </div>
                                     <div className="space-y-0.5">
                                         <div className="font-medium text-white/30">{v?.name}</div>
@@ -71,10 +75,10 @@ export default function AssetsTab() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="font-medium">
-                                        {v?.balance / v?.decimal}
+                                    <div className="font-medium text-white">
+                                        {v?.actual_balance}
                                     </div>
-                                    <div className="text-sm text-gray-400">≈ {((v?.balance / v?.decimal) * rates?.[String(v?.symbol)?.toLowerCase()]?.current_price)?.toFixed(4)}</div>
+                                    <div className="text-sm text-gray-400">≈ {((v?.actual_balance) * (rates?.[v?.symbol === 'sBTC' ? 'btc' : v?.symbol?.toLowerCase()]?.current_price ?? 0)).toFixed(2)}</div>
                                 </div>
                             </div>
                         ))}
@@ -99,7 +103,10 @@ export default function AssetsTab() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button className="w-full crypto-button">
+                    <Button onClick={() => {
+                        searchParams.set('tab', 'deposit')
+                        setSearchParams(searchParams)
+                    }} className="w-full crypto-button">
                         <Wallet className="mr-2 h-4 w-4" /> Deposit Assets
                     </Button>
                 </CardFooter>

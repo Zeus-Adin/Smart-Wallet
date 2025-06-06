@@ -20,6 +20,7 @@ interface AuthContextType {
   handleGetName: (address: string) => any
   handleGetMeta: (address: string | undefined, asset_identifiers: string, id: number, asset: 'ft' | 'nft') => Promise<any>
   handleGetClientConfig: (address: string | undefined) => { network?: StacksNetworkName, chain?: string, api?: string, explorer?: string }
+  formatDecimals: (value: number | string, decimals: number, isUmicro: boolean) => string
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -141,19 +142,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const formatDecimals = (value: number | string, decimals: number, isUmicro: boolean): string => {
+    if (isUmicro) {
+      return (Number(value) * 10 ** decimals).toFixed(0);
+    } else {
+      return (Number(value) / 10 ** decimals).toFixed(4);
+    }
+  }
+
   const handleGetBalance = async (address: string, asset_identifiers: string | undefined, offset: number) => {
     const { api, network } = handleGetClientConfig(address)
     const isMainnet = network === 'mainnet'
+    const sbtcAddress = isMainnet ? sbtcMainnetAddress.split('.')[0] : sbtcTestnetAddress.split('.')[0]
     const stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
     const stxDecimal = 1000000
-    const sbtcBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft/${isMainnet ? sbtcMainnetAddress : sbtcTestnetAddress}?offset=${offset}`))?.data
-    const sbtcMeta = await handleGetMeta(address, isMainnet ? sbtcMainnetAddress : sbtcTestnetAddress, 0, 'ft')
-    const ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
-    console.log({ ftBalance, sbtcBalance })
     const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
+    let ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
+    ftBalance = await Promise.all(ftBalance.map(async (res: { balance: string, token: string }) => {
+      if (!res) return
+      const tokenAddress = res?.token?.split('::')[0]
+      const tokenMeta = await handleGetMeta(address, tokenAddress, 0, 'ft')
+      const tokenMetadata = await axios.get(tokenMeta?.token_uri)
+      return { ...res, ...tokenMeta, ...tokenMetadata?.data, actual_balance: formatDecimals(res?.balance ?? 0, tokenMeta?.decimals ?? 0, false) }
+    }))
+    const sbtcBalance = ftBalance.find((t: { sender_address: string }) => t.sender_address === sbtcAddress)
     setBalance({
-      stxBalance: { ...stxBalance, decimal: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' },
-      sbtcBalance: { ...sbtcBalance, ...sbtcMeta },
+      stxBalance: {
+        ...stxBalance,
+        image: '/stx-logo.svg',
+        decimals: stxDecimal,
+        actual_balance: stxBalance?.balance / stxDecimal,
+        name: 'Stacks',
+        symbol: 'STX'
+      },
+      sbtcBalance,
       ftBalance,
       nftBalance
     })
@@ -184,7 +206,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         handleCCS,
         handleGetName,
         handleGetMeta,
-        handleGetClientConfig
+        handleGetClientConfig,
+        formatDecimals
       }}
     >
       {children}

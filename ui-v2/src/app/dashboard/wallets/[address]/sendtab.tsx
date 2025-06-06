@@ -7,7 +7,6 @@ import { Label } from "../../../../components/ui/label";
 import { TabsContent } from "../../../../components/ui/tabs";
 import { useAuth } from "../../../../lib/auth-provider";
 import { useParams } from "react-router-dom";
-import type { StacksNetworkName } from "@stacks/network";
 import { RefreshCw } from "lucide-react";
 import ExecuteTx from "./executetx";
 import type { Token } from "../../../../lib/types";
@@ -18,15 +17,15 @@ export default function SendTab() {
     const [amount, setAmount] = useState<number>(0)
     const [recipient, setRecipient] = useState<string>('')
     const [memo, setMemo] = useState<string>('')
-    const [network, setNetwork] = useState<StacksNetworkName>()
     const [allBalance, setAllBalance] = useState<Token[]>([])
-
-    const { balance, handleGetBalance } = useAuth()
     const [refreshing, setRefreshing] = useState<boolean>(false)
+    const { balance, rates, handleGetBalance, getRates } = useAuth()
+
     const refreshBalance = async () => {
         setRefreshing(true)
         if (address) {
             await handleGetBalance(address, '', 0)
+            getRates()
             setRefreshing(false)
         }
     }
@@ -41,7 +40,11 @@ export default function SendTab() {
             ...(balance?.ftBalance ?? []),
         ];
         setAllBalance(allBalances)
-    }, [balance])
+    }, [balance, rates])
+
+    useEffect(() => {
+        console.log({ selectedToken })
+    }, [selectedToken])
 
     return (
         <TabsContent value="send" className="space-y-4">
@@ -81,7 +84,7 @@ export default function SendTab() {
                         </div>
                         <div className="text-xs text-gray-400 flex justify-between">
                             <span>
-                                Available: {selectedToken?.actual_balance}
+                                Available: {Number(selectedToken?.actual_balance ?? 0).toFixed(4)}
                             </span>
                             <button className="text-primary hover:underline" onClick={() => setAmount(selectedToken?.actual_balance)}>Max</button>
                         </div>
@@ -110,9 +113,9 @@ export default function SendTab() {
                     values: {
                         symbol: selectedToken?.symbol,
                         amount, recipient, memo,
-                        decimal: selectedToken?.decimal,
-                        asset_address: selectedToken?.contractId?.split('::')[0],
-                        asset_name: selectedToken?.contractId?.split('::')[1],
+                        decimal: selectedToken?.decimals,
+                        asset_address: selectedToken?.token?.split('::')[0],
+                        asset_name: selectedToken?.token?.split('::')[1],
                     }
                 }} />
             </Card>

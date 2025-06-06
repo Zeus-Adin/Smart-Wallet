@@ -1,16 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { Copy, ExternalLink, Shield, Wallet, ArrowUpRight, ArrowDownRight, Clock, BarChart3, Zap, Settings, PlusCircle, ChevronDown, } from "lucide-react"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { Copy, Shield, Wallet, BarChart3, Zap, Settings, PlusCircle, ChevronDown, } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/alert"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
 import { Badge } from "../../../../components/ui/badge"
 import ProtectedRoute from "../../../../components/protected-route"
-import { useAuth, type Balance, type UsersData } from "../../../../lib/auth-provider"
+import { useAuth } from "../../../../lib/auth-provider"
 import { Navbar } from "../../../../components/navbar"
 import { presetContracts } from "../../../../lib/constants"
 import SendTab from "./sendtab"
@@ -18,9 +17,7 @@ import AssetsTab from "./assetstab"
 import ExtensionTab from "./extensiontab"
 import Activities from "./activities"
 import InfoTab from "./infotab"
-
-// Mock wallet data
-type WalletType = "Personal" | "Multi-Signature"
+import type { Balance, UsersData } from "../../../../lib/types"
 
 interface Wallet {
   id: number
@@ -67,36 +64,31 @@ const mockWallets: Wallet[] = [
 
 export default function WalletDashboard() {
   const router = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const currentTab = searchParams.get('tab') ?? 'assets'
   const { address } = useParams<{ address: string }>();
-  const [wallet, setWallet] = useState<UsersData | undefined>(undefined)
-  const [walletBalance, setWalletBalance] = useState<Balance>()
-  const [walletAssets, setWalletAssets] = useState<any[]>([])
-
   const [copied, setCopied] = useState(false)
+  const [wallet, setWallet] = useState<UsersData | undefined>()
+  const [walletBalance, setWalletBalance] = useState<Balance>()
   const { userData, balance, rates, handleGetBalance, getRates } = useAuth()
 
   // Find the wallet with the matching ID
   const refresh = async () => {
     if (address) {
       handleGetBalance(address, '', 0)
+      console.log(userData)
       setWallet(userData)
     }
   }
+
   useEffect(() => {
     refresh()
     getRates()
-
   }, [userData, address])
 
   useEffect(() => {
     setWalletBalance(balance)
-    const allBalances = [
-      balance?.stxBalance,
-      ...(balance?.ftBalance ?? []),
-    ];
-    console.log({ allBalances, balance })
-    setWalletAssets(allBalances)
-  }, [balance, rates])
+  }, [balance, rates, wallet])
 
   const copyToClipboard = () => {
     if (address) {
@@ -104,17 +96,6 @@ export default function WalletDashboard() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
-  }
-
-  function stringToColor(str?: string): string {
-    if (!str) return "hsl(0, 0%, 60%)"; // default neutral gray
-
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = hash % 360;
-    return `hsl(${hue}, 70%, 50%)`; // bright and vibrant
   }
 
   if (!wallet) {
@@ -157,18 +138,14 @@ export default function WalletDashboard() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-gray-900 border-gray-800">
-                {mockWallets.map((w) => (
-                  <DropdownMenuItem
-                    key={w.id}
-                    className={`cursor-pointer ${w.address === address ? "bg-gray-800" : ""}`}
-                    onClick={() => router(`/dashboard/wallets/${w.id}`)}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium text-white/30">{w.name}</span>
-                      <span className="text-xs text-gray-400">{w.balance}</span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
+                <DropdownMenuItem className="cursor-pointer "
+                  onClick={() => router(`/dashboard/wallets/${address}`)}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium text-white/30">Personal Wallet</span>
+                    <span className="text-xs text-gray-400">{balance?.stxBalance?.actual_balance} ≈ {(balance?.stxBalance?.actual_balance * rates?.['stx']?.current_price)?.toFixed(4)} USD</span>
+                  </div>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer border-t border-gray-800 mt-1 pt-1 text-white/30"
                   onClick={() => router("/dashboard/create-wallet")}
@@ -180,6 +157,7 @@ export default function WalletDashboard() {
             </DropdownMenu>
 
             <Button
+              disabled
               variant="outline"
               className="crypto-button-outline text-white/30"
               onClick={() => router(`/dashboard/wallets/${address}/settings`)}
@@ -219,12 +197,30 @@ export default function WalletDashboard() {
               <BarChart3 className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold crypto-gradient-text">{walletBalance?.stxBalance?.actual_balance} {walletBalance?.stxBalance?.symbol}</div>
-              <p className="text-xs text-gray-400 mt-2">≈ {walletBalance?.sbtcBalance?.balance ?? 0 / walletBalance?.sbtcBalance?.decimal} sBTC</p>
-              <p className="text-xs text-gray-400 mt-2"> ≈ {(Number(walletBalance?.stxBalance.actual_balance) * rates?.['stx'].current_price)?.toFixed(4)} USD</p>
-              <div className="mt-2 flex items-center">
+              <div className="flex gap-1">
+                <p className="text-2xl font-bold crypto-gradient-text flex gap-1">{(walletBalance?.stxBalance?.actual_balance ?? 0)?.toFixed(4)} <span className="text-xs text-gray-400 mt-2">STX</span></p>
+                <p className="text-xs text-gray-400 mt-2">≈ {
+                  (
+                    Number(walletBalance?.stxBalance?.actual_balance ?? 0) *
+                    Number(rates?.['stx']?.current_price ?? 0)
+                  ).toFixed(2)
+                } USD</p>
+              </div>
+              <div className="flex gap-1">
+                <p className="text-xs font-light text-transparent bg-clip-text bg-gradient-to-r from-[#f7931a] via-[#ffac33] to-[#ffe07d]">{walletBalance?.sbtcBalance?.actual_balance ?? 0} sBTC</p>
+                <p className="text-xs text-gray-400">≈ {
+                  (
+                    Number(walletBalance?.sbtcBalance?.actual_balance ?? 0) *
+                    Number(rates?.['btc']?.current_price ?? 0)
+                  ).toFixed(2)
+                } USD</p>
+              </div>
+              <div className="mt-2 flex items-center justify-between">
                 <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-                  <Zap className="h-3 w-3 mr-1" /> Rate {rates?.['stx'].current_price ?? 0.00} | USD
+                  <Zap className="h-3 w-3 mr-1" /> Rate {(rates?.['stx']?.current_price ?? 0)?.toFixed(2)} USD/STX
+                </Badge>
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+                  <Zap className="h-3 w-3 mr-1" /> Rate {(rates?.['btc']?.current_price ?? 0)?.toLocaleString()} USD/BTC
                 </Badge>
               </div>
             </CardContent>
@@ -247,7 +243,10 @@ export default function WalletDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="assets" className="space-y-4">
+        <Tabs defaultValue="assets" value={currentTab} className="space-y-4" onValueChange={(val) => {
+          searchParams.set('tab', val);
+          setSearchParams(searchParams);
+        }}>
           <TabsList className="crypto-tab-list grid w-full grid-cols-5 bg-gray-900/50 p-1 rounded-lg">
             <TabsTrigger value="assets" className="crypto-tab data-[state=active]:crypto-tab-active">
               Assets

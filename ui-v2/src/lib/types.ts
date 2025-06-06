@@ -1,4 +1,4 @@
-import type { AddressEntry, CallContractParams, ContractIdString, DeployContractParams, TransferFungibleParams, TransferNonFungibleParams, TransferStxParams } from "@stacks/connect/dist/types/methods"
+import type { AddressEntry, ContractIdString } from "@stacks/connect/dist/types/methods"
 import type { Dispatch, SetStateAction } from "react"
 
 export type SmartWallet = { address: `${string}.${string}` }

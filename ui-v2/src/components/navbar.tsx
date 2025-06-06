@@ -31,8 +31,6 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  console.log({ userData })
-
   return (
     <>
       <div className="w-full bg-yellow-500/10 py-2 px-4 text-center text-sm">
@@ -123,7 +121,7 @@ export function Navbar() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 mt-1 crypto-card" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 mt-1 crypto-card text-white/30" align="end" forceMount>
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{userData?.bnsnames?.[0]?.full_name || "User"}</p>
