@@ -32,7 +32,7 @@ const mockTransactions = [
     },
 ]
 
-export default function Activities() {
+export default function ActivitiesTab() {
     const { address } = useParams<SmartWallet>()
     const [walletTx, setWalletTx] = useState<any[]>([])
     const [refreshing, setRefreshing] = useState<boolean>(false)

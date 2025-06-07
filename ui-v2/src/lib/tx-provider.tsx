@@ -1,18 +1,17 @@
 import { request } from "@stacks/connect"
 import { createContext, useContext, useState, type ReactNode } from "react"
 import { makeContractCall, type SignedContractCallOptions } from "@stacks/transactions"
-import type { CallContractParams, DeployContractParams, TransferFungibleParams, TransferNonFungibleParams, TransferStxParams } from "@stacks/connect/dist/types/methods"
+import type { CallContractParams, DeployContractParams, SendTransferParams, TransferFungibleParams, TransferNonFungibleParams, TransferStxParams } from "@stacks/connect/dist/types/methods"
 import axios from "axios"
 import { useAuth } from "./auth-provider"
 import { fetchFeeEstimate } from '@stacks/transactions'
 
 interface TxContextType {
-    userData: object | null
-    authenticated: boolean
     swTx: []
     eFees: bigint | number
     handleGetSwTx: (address: string, offset: number) => Promise<void>
     handleStxSend: (params: TransferStxParams) => Promise<void>
+    handleSend: (params: SendTransferParams) => Promise<void>
     handleFtSend: (params: TransferFungibleParams) => Promise<void>
     handleNftSend: (params: TransferNonFungibleParams) => Promise<void>
     handleContractDeploy: (params: DeployContractParams) => Promise<void>
@@ -23,14 +22,17 @@ interface TxContextType {
 const TxContext = createContext<TxContextType | undefined>(undefined)
 
 export function TxProvider({ children }: { children: ReactNode }) {
-    const [userData, setUserData] = useState<object | null>(null)
-    const [authenticated, setAuthenticated] = useState<boolean>(false)
     const [swTx, setSwTx] = useState<[]>([])
     const [eFees, setEFees] = useState<bigint | number>(0)
     const { handleGetClientConfig } = useAuth()
 
     const handleStxSend = async (params: TransferStxParams) => {
         request('stx_transferStx', params)
+            .then((tx) => tx)
+            .catch((e) => { console.log({ e }) })
+    }
+    const handleSend = async (params: SendTransferParams) => {
+        request('sendTransfer', params)
             .then((tx) => tx)
             .catch((e) => { console.log({ e }) })
     }
@@ -76,12 +78,11 @@ export function TxProvider({ children }: { children: ReactNode }) {
     return (
         <TxContext.Provider
             value={{
-                userData,
-                authenticated,
                 swTx,
                 eFees,
                 handleGetSwTx,
                 handleStxSend,
+                handleSend,
                 handleFtSend,
                 handleNftSend,
                 handleContractDeploy,

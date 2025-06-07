@@ -2,12 +2,12 @@ import { useEffect, useState } from "react"
 import { Button } from "../../../../components/ui/button"
 import { CardFooter } from "../../../../components/ui/card"
 import { useAuth } from "../../../../lib/auth-provider"
-import { networkFrom, type StacksNetworkName } from "@stacks/network"
+import { type StacksNetworkName } from "@stacks/network"
 import { useParams } from "react-router-dom"
 import type { SmartWallet, ExecuteTxProps } from "../../../../lib/types"
 import { useTx } from "../../../../lib/tx-provider"
 import { Cl, Pc, serializeCV } from "@stacks/transactions"
-import type { CallContractParams } from "@stacks/connect/dist/types/methods"
+import type { CallContractParams, TransferStxParams } from "@stacks/connect/dist/types/methods"
 import { hexToBytes } from '@noble/hashes/utils';
 import { delegate_extension_contract_name } from "../../../../lib/constants"
 
@@ -15,24 +15,69 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     const { address } = useParams<SmartWallet>()
     const [network, setNetwork] = useState<StacksNetworkName>()
     const { handleGetClientConfig } = useAuth()
-    const { eFees, handleContractCall } = useTx()
     const [executing, setExecuting] = useState<boolean>(false)
     const { userData, formatDecimals } = useAuth()
+    const { eFees, handleContractCall, handleStxSend, handleFtSend } = useTx()
 
-    const executeContractFtTransfer = async () => {
-        let txOp: CallContractParams
+    const executeTransferCall = async () => {
         if (!props?.values) return
-        const { symbol, amount, recipient, memo, decimal, asset_address, asset_name } = props.values
-        if (!address || !amount || !decimal || !recipient) return
+        const { symbol, amount, sender, recipient, memo, decimal, asset_address, asset_name } = props.values
+        if (!sender || !amount || !decimal || !recipient) return
 
         const isStx = symbol === "STX"
         let finalAmount
         if (isStx) {
             finalAmount = amount * decimal
             setExecuting(true)
-            const postConditions = [Pc.principal(address).willSendLte(finalAmount).ustx()]
+
+            const txOp: TransferStxParams = {
+                amount: finalAmount,
+                recipient,
+                memo: memo,
+                network
+            }
+            await handleStxSend(txOp)
+        } else {
+            finalAmount = formatDecimals(amount, decimal, true)
+            console.log({ finalAmount, amount, decimal })
+
+            if (!asset_address || !asset_name) return
+            setExecuting(true)
+
+            const postConditions = [Pc.principal(sender).willSendLte(finalAmount).ft(asset_address, asset_name)]
+            const txOp: CallContractParams = {
+                contract: `${asset_address}.${asset_name}`,
+                functionName: 'transfer',
+                functionArgs: [
+                    Cl.uint(Math.round(Number(finalAmount))),
+                    Cl.principal(sender),
+                    Cl.principal(recipient),
+                    memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
+                ],
+                network,
+                postConditions,
+                postConditionMode: "deny"
+            }
+            await handleContractCall(txOp)
+        }
+        setExecuting(false)
+    }
+
+    const executeSwContractFtTransfer = async () => {
+        let txOp: CallContractParams
+        if (!props?.values) return
+        const { symbol, amount, sender, recipient, memo, decimal, asset_address, asset_name } = props.values
+        if (!sender || !amount || !decimal || !recipient) return
+
+        const isStx = symbol === "STX"
+        let finalAmount
+        if (isStx) {
+            finalAmount = amount * decimal
+            setExecuting(true)
+            const postConditions = [Pc.principal(sender).willSendLte(finalAmount).ustx()]
+            console.log({ asset_address })
             txOp = {
-                contract: address,
+                contract: `${sender.split('.')[0]}.${sender.split('.')[1]}`,
                 functionName: isStx ? 'stx-transfer' : 'sip010-transfer',
                 functionArgs: [
                     Cl.uint(Math.round(finalAmount)),
@@ -40,7 +85,8 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                     memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
                 ],
                 network,
-                postConditions
+                postConditions,
+                postConditionMode: "deny"
             }
         } else {
             finalAmount = formatDecimals(amount, decimal, true)
@@ -49,21 +95,22 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
             if (!asset_address || !asset_name) return
             setExecuting(true)
 
-            const postConditions = [Pc.principal(address).willSendLte(finalAmount).ft(asset_address, asset_name)]
+            const postConditions = [Pc.principal(sender).willSendLte(finalAmount).ft(asset_address, asset_name)]
             txOp = {
-                contract: address,
+                contract: `${sender.split('.')[0]}.${sender.split('.')[1]}`,
                 functionName: isStx ? 'stx-transfer' : 'sip010-transfer',
                 functionArgs: [
                     Cl.uint(Math.round(Number(finalAmount))),
                     Cl.principal(recipient),
-                    memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
+                    memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none(),
+                    Cl.principal(asset_address ?? '')
                 ],
                 network,
-                postConditions
+                postConditions,
+                postConditionMode: "deny"
             }
         }
-        console.log({ finalAmount, amount, decimal })
-
+        console.log({ txOp })
         await handleContractCall(txOp)
         setExecuting(false)
     }
@@ -104,7 +151,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 })
             ))
         }
-        console.log({ addresdd: `${extension_owner}.${delegate_extension_contract_name}` })
+        console.log({ addresdd: `${extension_owner}.${delegate_extension_contract_name} ` })
         const txOp = {
             contract: address,
             functionName: action,
@@ -125,11 +172,14 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
 
         const { action } = props
         switch (action) {
-            case 'sendftasset':
-                executeContractFtTransfer()
+            case 'send':
+                executeSwContractFtTransfer()
                 break;
             case 'extensions':
                 executeContractExtensionCall()
+                break;
+            case 'deposit':
+                executeTransferCall()
                 break;
 
             default:

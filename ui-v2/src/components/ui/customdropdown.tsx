@@ -6,7 +6,7 @@ const CustomDropDown = ({
     items,
     onSelect,
 }: {
-    items: Token[];
+    items: Token[] | [];
     onSelect: (val: Token) => void;
 }) => {
     const [open, setOpen] = useState(false);
@@ -29,11 +29,17 @@ const CustomDropDown = ({
                 onClick={() => setOpen((prev) => !prev)}
                 className="flex h-10 w-full justify-between rounded-md border border-gray-800 bg-gray-900 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 crypto-input text-white"
             >
-                <div className="flex text-left items-center justify-center gap-4">
-                    <img width="24" src={selected?.image} alt={selected?.name} />
-                    <span>{selected?.symbol} ({selected?.name})</span>
-                </div>
-                <span className="ml-2">▾</span>
+                {selected
+                    ? <>
+                        <div className="flex text-left items-center justify-center gap-4">
+                            <img width="24" src={selected?.image} alt={selected?.name} />
+                            <span>{selected?.symbol} ({selected?.name})</span>
+                        </div>
+                        <span className="ml-2">▾</span>
+                    </>
+                    : <div>Select asset from options...</div>
+                }
+
             </button>
 
             {open && (

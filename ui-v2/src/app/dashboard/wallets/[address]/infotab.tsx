@@ -32,7 +32,6 @@ export default function InfoTab() {
             tx: wcc?.tx_info?.tx_id,
             status: wcc?.tx_info?.tx_status,
         }
-        console.log({ wcc })
         setWcc_Exists(wcc?.found)
         setWalletInfo(info)
     }

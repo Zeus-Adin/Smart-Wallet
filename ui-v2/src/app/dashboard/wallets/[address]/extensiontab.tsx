@@ -12,11 +12,9 @@ import { delegate_extension_contract_name } from "../../../../lib/constants";
 export default function ExtensionTab() {
     const { address } = useParams<SmartWallet>()
     const [values, setValues] = useState<ExecuteValues>()
-
     const [dc_exists, setDc_Exists] = useState<boolean>(false)
     const [] = useState<boolean>(false)
     const [] = useState<boolean>(false)
-
     const { handleCCS } = useAuth()
 
     const validateExtensions = async () => {

@@ -1,52 +1,58 @@
-import { useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "../../../../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { TabsContent } from "../../../../components/ui/tabs";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../../../lib/auth-provider";
+import { type ContractAddress, type SmartWallet, type Token } from "../../../../lib/types";
+import ExecuteTx from "./executetx";
+import { Label } from "../../../../components/ui/label";
 import CustomDropDown from "../../../../components/ui/customdropdown";
 import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
-import { TabsContent } from "../../../../components/ui/tabs";
-import { useAuth } from "../../../../lib/auth-provider";
-import { useParams } from "react-router-dom";
-import { RefreshCw } from "lucide-react";
-import ExecuteTx from "./executetx";
-import type { Token } from "../../../../lib/types";
 
-export default function SendTab() {
-    const { address } = useParams<{ address: `${string}.${string}` }>()
-    const [selectedToken, setSelectedToken] = useState<Token | null>();
-    const [amount, setAmount] = useState<number>(0)
-    const [recipient, setRecipient] = useState<string>('')
-    const [memo, setMemo] = useState<string>('')
+export default function DepositTab() {
+    const router = useNavigate()
+    const { address } = useParams<SmartWallet>()
     const [refreshing, setRefreshing] = useState<boolean>(false)
-    const { balance, handleGetSwBalance } = useAuth()
+    const [selectedToken, setSelectedToken] = useState<Token | null>()
+    const [action, setAction] = useState<string>('')
+    const [amount, setAmount] = useState<number>(0)
+    const [recipient, setRecipient] = useState<string>(address ? address?.toString() : '')
+    const [memo, setMemo] = useState<string>('')
+    const { userData, rates, authUserBalance, handleGetBalance, getRates } = useAuth()
 
     const refreshBalance = async () => {
         setRefreshing(true)
-        if (address) {
-            await handleGetSwBalance(address, '', 0)
+        const authed_user = userData?.addresses?.stx?.[0]?.address
+        if (!authed_user) {
             setRefreshing(false)
+            return
         }
+        await handleGetBalance(authed_user, '', 0)
+        await getRates()
+
         setRefreshing(false)
     }
 
     useEffect(() => {
         refreshBalance()
-    }, [address])
+    }, [])
 
     useEffect(() => {
-        setSelectedToken(balance?.all?.[0])
-    }, [balance])
+        setSelectedToken(authUserBalance?.all?.[0])
+    }, [authUserBalance])
+
+    console.log({ authUserBalance })
 
     return (
-        <TabsContent value="send" className="space-y-4">
+        <TabsContent value="deposit" className="space-y-4">
             <Card className="crypto-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle className="text-white/30">Send Assets</CardTitle>
-                            <CardDescription>
-                                Transfer assets from your Smart Wallet to another address.
-                            </CardDescription>
+                            <CardTitle className="text-white/30">Deposit Informations</CardTitle>
+                            <CardDescription>Details about your smart wallet configuration</CardDescription>
                         </div>
                         <Button onClick={refreshBalance} variant="outline" size="sm" className="crypto-button-outline text-white/30">
                             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
@@ -56,8 +62,8 @@ export default function SendTab() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="asset" className="text-white/30">Asset</Label>
-                        <CustomDropDown onSelect={setSelectedToken} items={balance?.all ?? []} />
+                        <Label htmlFor="asset" className="text-white/30">Assets</Label>
+                        <CustomDropDown onSelect={setSelectedToken} items={authUserBalance?.all ?? []} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="amount" className="text-white/30">Amount</Label>
@@ -84,6 +90,7 @@ export default function SendTab() {
                         <Label htmlFor="recipient" className="text-white/30">Recipient Address</Label>
                         <Input
                             id="recipient"
+                            value={recipient}
                             placeholder="Enter STX address"
                             className="crypto-input text-white"
                             onChange={(e) => setRecipient(e.target.value)}
@@ -100,10 +107,11 @@ export default function SendTab() {
                     </div>
                 </CardContent>
                 <ExecuteTx props={{
-                    action: 'send',
+                    action: 'deposit',
                     values: {
+                        action: 'ft',
                         symbol: selectedToken?.symbol,
-                        amount, sender: address?.toString() ?? '', recipient, memo,
+                        amount, sender: userData?.addresses?.stx?.[0]?.address ?? '', recipient, memo,
                         decimal: selectedToken?.decimals,
                         asset_address: selectedToken?.token?.split('::')[0],
                         asset_name: selectedToken?.token?.split('::')[1],
@@ -111,5 +119,5 @@ export default function SendTab() {
                 }} />
             </Card>
         </TabsContent>
-    );
+    )
 }

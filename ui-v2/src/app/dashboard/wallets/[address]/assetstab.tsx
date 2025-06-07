@@ -12,12 +12,12 @@ export default function AssetsTab() {
     const { address } = useParams<{ address: string }>();
     const [walletAssets, setWalletAssets] = useState<any[]>([])
     const [refreshing, setRefreshing] = useState<boolean>(false)
-    const { balance, rates, handleGetBalance } = useAuth()
+    const { balance, rates, handleGetSwBalance } = useAuth()
 
     const refresh = async () => {
         setRefreshing(true)
         if (address) {
-            await handleGetBalance(address, '', 0)
+            await handleGetSwBalance(address, '', 0)
             setRefreshing(false)
         }
     }
@@ -34,12 +34,12 @@ export default function AssetsTab() {
     }
 
     useEffect(() => {
-        const allBalances = [
-            balance?.stxBalance,
-            ...(balance?.ftBalance ?? []),
-        ];
-        console.log({ allBalances, balance })
-        setWalletAssets(allBalances)
+        refresh()
+    }, [address])
+
+    useEffect(() => {
+        if (!balance?.all) return
+        setWalletAssets(balance?.all)
     }, [balance])
 
     return (
@@ -95,7 +95,12 @@ export default function AssetsTab() {
                             </div>
                             <div className="text-right">
                                 <div className="font-medium">{balance?.nftBalance?.length} Items</div>
-                                <Button variant="ghost" size="sm" className="text-primary">
+                                <Button variant="ghost" size="sm" className="text-primary"
+                                    onClick={() => {
+                                        searchParams.set('tab', 'nft')
+                                        setSearchParams(searchParams)
+                                    }}
+                                >
                                     View <ChevronRight className="h-4 w-4 ml-1" />
                                 </Button>
                             </div>

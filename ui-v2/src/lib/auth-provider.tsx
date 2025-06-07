@@ -9,11 +9,13 @@ import type { Accounts, Balance, Cs, UsersData } from "./types"
 interface AuthContextType {
   userData: UsersData | undefined
   balance: Balance | undefined
+  authUserBalance: Balance | undefined
   rates: any
   authenticated: boolean
   loading: boolean
   handleSignIn: () => void
   handleSignOut: () => void
+  handleGetSwBalance: (address: string, asset_identifiers: string | undefined, offset: number) => Promise<void>
   handleGetBalance: (address: string, asset_identifiers: string | undefined, offset: number) => Promise<void>
   getRates: () => Promise<any>
   handleCCS: (address: string | undefined, contractId: string, txinfo: boolean) => Promise<Cs>
@@ -27,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UsersData | undefined>(undefined)
   const [balance, setBalance] = useState<Balance>()
+  const [authUserBalance, setAuthUserBalance] = useState<Balance>()
   const [rates, setRates] = useState<any>()
   const [authenticated, setAuthenticated] = useState<boolean>(false)
   const [loading, setLoading] = useState(true)
@@ -34,7 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const network = searchParams.get('network')
   // Check if user is already authenticated (from localStorage)
   useEffect(() => {
-    console.log('Network state checking', { network })
     const checkAuth = async () => {
       try {
         if (isConnected()) {
@@ -150,13 +152,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const handleGetBalance = async (address: string, asset_identifiers: string | undefined, offset: number) => {
+  const handleGetSwBalance = async (address: string, asset_identifiers: string | undefined, offset: number) => {
     const { api, network } = handleGetClientConfig(address)
     const isMainnet = network === 'mainnet'
     const sbtcAddress = isMainnet ? sbtcMainnetAddress.split('.')[0] : sbtcTestnetAddress.split('.')[0]
-    const stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
+
+    let stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
     const stxDecimal = 1000000
+    stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' }
+
     const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
+
     let ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
     ftBalance = await Promise.all(ftBalance.map(async (res: { balance: string, token: string }) => {
       if (!res) return
@@ -165,19 +171,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const tokenMetadata = await axios.get(tokenMeta?.token_uri)
       return { ...res, ...tokenMeta, ...tokenMetadata?.data, actual_balance: formatDecimals(res?.balance ?? 0, tokenMeta?.decimals ?? 0, false) }
     }))
+
     const sbtcBalance = ftBalance.find((t: { sender_address: string }) => t.sender_address === sbtcAddress)
+
+    const allBalances = [stxBalance, ...ftBalance,]
+
     setBalance({
-      stxBalance: {
-        ...stxBalance,
-        image: '/stx-logo.svg',
-        decimals: stxDecimal,
-        actual_balance: stxBalance?.balance / stxDecimal,
-        name: 'Stacks',
-        symbol: 'STX'
-      },
+      stxBalance,
       sbtcBalance,
       ftBalance,
-      nftBalance
+      nftBalance,
+      all: allBalances
+    })
+  }
+
+  const handleGetBalance = async (address: string, asset_identifiers: string | undefined, offset: number) => {
+    const { api, network } = handleGetClientConfig(address)
+    const isMainnet = network === 'mainnet'
+    const sbtcAddress = isMainnet ? sbtcMainnetAddress.split('.')[0] : sbtcTestnetAddress.split('.')[0]
+
+    let stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
+    const stxDecimal = 1000000
+    stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' }
+
+    const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
+
+    let ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
+    ftBalance = await Promise.all(ftBalance.map(async (res: { balance: string, token: string }) => {
+      if (!res) return
+      const tokenAddress = res?.token?.split('::')[0]
+      const tokenMeta = await handleGetMeta(address, tokenAddress, 0, 'ft')
+      const tokenMetadata = await axios.get(tokenMeta?.token_uri)
+      return { ...res, ...tokenMeta, ...tokenMetadata?.data, actual_balance: formatDecimals(res?.balance ?? 0, tokenMeta?.decimals ?? 0, false) }
+    }))
+
+    const sbtcBalance = ftBalance.find((t: { sender_address: string }) => t.sender_address === sbtcAddress)
+
+    const allBalances = [stxBalance, ...ftBalance,]
+
+    setAuthUserBalance({
+      stxBalance,
+      sbtcBalance,
+      ftBalance,
+      nftBalance,
+      all: allBalances
     })
   }
 
@@ -196,11 +233,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         userData,
         balance,
+        authUserBalance,
         rates,
         authenticated,
         loading,
         handleSignIn,
         handleSignOut,
+        handleGetSwBalance,
         handleGetBalance,
         getRates,
         handleCCS,

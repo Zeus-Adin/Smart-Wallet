@@ -15,9 +15,11 @@ import { presetContracts } from "../../../../lib/constants"
 import SendTab from "./sendtab"
 import AssetsTab from "./assetstab"
 import ExtensionTab from "./extensiontab"
-import Activities from "./activities"
+import ActivitiesTab from "./activitiestab"
 import InfoTab from "./infotab"
 import type { Balance, UsersData } from "../../../../lib/types"
+import DepositTab from "./deposittab"
+import NftTab from "./nfttab"
 
 interface Wallet {
   id: number
@@ -268,8 +270,10 @@ export default function WalletDashboard() {
           <AssetsTab />
           <SendTab />
           <ExtensionTab />
-          <Activities />
+          <ActivitiesTab />
           <InfoTab />
+          c<DepositTab />
+          <NftTab />
         </Tabs>
       </main>
     </div>

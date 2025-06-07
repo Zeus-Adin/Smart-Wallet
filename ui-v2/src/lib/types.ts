@@ -2,6 +2,7 @@ import type { AddressEntry, ContractIdString } from "@stacks/connect/dist/types/
 import type { Dispatch, SetStateAction } from "react"
 
 export type SmartWallet = { address: `${string}.${string}` }
+export type ContractAddress = `${string}.${string}`
 export type presetType = {
     id: string
     name: string
@@ -23,19 +24,20 @@ export type Accounts = {
     btc: Omit<AddressEntry, "publicKey">[]
 } | undefined
 
-export type Balance = {
-    stxBalance: any
-    ftBalance: any
-    sbtcBalance: any
-    nftBalance: any
-}
-
 export interface Token {
     symbol: string;
     name: string;
     balance: number;
     decimal: number
     [key: string]: any;
+}
+
+export type Balance = {
+    stxBalance: any
+    ftBalance: any
+    sbtcBalance: any
+    nftBalance: any
+    all: Token[]
 }
 
 export type Cs = {
@@ -53,6 +55,7 @@ export type ExecuteValues = {
     action?: string
     amount?: number
     id?: number
+    sip?: number
     symbol?: string
     name?: string
     cycles?: number
@@ -63,6 +66,7 @@ export type ExecuteValues = {
         hashbytes?: string
     }
     decimal?: number
+    sender: string
     recipient?: string
     memo?: string
     extension_address?: ContractIdString
