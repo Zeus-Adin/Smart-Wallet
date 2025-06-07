@@ -1,11 +1,12 @@
-import { ArrowDownRight, ArrowUpRight, Clock, ExternalLink, RefreshCw } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Clock, ExternalLink, FileCode, RefreshCw } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTx } from "../../../../lib/tx-provider";
-import type { SmartWallet } from "../../../../lib/types";
+import type { SmartWallet, TxAssetInfo } from "../../../../lib/types";
+import { useAuth } from "../../../../lib/auth-provider";
 
 // Mock transaction data
 const mockTransactions = [
@@ -36,20 +37,30 @@ export default function ActivitiesTab() {
     const { address } = useParams<SmartWallet>()
     const [walletTx, setWalletTx] = useState<any[]>([])
     const [refreshing, setRefreshing] = useState<boolean>(false)
+    const [offset, setOffset] = useState<number>(0)
     const { swTx, handleGetSwTx } = useTx()
+    const { balance, formatDecimals } = useAuth()
 
     const refreshTx = async () => {
         setRefreshing(true)
         if (address) {
-            await handleGetSwTx(address, 0)
-            console.log({ address })
+            await handleGetSwTx(address, offset)
             setRefreshing(false)
         }
     }
 
+    const loadMore = async () => {
+        setOffset(prev => prev + 20)
+        refreshTx()
+    }
+
     useEffect(() => {
-        console.log({ swTx })
-    }, [swTx])
+        refreshTx()
+    }, [])
+
+    useEffect(() => {
+        console.log({ swTx, balance })
+    }, [swTx, balance])
 
     return (
         <TabsContent value="activity" className="space-y-4">
@@ -72,39 +83,50 @@ export default function ActivitiesTab() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
-                        {mockTransactions.map((tx, index) => (
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-hide">
+                        {swTx.map((tx, index) => (
                             <div
                                 key={index}
                                 className="flex items-center justify-between p-3 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors"
                             >
                                 <div className="flex items-center">
                                     <div
-                                        className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${tx.type === "receive" ? "bg-green-500/20" : "bg-blue-500/20"
+                                        className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${tx?.action === "receive" ? "bg-green-500/20" : tx?.action === "sent" ? "bg-red-500/20" : "bg-blue-500/20"
                                             }`}
                                     >
-                                        {tx.type === "receive" ? (
-                                            <ArrowDownRight className="h-4 w-4 text-green-400" />
-                                        ) : (
-                                            <ArrowUpRight className="h-4 w-4 text-blue-400" />
-                                        )}
+                                        {tx?.action === "receive"
+                                            ? <ArrowDownRight className="h-4 w-4 text-green-400" />
+                                            : <>
+                                                {tx?.action === "sent"
+                                                    ? <ArrowUpRight className="h-4 w-4 text-red-400" />
+                                                    : <FileCode className="h-4 w-4 text-blue-400" />
+                                                }
+                                            </>
+                                        }
                                     </div>
                                     <div>
-                                        <div className="font-medium">{tx.type === "receive" ? "Received" : "Sent"}</div>
+                                        <div className="font-medium text-white/30">
+                                            {tx?.action === "receive" ? "Received" : tx?.action === "sent" ? "Sent" : tx?.action?.replace('_', ' ')}
+                                        </div>
                                         <div className="text-xs text-gray-400">
-                                            {tx.type === "receive"
-                                                ? `From: ${tx.from.slice(0, 6)}...${tx.from.slice(-4)}`
-                                                : `To: ${tx.to.slice(0, 6)}...${tx.to.slice(-4)}`}
+                                            {tx?.action === "receive"
+                                                ? `From: ${tx?.sender.slice(0, 6)}...${tx?.sender.slice(-4)}`
+                                                : tx?.action === "sent"
+                                                    ? `To: ${tx?.sender.slice(0, 6)}...${tx?.sender.slice(-4)}`
+                                                    : `By: ${tx?.sender.slice(0, 6)}...${tx?.sender.slice(-4)}`
+                                            }
                                         </div>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className={`font-medium ${tx.type === "receive" ? "text-green-400" : ""}`}>
-                                        {tx.type === "receive" ? "+" : "-"}
-                                        {tx.amount}
-                                    </div>
+                                    {tx?.assets?.map((a: TxAssetInfo, i) => (
+                                        <div key={i} className={`font-medium ${tx?.action === "receive" ? "text-green-400" : "text-red-400"}`}>
+                                            {tx?.action === "receive" ? "+" : tx?.action === 'sent' ? "-" : ''}
+                                            {formatDecimals(a.amount, balance?.all?.find(t => t?.symbol?.toLowerCase() === a?.symbol?.toLowerCase())?.decimals ?? 0, false)} {a.symbol}
+                                        </div>
+                                    ))}
                                     <div className="flex items-center text-xs text-gray-400">
-                                        <Clock className="h-3 w-3 mr-1" /> {tx.date}
+                                        <Clock className="h-3 w-3 mr-1" /> {tx?.stamp}
                                     </div>
                                 </div>
                             </div>
@@ -112,8 +134,8 @@ export default function ActivitiesTab() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button variant="outline" className="w-full crypto-button-outline text-white">
-                        View All Transactions
+                    <Button onClick={loadMore} variant="outline" className="w-full crypto-button-outline text-white">
+                        View More Transactions
                     </Button>
                 </CardFooter>
             </Card>

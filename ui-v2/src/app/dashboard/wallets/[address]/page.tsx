@@ -78,7 +78,6 @@ export default function WalletDashboard() {
   const refresh = async () => {
     if (address) {
       handleGetBalance(address, '', 0)
-      console.log(userData)
       setWallet(userData)
     }
   }
@@ -200,7 +199,7 @@ export default function WalletDashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-1">
-                <p className="text-2xl font-bold crypto-gradient-text flex gap-1">{(walletBalance?.stxBalance?.actual_balance ?? 0)?.toFixed(4)} <span className="text-xs text-gray-400 mt-2">STX</span></p>
+                <p className="text-2xl font-bold crypto-gradient-text flex gap-1">{(Number(walletBalance?.stxBalance?.actual_balance ?? 0))?.toFixed(4)} <span className="text-xs text-gray-400 mt-2">STX</span></p>
                 <p className="text-xs text-gray-400 mt-2">≈ {
                   (
                     Number(walletBalance?.stxBalance?.actual_balance ?? 0) *

@@ -17,7 +17,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     const { handleGetClientConfig } = useAuth()
     const [executing, setExecuting] = useState<boolean>(false)
     const { userData, formatDecimals } = useAuth()
-    const { eFees, handleContractCall, handleStxSend, handleFtSend } = useTx()
+    const { eFees, handleContractCall, handleStxSend } = useTx()
 
     const executeTransferCall = async () => {
         if (!props?.values) return
@@ -27,7 +27,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
         const isStx = symbol === "STX"
         let finalAmount
         if (isStx) {
-            finalAmount = amount * decimal
+            finalAmount = formatDecimals(amount, decimal, true)
             setExecuting(true)
 
             const txOp: TransferStxParams = {
@@ -39,8 +39,6 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
             await handleStxSend(txOp)
         } else {
             finalAmount = formatDecimals(amount, decimal, true)
-            console.log({ finalAmount, amount, decimal })
-
             if (!asset_address || !asset_name) return
             setExecuting(true)
 
@@ -49,7 +47,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 contract: `${asset_address}.${asset_name}`,
                 functionName: 'transfer',
                 functionArgs: [
-                    Cl.uint(Math.round(Number(finalAmount))),
+                    Cl.uint(Number(finalAmount)),
                     Cl.principal(sender),
                     Cl.principal(recipient),
                     memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
@@ -72,15 +70,14 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
         const isStx = symbol === "STX"
         let finalAmount
         if (isStx) {
-            finalAmount = amount * decimal
+            finalAmount = formatDecimals(amount, decimal, true)
             setExecuting(true)
             const postConditions = [Pc.principal(sender).willSendLte(finalAmount).ustx()]
-            console.log({ asset_address })
             txOp = {
                 contract: `${sender.split('.')[0]}.${sender.split('.')[1]}`,
                 functionName: isStx ? 'stx-transfer' : 'sip010-transfer',
                 functionArgs: [
-                    Cl.uint(Math.round(finalAmount)),
+                    Cl.uint(Number(finalAmount)),
                     Cl.principal(recipient),
                     memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none()
                 ],
@@ -90,8 +87,6 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
             }
         } else {
             finalAmount = formatDecimals(amount, decimal, true)
-            console.log({ finalAmount, amount, decimal })
-
             if (!asset_address || !asset_name) return
             setExecuting(true)
 
@@ -100,7 +95,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 contract: `${sender.split('.')[0]}.${sender.split('.')[1]}`,
                 functionName: isStx ? 'stx-transfer' : 'sip010-transfer',
                 functionArgs: [
-                    Cl.uint(Math.round(Number(finalAmount))),
+                    Cl.uint(Number(finalAmount)),
                     Cl.principal(recipient),
                     memo ? Cl.some(Cl.bufferFromAscii(memo)) : Cl.none(),
                     Cl.principal(asset_address ?? '')
@@ -117,13 +112,12 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
 
     const executeContractExtensionCall = async () => {
         if (!props?.values || !props?.action) return
-        const { action, amount, cycles, poxAddress, recipient } = props?.values
+        const { action, amount, cycles, poxAddress, decimal, recipient } = props?.values
         const extension_owner = address?.split('.')[0]
-        if (!action || !amount || !cycles || !recipient || !address || !extension_owner) return
+        if (!action || !amount || !cycles || !recipient || !address || !extension_owner || !decimal) return
         setExecuting(true)
 
-        const decimal = 1000000
-        const delegateAmount = amount * decimal
+        const delegateAmount = formatDecimals(amount, decimal, true)
         const postConditions = [Pc.principal(address).willSendLte(delegateAmount).ustx()]
 
         let serializedPayload
@@ -151,7 +145,6 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 })
             ))
         }
-        console.log({ addresdd: `${extension_owner}.${delegate_extension_contract_name} ` })
         const txOp = {
             contract: address,
             functionName: action,
@@ -167,7 +160,6 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     }
 
     const execute = () => {
-        console.log({ address, props })
         if (!props?.action) return
 
         const { action } = props

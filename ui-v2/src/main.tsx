@@ -8,13 +8,13 @@ import { PageRoutes } from './app/pageroutes';
 import { TxProvider } from './lib/tx-provider';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <TxProvider>
-          <PageRoutes />
-        </TxProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
+  // <StrictMode>
+  <BrowserRouter>
+    <AuthProvider>
+      <TxProvider>
+        <PageRoutes />
+      </TxProvider>
+    </AuthProvider>
+  </BrowserRouter>
+  //</StrictMode>
 )

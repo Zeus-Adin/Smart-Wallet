@@ -82,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let response
     try {
       const { api } = handleGetClientConfig(address)
-      console.log({ address, asset_identifiers, id, asset, url: `${api}/metadata/v1/${asset}/${asset_identifiers}` })
       let res
       if (asset === 'ft') {
         res = (await axios.get(`${api}/metadata/v1/${asset}/${asset_identifiers}`)).data
@@ -128,7 +127,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log({ e });
       })
       .finally(() => {
-        console.log("Finalized");
         setLoading(false)
       })
   }
@@ -145,11 +143,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const formatDecimals = (value: number | string, decimals: number, isUmicro: boolean): string => {
+    let result
     if (isUmicro) {
-      return (Number(value) * 10 ** decimals).toFixed(0);
+      result = (Number(value) * 10 ** decimals).toFixed(0);
     } else {
-      return (Number(value) / 10 ** decimals).toFixed(4);
+      result = (Number(value) / 10 ** decimals).toFixed(4);
     }
+    return result
   }
 
   const handleGetSwBalance = async (address: string, asset_identifiers: string | undefined, offset: number) => {
@@ -158,8 +158,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sbtcAddress = isMainnet ? sbtcMainnetAddress.split('.')[0] : sbtcTestnetAddress.split('.')[0]
 
     let stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
-    const stxDecimal = 1000000
-    stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' }
+    const stxDecimal = 6
+    stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: formatDecimals(stxBalance?.balance, stxDecimal, false), name: 'Stacks', symbol: 'STX' }
 
     const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
 
@@ -191,8 +191,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sbtcAddress = isMainnet ? sbtcMainnetAddress.split('.')[0] : sbtcTestnetAddress.split('.')[0]
 
     let stxBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/stx?offset=${offset}`))?.data
-    const stxDecimal = 1000000
-    stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: stxBalance?.balance / stxDecimal, name: 'Stacks', symbol: 'STX' }
+    const stxDecimal = 6
+    stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: formatDecimals(stxBalance?.balance, stxDecimal, false), name: 'Stacks', symbol: 'STX' }
 
     const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
 

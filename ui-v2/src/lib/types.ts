@@ -97,3 +97,20 @@ export type Info = {
     version: number,
     status: string
 }
+
+export type TxAssetInfo = {
+    amount: string
+    name: string
+    asset: string
+    symbol: string
+}
+
+export type TxInfo = {
+    action: string
+    sender: string
+    stamp: string
+    time: string
+    assets: TxAssetInfo[]
+    tx: string
+    tx_status: string
+}

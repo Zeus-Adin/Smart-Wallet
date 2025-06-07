@@ -43,8 +43,6 @@ export default function DepositTab() {
         setSelectedToken(authUserBalance?.all?.[0])
     }, [authUserBalance])
 
-    console.log({ authUserBalance })
-
     return (
         <TabsContent value="deposit" className="space-y-4">
             <Card className="crypto-card">
