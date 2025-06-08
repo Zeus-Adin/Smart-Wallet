@@ -2,7 +2,7 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../../lib/auth-provider";
 import { type SmartWallet, type Token } from "../../../../lib/types";
@@ -12,7 +12,6 @@ import CustomDropDown from "../../../../components/ui/customdropdown";
 import { Input } from "../../../../components/ui/input";
 
 export default function DepositTab() {
-    const router = useNavigate()
     const { address } = useParams<SmartWallet>()
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [selectedToken, setSelectedToken] = useState<Token | null>()

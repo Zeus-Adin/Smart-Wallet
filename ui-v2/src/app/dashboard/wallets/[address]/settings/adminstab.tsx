@@ -1,12 +1,12 @@
-import { Info, Shield, UserPlus } from "lucide-react";
+import { Shield, UserPlus } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../../../../../components/ui/alert";
 import { Button } from "../../../../../components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../../components/ui/card";
 import { Input } from "../../../../../components/ui/input";
 import { Label } from "../../../../../components/ui/label";
 import { TabsContent } from "../../../../../components/ui/tabs";
-import { useEffect, useState } from "react";
-import { useAuth } from "../../../../../lib/auth-provider";
+// import { useEffect, useState } from "react";
+// import { useAuth } from "../../../../../lib/auth-provider";
 import { Badge } from "../../../../../components/ui/badge";
 
 export default function AdminsTab() {

@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Wallet } from "lucide-react"
 import { Navbar } from "../../components/navbar"
 import { useAuth } from "../../lib/auth-provider"

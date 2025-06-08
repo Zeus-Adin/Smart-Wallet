@@ -25,7 +25,7 @@ const TxContext = createContext<TxContextType | undefined>(undefined)
 
 export function TxProvider({ children }: { children: ReactNode }) {
     const [swTx, setSwTx] = useState<TxInfo[]>([])
-    const [eFees, setEFees] = useState<bigint | number>(0)
+    const [eFees] = useState<bigint | number>(0)
     const { handleGetClientConfig } = useAuth()
 
     const handleStxSend = async (params: TransferStxParams) => {

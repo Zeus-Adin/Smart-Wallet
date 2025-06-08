@@ -2,13 +2,12 @@ import { RefreshCw, Settings } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { type SmartWallet } from "../../../../lib/types";
 import { useAuth } from "../../../../lib/auth-provider";
 
 export default function NftTab() {
-    const router = useNavigate()
     const { address } = useParams<SmartWallet>()
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const { handleGetBalance, getRates } = useAuth()

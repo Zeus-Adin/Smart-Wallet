@@ -1,10 +1,10 @@
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { ArrowLeft, Mail, MessageSquare, Phone } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Navbar } from "@/components/navbar"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Navbar } from "../../components/navbar"
+import { Input } from "../../components/ui/input"
+import { Textarea } from "../../components/ui/textarea"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
 
 export default function SupportPage() {
   return (
@@ -13,7 +13,7 @@ export default function SupportPage() {
       <main className="flex-1 p-4 md:p-8 bg-black">
         <div className="mx-auto max-w-4xl space-y-8">
           <div className="space-y-2">
-            <Link href="/" className="inline-flex items-center text-sm text-gray-400 hover:text-white mb-4">
+            <Link to="/" className="inline-flex items-center text-sm text-gray-400 hover:text-white mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Home
             </Link>
@@ -104,7 +104,7 @@ export default function SupportPage() {
                 <CardContent className="space-y-4">
                   <p className="text-sm">Check our comprehensive FAQ section for quick answers to common questions.</p>
                   <Button variant="outline" className="w-full" asChild>
-                    <Link href="/docs">View FAQs</Link>
+                    <Link to="/docs">View FAQs</Link>
                   </Button>
                 </CardContent>
               </Card>

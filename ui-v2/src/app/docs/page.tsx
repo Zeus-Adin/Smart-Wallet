@@ -1,8 +1,8 @@
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Book, ExternalLink, Key, Shield, Wallet } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Navbar } from "@/components/navbar"
+import { Button } from "../../components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { Navbar } from "../../components/navbar"
 
 export default function DocsPage() {
   return (
@@ -120,7 +120,7 @@ export default function DocsPage() {
                     implementation.
                   </p>
                   <div className="pt-2">
-                    <Link href="https://polimartlabs.gitbook.io/smart-wallet" target="_blank" rel="noreferrer">
+                    <Link to="https://polimartlabs.gitbook.io/smart-wallet" target="_blank" rel="noreferrer">
                       <Button variant="outline" className="w-full">
                         View Official Documentation
                         <ExternalLink className="ml-2 h-4 w-4" />
@@ -215,7 +215,7 @@ export default function DocsPage() {
                 <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
                   <p className="font-semibold">For detailed technical documentation:</p>
                   <Link
-                    href="https://polimartlabs.gitbook.io/smart-wallet"
+                    to="https://polimartlabs.gitbook.io/smart-wallet"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center mt-2 text-primary hover:underline"
@@ -236,7 +236,7 @@ export default function DocsPage() {
           </p>
           <div className="flex items-center gap-4">
             <Link
-              href="https://polimartlabs.gitbook.io/smart-wallet"
+              to="https://polimartlabs.gitbook.io/smart-wallet"
               className="text-sm text-gray-500 hover:text-gray-400 underline underline-offset-4"
               target="_blank"
               rel="noreferrer"
