@@ -1,0 +1,14 @@
+[build]
+  command = "pnpm run build"
+  publish = "dist"
+
+[dev]
+  command = "vite"
+  port = 5173
+  targetPort = 5173
+  framework = "vite"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
