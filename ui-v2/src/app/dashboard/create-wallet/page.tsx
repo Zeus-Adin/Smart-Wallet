@@ -59,6 +59,7 @@ export default function CreateWallet() {
       const params: DeployContractParams = {
         name,
         clarityCode,
+        clarityVersion: 3,
         network,
         postConditionMode: 'deny'
       }
