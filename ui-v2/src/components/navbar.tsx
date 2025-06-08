@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { Wallet, Menu, X, ChevronDown, Bell } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { useAuth } from "../lib/auth-provider"
@@ -16,8 +16,11 @@ import {
 import { Badge } from "../components/ui/badge.tsx"
 import { ConnectWalletButton } from "../components/connect-wallet-button.tsx"
 import { StacksNetworks } from "@stacks/network"
+import type { SmartWallet } from "../lib/types.ts"
 
 export function Navbar() {
+  const { address } = useParams<SmartWallet>()
+  const route = useNavigate()
   const { authenticated, handleSignOut, userData, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -26,7 +29,6 @@ export function Navbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10)
     }
-
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -136,10 +138,8 @@ export function Navbar() {
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="focus:bg-gray-800">
-                      <Link to="/settings" className="flex items-center">
-                        Settings
-                      </Link>
+                    <DropdownMenuItem onClick={() => route(`/dashboard/wallets/${address}/settings`)} className="focus:bg-gray-800">
+                      Settings
                     </DropdownMenuItem>
                     <div className="crypto-divider my-1"></div>
                     <DropdownMenuItem onClick={handleSignOut} className="focus:bg-gray-800">

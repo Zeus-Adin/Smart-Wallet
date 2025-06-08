@@ -10,7 +10,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const router = useNavigate()
 
   useEffect(() => {
-    // Only redirect if we're not loading and not authenticated
     if (!loading && !authenticated) {
       router("/")
     }

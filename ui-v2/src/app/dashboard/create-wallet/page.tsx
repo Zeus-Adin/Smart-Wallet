@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { ArrowLeft, Check, ChevronRight, AlertCircle, Hourglass } from "lucide-react"
 import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card"
@@ -20,7 +20,10 @@ import axios from "axios"
 
 export default function CreateWallet() {
   const router = useNavigate()
-  const [selectedPreset, setSelectedPreset] = useState(presetContracts[0])
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedContract = searchParams.get('contract') ?? 0
+  const currentTab = searchParams.get('tab') ?? 'contract'
+  const [selectedPreset, setSelectedPreset] = useState(presetContracts[Number(selectedContract)])
 
   // Configure Values
   const [walletName, setWalletName] = useState("")
@@ -49,19 +52,24 @@ export default function CreateWallet() {
     const clarityCode: string = (await axios.get(sp.contractSrc)).data;
     setIsDeploying(true);
 
-    setTimeout(() => {
-      try {
-        const params: DeployContractParams = {
-          name,
-          clarityCode
-        };
-        handleContractDeploy(params);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        // cleanup here
+    try {
+      const authed_user = userData?.addresses?.stx?.[0]?.address
+      const { network } = handleGetClientConfig(authed_user)
+
+      const params: DeployContractParams = {
+        name,
+        clarityCode,
+        network,
+        postConditionMode: 'deny'
       }
-    }, 2000);
+      console.log({ params })
+      handleContractDeploy(params);
+    } catch (error) {
+      console.error(error);
+      setIsDeploying(false);
+    } finally {
+      setIsDeploying(false);
+    }
   };
 
 
@@ -82,7 +90,10 @@ export default function CreateWallet() {
             <p className="text-gray-400">Deploy a new smart wallet with your preferred settings</p>
           </div>
 
-          <Tabs defaultValue="contract" className="space-y-6">
+          <Tabs defaultValue="contract" value={currentTab} className="space-y-6" onValueChange={(val) => {
+            searchParams.set('tab', val)
+            setSearchParams(searchParams)
+          }}>
             <TabsList className="crypto-tab-list grid w-full grid-cols-2 bg-gray-900/50 p-1 rounded-lg">
               <TabsTrigger value="contract" className="crypto-tab data-[state=active]:crypto-tab-active">
                 Contracts

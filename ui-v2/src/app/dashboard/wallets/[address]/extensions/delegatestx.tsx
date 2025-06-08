@@ -1,27 +1,29 @@
-import { AlertTriangle, Settings, Shield } from "lucide-react"
+import { AlertTriangle, Settings } from "lucide-react"
 import { AccordionContent, AccordionItem, AccordionTrigger } from "../../../../../components/ui/accordion"
 import { Alert, AlertDescription, AlertTitle } from "../../../../../components/ui/alert"
 import { Input } from "../../../../../components/ui/input"
 import { Label } from "../../../../../components/ui/label"
-import { type SmartWallet, type ExecuteValuesProps } from '../../../../../lib/types'
+import { type ExecuteValuesProps } from '../../../../../lib/types'
 import { useEffect, useState } from "react"
 import { Button } from "../../../../../components/ui/button"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../../../../../lib/auth-provider"
 
 
 
 export default function DelegateStx({ dc_exists, setValues }: ExecuteValuesProps) {
-    const { address } = useParams<SmartWallet>()
+    const router = useNavigate()
     const [action, setAction] = useState<string>()
     const [amount, setAmount] = useState<number>()
     const [delegateToAddress, setDelegateToAddress] = useState<string>()
     const [cycles, setCycles] = useState<number>(1)
-    const [poxAddress, setPoxAddress] = useState<{ version?: string, hashbytes?: string } | undefined>()
-    const router = useNavigate()
+    const [poxAddress] = useState<{ version?: string, hashbytes?: string } | undefined>()
+    const { userData } = useAuth()
 
     useEffect(() => {
         setValues({
             action,
+            sender: userData?.addresses?.stx?.[0]?.address ?? '',
             amount,
             cycles,
             recipient: delegateToAddress,
@@ -96,7 +98,7 @@ export default function DelegateStx({ dc_exists, setValues }: ExecuteValuesProps
                             <div className="flex">
                                 <Button variant="outline"
                                     className="w-50 crypto-button-outline text-white ml-auto"
-                                    onClick={() => router(`/dashboard/create-wallet`)}
+                                    onClick={() => router(`/dashboard/create-wallet?contract=1`)}
                                 >
                                     <Settings className="mr-2 h-4 w-4" /> Deploy Contract
                                 </Button>

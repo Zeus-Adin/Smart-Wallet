@@ -22,38 +22,7 @@ export const presetContracts: presetType[] = [
         contractSrc: '/smart-wallet.clar',
         customConfig: false
     },
-    {
-        id: "multisig",
-        name: "Multi-Signature Wallet",
-        description: "Secure wallet requiring multiple approvals for transactions",
-        signers: 3,
-        threshold: 2,
-        features: ["Multiple signers", "Enhanced security", "Shared control"],
-        recommended: false,
-        state: 'null',
-        extension: false,
-        deployable: false,
 
-        contractName: 'smart-wallet',
-        contractSrc: '/smart-wallet.clar',
-        customConfig: true,
-    },
-    {
-        id: "business",
-        name: "Business Wallet",
-        description: "Advanced wallet with multiple admins and daily limits",
-        signers: 5,
-        threshold: 3,
-        features: ["Multiple admins", "Spending limits", "Transaction policies"],
-        recommended: false,
-        state: '',
-        extension: true,
-        deployable: false,
-
-        contractName: 'ext-delegate-stx-pox-4',
-        contractSrc: '/ext-delegate-stx-pox-4.clar',
-        customConfig: true
-    },
     {
         id: "delegate-stx",
         name: "Delegate Stx",

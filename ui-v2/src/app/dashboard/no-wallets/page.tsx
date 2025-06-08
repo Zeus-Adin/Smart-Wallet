@@ -7,10 +7,28 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import ProtectedRoute from "../../../components/protected-route"
 import { Navbar } from "../../../components/navbar"
 import { useAuth } from "../../../lib/auth-provider"
+import { useEffect } from "react"
+import { wallet_contract_name } from "../../../lib/constants"
 
 export default function NoWallets() {
   const router = useNavigate()
-  const { userData } = useAuth()
+  const { userData, walletInfo, handleCCS } = useAuth()
+
+  const refresh = async () => {
+    const authed_user = userData?.addresses?.stx?.[0]?.address
+    const authed_user_sw = `${authed_user}.${wallet_contract_name}`
+    const sw = await handleCCS(authed_user, authed_user_sw, false)
+    if (sw?.found) {
+      router(`/dashboard/wallets/${authed_user_sw}`)
+    }
+  }
+
+  useEffect(() => {
+    refresh()
+  }, [walletInfo, userData])
+
+  console.log({ walletInfo })
+
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen flex-col">
@@ -42,7 +60,7 @@ export default function NoWallets() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full crypto-button" onClick={() => router("/dashboard/create-wallet")}>
+              <Button className="w-full crypto-button" onClick={() => router("/dashboard/create-wallet?contract=0")}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Create Your First Smart Wallet
               </Button>
             </CardFooter>

@@ -31,38 +31,6 @@ interface Wallet {
   signers: number
   threshold: number
 }
-const mockWallets: Wallet[] = [
-  {
-    id: 1,
-    name: "Personal Wallet",
-    address: "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",
-    balance: 125.75,
-    usdBalance: 156.25,
-    type: "Personal",
-    signers: 1,
-    threshold: 1,
-  },
-  {
-    id: 2,
-    name: "Business Wallet",
-    address: "SP1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE",
-    balance: 2450.00,
-    usdBalance: 3062.50,
-    type: "Multi-Signature",
-    signers: 3,
-    threshold: 2,
-  },
-  {
-    id: 3,
-    name: "Savings Wallet",
-    address: "SP2X0TZ59D5SZ8ACQ6PEHZ72CZQB8XFGDYB5SKE5Z",
-    balance: 500.00,
-    usdBalance: 625.00,
-    type: "Personal",
-    signers: 1,
-    threshold: 1,
-  },
-]
 
 export default function WalletDashboard() {
   const router = useNavigate()
@@ -124,7 +92,7 @@ export default function WalletDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
             <div className="flex items-center gap-2 text-white/30">
-              <h1 className="text-2xl font-bold">{mockWallets[0]?.name}</h1>
+              <h1 className="text-2xl font-bold">{presetContracts[0]?.name}</h1>
               <Badge variant="outline" className="bg-gray-800 text-gray-300 border-gray-700">
                 {wallet?.addresses?.stx?.[0]?.symbol}
               </Badge>
@@ -158,7 +126,6 @@ export default function WalletDashboard() {
             </DropdownMenu>
 
             <Button
-              disabled
               variant="outline"
               className="crypto-button-outline text-white/30"
               onClick={() => router(`/dashboard/wallets/${address}/settings`)}
@@ -245,8 +212,8 @@ export default function WalletDashboard() {
         </div>
 
         <Tabs defaultValue="assets" value={currentTab} className="space-y-4" onValueChange={(val) => {
-          searchParams.set('tab', val);
-          setSearchParams(searchParams);
+          searchParams.set('tab', val)
+          setSearchParams(searchParams)
         }}>
           <TabsList className="crypto-tab-list grid w-full grid-cols-5 bg-gray-900/50 p-1 rounded-lg">
             <TabsTrigger value="assets" className="crypto-tab data-[state=active]:crypto-tab-active">

@@ -16,7 +16,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     const [network, setNetwork] = useState<StacksNetworkName>()
     const { handleGetClientConfig } = useAuth()
     const [executing, setExecuting] = useState<boolean>(false)
-    const { userData, formatDecimals } = useAuth()
+    const { formatDecimals } = useAuth()
     const { eFees, handleContractCall, handleStxSend } = useTx()
 
     const executeTransferCall = async () => {

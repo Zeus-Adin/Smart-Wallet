@@ -44,7 +44,7 @@ export default function ExtensionTab() {
                 </CardContent>
                 <ExecuteTx props={{
                     action: 'extensions',
-                    values: { ...values }
+                    values: values
                 }} />
             </Card>
         </TabsContent>

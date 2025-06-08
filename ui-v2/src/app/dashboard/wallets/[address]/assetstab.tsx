@@ -23,14 +23,14 @@ export default function AssetsTab() {
     }
 
     function stringToColor(str?: string): string {
-        if (!str) return "hsl(0, 0%, 60%)"; // default neutral gray
+        if (!str) return "hsl(0, 0%, 60%)";
 
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
         }
         const hue = hash % 360;
-        return `hsl(${hue}, 70%, 50%)`; // bright and vibrant
+        return `hsl(${hue}, 70%, 50%)`;
     }
 
     useEffect(() => {
@@ -89,12 +89,12 @@ export default function AssetsTab() {
                                     <Layers className="h-5 w-5 text-purple-400" />
                                 </div>
                                 <div className="space-y-0.5">
-                                    <div className="font-medium">NFT Collectibles</div>
+                                    <div className="font-medium text-white/30">NFT Collectibles</div>
                                     <div className="text-sm text-gray-400">Digital Assets</div>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <div className="font-medium">{balance?.nftBalance?.length} Items</div>
+                                <div className="font-medium text-white">{balance?.nftBalance?.length} Items</div>
                                 <Button variant="ghost" size="sm" className="text-primary"
                                     onClick={() => {
                                         searchParams.set('tab', 'nft')

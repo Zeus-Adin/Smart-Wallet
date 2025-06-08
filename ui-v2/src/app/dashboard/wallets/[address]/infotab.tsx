@@ -3,37 +3,19 @@ import { Alert, AlertDescription, AlertTitle } from "../../../../components/ui/a
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
 import { Button } from "../../../../components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../../../lib/auth-provider";
-import type { Info, SmartWallet } from "../../../../lib/types";
-import { formatDistanceToNow } from 'date-fns';
+import type { SmartWallet } from "../../../../lib/types";
 
 export default function InfoTab() {
     const { address } = useParams<SmartWallet>()
-    const [walletInfo, setWalletInfo] = useState<Info>()
-    const [wcc_Exists, setWcc_Exists] = useState<boolean>(false)
-    const { handleCCS } = useAuth()
+    const { walletInfo, getWalletInfo } = useAuth()
     const router = useNavigate()
 
     const refresh = async () => {
         if (!address) return
-        const wcc = await handleCCS(address, address, true)
-        const date = new Date(wcc?.tx_info?.block_time_iso)
-        const timeAgo = formatDistanceToNow(date, { addSuffix: true })
-        const info: Info = {
-            name: address?.split('.')[1].replace('-', ' '),
-            deployer: wcc?.tx_info?.sender_address,
-            type: wcc?.tx_info?.tx_type.replace('_', ' '),
-            sponsored: wcc?.tx_info?.sponsored,
-            creation: timeAgo,
-            owner: wcc?.tx_info?.sender_address,
-            version: wcc?.tx_info?.smart_contract?.clarity_version,
-            tx: wcc?.tx_info?.tx_id,
-            status: wcc?.tx_info?.tx_status,
-        }
-        setWcc_Exists(wcc?.found)
-        setWalletInfo(info)
+        await getWalletInfo(address)
     }
 
     useEffect(() => {

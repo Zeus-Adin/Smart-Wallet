@@ -5,7 +5,7 @@ import { TabsContent } from "../../../../components/ui/tabs";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../../lib/auth-provider";
-import { type ContractAddress, type SmartWallet, type Token } from "../../../../lib/types";
+import { type SmartWallet, type Token } from "../../../../lib/types";
 import ExecuteTx from "./executetx";
 import { Label } from "../../../../components/ui/label";
 import CustomDropDown from "../../../../components/ui/customdropdown";
@@ -16,11 +16,11 @@ export default function DepositTab() {
     const { address } = useParams<SmartWallet>()
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [selectedToken, setSelectedToken] = useState<Token | null>()
-    const [action, setAction] = useState<string>('')
+    // const [action, setAction] = useState<string>('')
     const [amount, setAmount] = useState<number>(0)
     const [recipient, setRecipient] = useState<string>(address ? address?.toString() : '')
     const [memo, setMemo] = useState<string>('')
-    const { userData, rates, authUserBalance, handleGetBalance, getRates } = useAuth()
+    const { userData, authUserBalance, handleGetBalance, getRates } = useAuth()
 
     const refreshBalance = async () => {
         setRefreshing(true)

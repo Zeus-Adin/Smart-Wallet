@@ -70,7 +70,7 @@ export type ExecuteValues = {
     recipient?: string
     memo?: string
     extension_address?: ContractIdString
-}
+} | undefined
 
 export type ExecuteValuesProps = {
     dc_exists: boolean
@@ -94,8 +94,10 @@ export type Info = {
     owner: string
     creation: string
     sponsored: string
-    version: number,
+    version: number
     status: string
+    found: boolean
+    address: string
 }
 
 export type TxAssetInfo = {

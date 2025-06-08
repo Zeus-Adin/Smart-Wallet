@@ -4,10 +4,12 @@ import { defaultUrlFromNetwork, type StacksNetworkName } from '@stacks/network'
 import axios from "axios"
 import { useSearchParams } from "react-router-dom"
 import { sbtcMainnetAddress, sbtcTestnetAddress } from "./constants"
-import type { Accounts, Balance, Cs, UsersData } from "./types"
+import type { Accounts, Balance, Cs, Info, UsersData } from "./types"
+import { formatDistanceToNow } from "date-fns"
 
 interface AuthContextType {
   userData: UsersData | undefined
+  walletInfo: Info | undefined
   balance: Balance | undefined
   authUserBalance: Balance | undefined
   rates: any
@@ -23,11 +25,13 @@ interface AuthContextType {
   handleGetMeta: (address: string | undefined, asset_identifiers: string, id: number, asset: 'ft' | 'nft') => Promise<any>
   handleGetClientConfig: (address: string | undefined) => { network?: StacksNetworkName, chain?: string, api?: string, explorer?: string }
   formatDecimals: (value: number | string, decimals: number, isUmicro: boolean) => string
+  getWalletInfo: (address: string) => Promise<void>
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UsersData | undefined>(undefined)
+  const [walletInfo, setWalletInfo] = useState<Info>()
   const [balance, setBalance] = useState<Balance>()
   const [authUserBalance, setAuthUserBalance] = useState<Balance>()
   const [rates, setRates] = useState<any>()
@@ -228,10 +232,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRates(formattedData)
   }
 
+  const getWalletInfo = async (address: string) => {
+    if (!address) return
+    const wcc = await handleCCS(address, address, true)
+    const date = new Date(wcc?.tx_info?.block_time_iso)
+    const timeAgo = formatDistanceToNow(date, { addSuffix: true })
+    setWalletInfo({
+      name: address?.split('.')[1].replace('-', ' '),
+      deployer: wcc?.tx_info?.sender_address,
+      type: wcc?.tx_info?.tx_type.replace('_', ' '),
+      sponsored: wcc?.tx_info?.sponsored,
+      creation: timeAgo,
+      owner: wcc?.tx_info?.sender_address,
+      version: wcc?.tx_info?.smart_contract?.clarity_version,
+      tx: wcc?.tx_info?.tx_id,
+      status: wcc?.tx_info?.tx_status,
+      found: wcc?.found,
+      address: address
+    })
+  }
+
   return (
     <AuthContext.Provider
       value={{
         userData,
+        walletInfo,
         balance,
         authUserBalance,
         rates,
@@ -246,7 +271,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         handleGetName,
         handleGetMeta,
         handleGetClientConfig,
-        formatDecimals
+        formatDecimals,
+        getWalletInfo
       }}
     >
       {children}

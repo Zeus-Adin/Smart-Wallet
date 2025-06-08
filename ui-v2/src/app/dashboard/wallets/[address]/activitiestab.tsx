@@ -8,34 +8,8 @@ import { useTx } from "../../../../lib/tx-provider";
 import type { SmartWallet, TxAssetInfo } from "../../../../lib/types";
 import { useAuth } from "../../../../lib/auth-provider";
 
-// Mock transaction data
-const mockTransactions = [
-    {
-        type: "receive",
-        amount: "0.25 STX",
-        from: "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",
-        date: "2 hours ago",
-        status: "completed",
-    },
-    {
-        type: "send",
-        amount: "0.1 STX",
-        to: "SP1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE",
-        date: "1 day ago",
-        status: "completed",
-    },
-    {
-        type: "receive",
-        amount: "10 MNO",
-        from: "SP2X0TZ59D5SZ8ACQ6PEHZ72CZQB8XFGDYB5SKE5Z",
-        date: "3 days ago",
-        status: "completed",
-    },
-]
-
 export default function ActivitiesTab() {
     const { address } = useParams<SmartWallet>()
-    const [walletTx, setWalletTx] = useState<any[]>([])
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [offset, setOffset] = useState<number>(0)
     const { swTx, handleGetSwTx } = useTx()
@@ -59,7 +33,7 @@ export default function ActivitiesTab() {
     }, [])
 
     useEffect(() => {
-        console.log({ swTx, balance })
+
     }, [swTx, balance])
 
     return (
