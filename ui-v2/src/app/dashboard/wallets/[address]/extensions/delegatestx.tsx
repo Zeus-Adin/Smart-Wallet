@@ -22,6 +22,7 @@ export default function DelegateStx({ dc_exists, setValues }: ExecuteValuesProps
     useEffect(() => {
         setValues({
             action,
+            symbol: 'STX',
             sender: address?.toString() ?? '',
             amount,
             cycles,
