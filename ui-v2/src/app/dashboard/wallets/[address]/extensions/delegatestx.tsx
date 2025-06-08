@@ -3,27 +3,26 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from "../../../../.
 import { Alert, AlertDescription, AlertTitle } from "../../../../../components/ui/alert"
 import { Input } from "../../../../../components/ui/input"
 import { Label } from "../../../../../components/ui/label"
-import { type ExecuteValuesProps } from '../../../../../lib/types'
+import type { SmartWallet, ExecuteValuesProps } from '../../../../../lib/types'
 import { useEffect, useState } from "react"
 import { Button } from "../../../../../components/ui/button"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "../../../../../lib/auth-provider"
+import { useNavigate, useParams } from "react-router-dom"
 
 
 
 export default function DelegateStx({ dc_exists, setValues }: ExecuteValuesProps) {
     const router = useNavigate()
+    const { address } = useParams<SmartWallet>()
     const [action, setAction] = useState<string>()
     const [amount, setAmount] = useState<number>()
     const [delegateToAddress, setDelegateToAddress] = useState<string>()
     const [cycles, setCycles] = useState<number>(1)
     const [poxAddress] = useState<{ version?: string, hashbytes?: string } | undefined>()
-    const { userData } = useAuth()
 
     useEffect(() => {
         setValues({
             action,
-            sender: userData?.addresses?.stx?.[0]?.address ?? '',
+            sender: address?.toString() ?? '',
             amount,
             cycles,
             recipient: delegateToAddress,

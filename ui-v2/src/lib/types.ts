@@ -6,6 +6,7 @@ export type ContractAddress = `${string}.${string}`
 export type presetType = {
     id: string
     name: string
+    function_name: string
     description: string
     signers: number
     threshold: number

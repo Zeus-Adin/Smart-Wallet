@@ -9,6 +9,7 @@ export const presetContracts: presetType[] = [
     {
         id: "personal",
         name: "Personal Wallet",
+        function_name: 'deploy',
         description: "Simple single-signature wallet for personal use",
         signers: 1,
         threshold: 1,
@@ -26,6 +27,7 @@ export const presetContracts: presetType[] = [
     {
         id: "delegate-stx",
         name: "Delegate Stx",
+        function_name: 'delegate-stx',
         description: "Earn BTC rewards by assigning your STX to a pool while keeping full control of your tokens.",
         signers: 1,
         threshold: 1,

@@ -111,13 +111,14 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     }
 
     const executeContractExtensionCall = async () => {
+        console.log({ props })
         if (!props?.values || !props?.action) return
-        const { action, amount, cycles, poxAddress, decimal, recipient } = props?.values
+        const { action, amount, cycles, poxAddress, recipient } = props?.values
         const extension_owner = address?.split('.')[0]
-        if (!action || !amount || !cycles || !recipient || !address || !extension_owner || !decimal) return
+        if (!action || !amount || !cycles || !recipient || !address || !extension_owner) return
         setExecuting(true)
 
-        const delegateAmount = formatDecimals(amount, decimal, true)
+        const delegateAmount = formatDecimals(amount, 6, true)
         const postConditions = [Pc.principal(address).willSendLte(delegateAmount).ustx()]
 
         let serializedPayload
@@ -147,7 +148,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
         }
         const txOp = {
             contract: address,
-            functionName: action,
+            functionName: 'extension-call',
             functionArgs: [
                 Cl.contractPrincipal(extension_owner, delegate_extension_contract_name),
                 Cl.buffer(serializedPayload)
@@ -155,6 +156,8 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
             network,
             postConditions
         }
+        console.log({ txOp })
+
         await handleContractCall(txOp)
         setExecuting(false)
     }
