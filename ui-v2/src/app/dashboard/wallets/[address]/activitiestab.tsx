@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useTx } from "../../../../lib/tx-provider";
 import type { SmartWallet, TxAssetInfo } from "../../../../lib/types";
 import { useAuth } from "../../../../lib/auth-provider";
+import { Badge } from "../../../../components/ui/badge";
 
 export default function ActivitiesTab() {
     const { address } = useParams<SmartWallet>()
@@ -98,15 +99,33 @@ export default function ActivitiesTab() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    {tx?.assets?.map((a: TxAssetInfo, i) => (
-                                        <div key={i} className={`font-medium ${tx?.action === "receive" ? "text-green-400" : "text-red-400"}`}>
-                                            {tx?.action === "receive" ? "+" : tx?.action === 'sent' ? "-" : ''}
-                                            {formatDecimals(a.amount, balance?.all?.find(t => t?.symbol?.toLowerCase() === a?.symbol?.toLowerCase())?.decimals ?? 0, false)} {a.symbol}
+                                <div className="flex flex-col gap-1 text-right">
+                                    {tx?.assets?.length > 0
+                                        ? tx?.assets?.map((a: TxAssetInfo, i) => (
+                                            <div key={i} className={`flex flex-col font-medium ${tx?.action === "receive" ? "text-green-400" : "text-red-400"}`}>
+                                                {tx?.action === "receive" ? "+" : tx?.action === 'sent' ? "-" : ''}
+                                                {formatDecimals(a.amount, balance?.all?.find(t => t?.symbol?.toLowerCase() === a?.symbol?.toLowerCase())?.decimals ?? 0, false)} {a.symbol}
+
+                                                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+                                                    <div className="text-xs truncate max-w-[40] text-gray-400">
+                                                        {tx?.tx_status}
+                                                    </div>
+                                                </Badge>
+
+                                            </div>
+                                        ))
+                                        : <div className={`flex flex-col font-medium ${tx?.action === "receive" ? "text-green-400" : "text-red-400"}`}>
+                                            <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+                                                <div className="text-xs truncate max-w-[40] text-gray-400">
+                                                    {tx?.tx_status}
+                                                </div>
+                                            </Badge>
                                         </div>
-                                    ))}
+                                    }
                                     <div className="flex items-center text-xs text-gray-400 gap-2">
-                                        <a href={`${configExplorer}txid/${tx?.tx}?chain=${configChain}`} target="_blank" className="text-xs underline truncate max-w-[40] text-gray-400">{tx?.tx.slice(0, 6)}...{tx?.tx.slice(-4)}</a>
+                                        <a href={`${configExplorer}txid/${tx?.tx}?chain=${configChain}`} target="_blank" className="text-xs underline truncate max-w-[40] text-gray-400">
+                                            {tx?.tx.slice(0, 6)}...{tx?.tx.slice(-4)}
+                                        </a>
                                         <div className="flex items-center"><Clock className="h-3 w-3 mr-1" /> {tx?.stamp}</div>
                                     </div>
                                 </div>
