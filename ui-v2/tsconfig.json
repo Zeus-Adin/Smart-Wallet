@@ -15,11 +15,6 @@
     "moduleResolution": "node",
     "module": "ESNext",
     "target": "ESNext",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
+    "baseUrl": "."
   }
 }
