@@ -3,17 +3,20 @@ import { Button } from "../../../../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { TabsContent } from "../../../../components/ui/tabs";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTx } from "../../../../lib/tx-provider";
 import type { SmartWallet, TxAssetInfo } from "../../../../lib/types";
 import { useAuth } from "../../../../lib/auth-provider";
 
 export default function ActivitiesTab() {
     const { address } = useParams<SmartWallet>()
+    const [searchParams] = useSearchParams()
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [offset, setOffset] = useState<number>(0)
     const { swTx, handleGetSwTx } = useTx()
-    const { balance, formatDecimals } = useAuth()
+    const [configExplorer, setConfigExplorer] = useState<string>()
+    const [configChain, setConfigChain] = useState<string>()
+    const { balance, formatDecimals, handleGetClientConfig } = useAuth()
 
     const refreshTx = async () => {
         setRefreshing(true)
@@ -33,8 +36,11 @@ export default function ActivitiesTab() {
     }, [])
 
     useEffect(() => {
-
-    }, [swTx, balance])
+        console.log({ swTx, address, balance, searchParams })
+        const { explorer, chain } = handleGetClientConfig(address)
+        setConfigExplorer(explorer)
+        setConfigChain(chain)
+    }, [swTx, address, balance, searchParams])
 
     return (
         <TabsContent value="activity" className="space-y-4">
@@ -99,8 +105,9 @@ export default function ActivitiesTab() {
                                             {formatDecimals(a.amount, balance?.all?.find(t => t?.symbol?.toLowerCase() === a?.symbol?.toLowerCase())?.decimals ?? 0, false)} {a.symbol}
                                         </div>
                                     ))}
-                                    <div className="flex items-center text-xs text-gray-400">
-                                        <Clock className="h-3 w-3 mr-1" /> {tx?.stamp}
+                                    <div className="flex items-center text-xs text-gray-400 gap-2">
+                                        <a href={`${configExplorer}txid/${tx?.tx}?chain=${configChain}`} target="_blank" className="text-xs underline truncate max-w-[40] text-gray-400">{tx?.tx.slice(0, 6)}...{tx?.tx.slice(-4)}</a>
+                                        <div className="flex items-center"><Clock className="h-3 w-3 mr-1" /> {tx?.stamp}</div>
                                     </div>
                                 </div>
                             </div>

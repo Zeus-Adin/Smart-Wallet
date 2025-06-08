@@ -112,7 +112,9 @@ export default function WalletDashboard() {
                 >
                   <div className="flex flex-col">
                     <span className="font-medium text-white/30">Personal Wallet</span>
-                    <span className="text-xs text-gray-400">{balance?.stxBalance?.actual_balance} ≈ {(balance?.stxBalance?.actual_balance * rates?.['stx']?.current_price)?.toFixed(4)} USD</span>
+                    <span className="text-xs text-gray-400">
+                      {balance?.stxBalance?.actual_balance} ≈ {(balance?.stxBalance?.actual_balance * rates?.['stx']?.current_price)?.toFixed(4)} USD
+                    </span>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -166,7 +168,10 @@ export default function WalletDashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-1">
-                <p className="text-2xl font-bold crypto-gradient-text flex gap-1">{(Number(walletBalance?.stxBalance?.actual_balance ?? 0))?.toFixed(4)} <span className="text-xs text-gray-400 mt-2">STX</span></p>
+                <p className="text-2xl font-bold crypto-gradient-text flex gap-1">
+                  {(Number(walletBalance?.stxBalance?.actual_balance ?? 0))?.toFixed(4)}
+                  <span className="text-xs text-gray-400 mt-2">STX</span>
+                </p>
                 <p className="text-xs text-gray-400 mt-2">≈ {
                   (
                     Number(walletBalance?.stxBalance?.actual_balance ?? 0) *
@@ -175,7 +180,9 @@ export default function WalletDashboard() {
                 } USD</p>
               </div>
               <div className="flex gap-1">
-                <p className="text-xs font-light text-transparent bg-clip-text bg-gradient-to-r from-[#f7931a] via-[#ffac33] to-[#ffe07d]">{walletBalance?.sbtcBalance?.actual_balance ?? 0} sBTC</p>
+                <p className="text-xs font-light text-transparent bg-clip-text bg-gradient-to-r from-[#f7931a] via-[#ffac33] to-[#ffe07d]">
+                  {walletBalance?.sbtcBalance?.actual_balance ?? 0} sBTC
+                </p>
                 <p className="text-xs text-gray-400">≈ {
                   (
                     Number(walletBalance?.sbtcBalance?.actual_balance ?? 0) *

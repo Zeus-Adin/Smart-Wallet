@@ -1,4 +1,5 @@
 import type { AddressEntry, ContractIdString } from "@stacks/connect/dist/types/methods"
+import type { StacksNetworkName } from "@stacks/network"
 import type { Dispatch, SetStateAction } from "react"
 
 export type SmartWallet = { address: `${string}.${string}` }
@@ -116,4 +117,11 @@ export type TxInfo = {
     assets: TxAssetInfo[]
     tx: string
     tx_status: string
+}
+
+export type ClientConfig = {
+    network: StacksNetworkName
+    api: string
+    explorer: string
+    chain: string
 }

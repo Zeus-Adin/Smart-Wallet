@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleGetClientConfig = (address: string | undefined) => {
     const network: StacksNetworkName = searchParams.get("network") || address?.startsWith('SP') ? 'mainnet' : 'testnet'
     const api: string | undefined = searchParams.get("api") || defaultUrlFromNetwork(network)
-    const chain: string | undefined = searchParams.get("chain") || 'mannet'
+    const chain: string | undefined = searchParams.get("chain") || network
     const explorer: string | undefined = searchParams.get("explorer") || 'https://explorer.hiro.so/'
     return { network, chain, api, explorer }
   }
