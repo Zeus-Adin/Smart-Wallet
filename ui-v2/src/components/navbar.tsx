@@ -60,7 +60,7 @@ export function Navbar() {
               <Link className="text-sm font-medium hover:text-primary transition-colors" to="/feat">
                 Features
               </Link>
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/docs">
+              <Link className="text-sm font-medium hover:text-primary transition-colors" to="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet">
                 Documentation
               </Link>
               <div className="relative group">
