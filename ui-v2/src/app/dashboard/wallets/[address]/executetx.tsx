@@ -154,8 +154,8 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 Cl.buffer(serializedPayload)
             ],
             network,
-            // postConditions,
-            // postConditionMode: 'deny'
+            postConditions,
+            postConditionMode: 'deny'
         }
         console.log({ txOp })
 
