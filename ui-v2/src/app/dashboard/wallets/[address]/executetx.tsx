@@ -146,7 +146,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 })
             ))
         }
-        const txOp = {
+        const txOp: CallContractParams = {
             contract: address,
             functionName: 'extension-call',
             functionArgs: [
@@ -154,7 +154,8 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 Cl.buffer(serializedPayload)
             ],
             network,
-            postConditions
+            // postConditions,
+            // postConditionMode: 'deny'
         }
         console.log({ txOp })
 

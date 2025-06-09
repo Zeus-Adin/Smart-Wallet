@@ -98,7 +98,7 @@ export function Navbar() {
           </div>
           <div className="flex items-center gap-4">
             {!authenticated && !loading && (
-              <Link to="/docs" className="hidden md:block">
+              <Link to="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet" className="hidden md:block">
                 <Button variant="outline" size="sm" className="crypto-button-outline">
                   Docs
                 </Button>

@@ -14,8 +14,8 @@ export default function DelegateStx({ dc_exists, setValues }: ExecuteValuesProps
     const router = useNavigate()
     const { address } = useParams<SmartWallet>()
     const [action, setAction] = useState<string>()
-    const [amount, setAmount] = useState<number>()
-    const [delegateToAddress, setDelegateToAddress] = useState<string>()
+    const [amount, setAmount] = useState<number>(0)
+    const [delegateToAddress, setDelegateToAddress] = useState<string>('')
     const [cycles, setCycles] = useState<number>(1)
     const [poxAddress] = useState<{ version?: string, hashbytes?: string } | undefined>()
 
