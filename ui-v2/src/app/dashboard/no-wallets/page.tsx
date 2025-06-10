@@ -39,7 +39,7 @@ export default function NoWallets() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-900">
                 <Wallet className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl">No Smart Wallets</CardTitle>
+              <CardTitle className="text-2xl text-white/30">No Smart Wallets</CardTitle>
               <CardDescription>
                 You don't have any smart wallets associated to this address({userData?.addresses?.stx?.[0]?.address.slice(0, 4)}...{userData?.addresses?.stx?.[0]?.address.slice(-4)}) yet. Create your first smart wallet to get started.
               </CardDescription>
@@ -50,7 +50,7 @@ export default function NoWallets() {
                 features.
               </p>
               <div className="rounded-lg border border-gray-800 p-4 bg-gray-900/50">
-                <h3 className="font-medium mb-2">Benefits of Smart Wallets</h3>
+                <h3 className="font-medium mb-2 text-white/30">Benefits of Smart Wallets</h3>
                 <ul className="text-sm text-gray-400 space-y-2 text-left list-disc list-inside">
                   <li>Enhanced security with multi-signature support</li>
                   <li>Social recovery options if you lose access</li>
@@ -60,7 +60,7 @@ export default function NoWallets() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full crypto-button" onClick={() => router("/dashboard/create-wallet?contract=0")}>
+              <Button className="w-full crypto-button text-white" onClick={() => router("/dashboard/create-wallet?contract=0")}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Create Your First Smart Wallet
               </Button>
             </CardFooter>

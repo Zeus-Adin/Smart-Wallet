@@ -19,13 +19,22 @@ export default function WalletSettings() {
   const { walletInfo, getWalletInfo } = useAuth()
 
   const refresh = async () => {
-    if (!address) return
+    if (!address) {
+      router('/dashboard/no-wallets')
+      return
+    }
     await getWalletInfo(address)
   }
 
   useEffect(() => {
     refresh()
   }, [])
+
+  useEffect(() => {
+    if (!walletInfo?.found) {
+      router('/dashboard/no-wallets')
+    }
+  }, [walletInfo])
 
   if (!walletInfo) {
     return (

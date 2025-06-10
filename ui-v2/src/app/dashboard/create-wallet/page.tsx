@@ -114,7 +114,7 @@ export default function CreateWallet() {
                   >
                     <CardHeader>
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{contract.name}</CardTitle>
+                        <CardTitle className="text-lg text-white/30">{contract.name}</CardTitle>
 
                         {contract.recommended && (<Badge className="bg-primary/20 text-primary border-primary/30">Recommended</Badge>)}
                         {contract.extension && (<Badge className="bg-orange-300/30 text-orange-300 border-orange-300/30">Extension</Badge>)}
@@ -126,16 +126,16 @@ export default function CreateWallet() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">Signers:</span>
-                          <span>{contract.signers}</span>
+                          <span className="text-white">{contract.signers}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">Required signatures:</span>
-                          <span>
+                          <span className="text-white">
                             {contract.threshold} of {contract.signers}
                           </span>
                         </div>
                         <div className="pt-2">
-                          <h4 className="text-sm font-medium mb-2">Features:</h4>
+                          <h4 className="text-sm font-medium mb-2 text-white/30">Features:</h4>
                           <ul className="space-y-1">
                             {contract.features.map((feature, index) => (
                               <li key={index} className="text-xs text-gray-400 flex items-center">
