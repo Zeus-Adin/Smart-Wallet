@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { Copy, Shield, Wallet, BarChart3, Zap, Settings, PlusCircle, ChevronDown, SwitchCamera, } from "lucide-react"
+import { Copy, Shield, Wallet, BarChart3, Zap, Settings, PlusCircle, ChevronDown, RefreshCcwIcon, } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
@@ -182,7 +182,7 @@ export default function WalletDashboard() {
                   })} className="hover:bg-gray-800">
                     {copiedBtc
                       ? <span className="text-xs text-primary">switched!</span>
-                      : <SwitchCamera className="h-4 w-4 text-white" />
+                      : <RefreshCcwIcon className="h-4 w-4 text-white" />
                     }
                   </Button>
                   <Button variant="ghost" size="icon" onClick={copyBtcToClipboard} className="hover:bg-gray-800">
