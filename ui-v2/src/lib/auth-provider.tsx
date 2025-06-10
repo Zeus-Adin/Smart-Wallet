@@ -4,7 +4,7 @@ import { defaultUrlFromNetwork, type StacksNetworkName } from '@stacks/network'
 import axios from "axios"
 import { useSearchParams } from "react-router-dom"
 import { sbtcMainnetAddress, sbtcTestnetAddress } from "./constants"
-import type { Accounts, Balance, Cs, Info, UsersData } from "./types"
+import type { Accounts, Balance, Cs, Info, UsersData, nftResponseBalanceValues } from "./types"
 import { formatDistanceToNow } from "date-fns"
 
 interface AuthContextType {
@@ -165,7 +165,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stxDecimal = 6
     stxBalance = { ...stxBalance, image: '/stx-logo.svg', decimals: stxDecimal, actual_balance: formatDecimals(stxBalance?.balance, stxDecimal, false), name: 'Stacks', symbol: 'STX' }
 
-    const nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
+    let nftBalance = (await axios.get(`${api}/extended/v1/tokens/nft/holdings?principal=${address}&${asset_identifiers ? `asset_identifiers=${asset_identifiers}` : ''}&offset=${offset}&tx_metadata=true`))?.data?.results
+    nftBalance = await Promise.all(nftBalance.map(async (res: nftResponseBalanceValues) => {
+      const id = res?.value?.repr?.replace('u', '')
+      const asset = res?.asset_identifier
+      const tokenMeta = await handleGetMeta(address, asset?.split('::')[0], Number(id), 'nft')
+      const tokenMetadata = await axios.get(tokenMeta?.token_uri)
+      return {
+        asset_name: asset?.split('::')[1],
+        asset_address: asset?.split('::')[0],
+        contract_name: asset?.split('::')[0]?.split('.')[1],
+        id,
+        ...tokenMeta,
+        ...tokenMetadata,
+        tx: res?.tx?.tx_id,
+        status: res?.tx?.tx_status,
+        time: res?.tx?.block_time_iso
+      }
+    }))
 
     let ftBalance = (await axios.get(`${api}/extended/v2/addresses/${address}/balances/ft?offset=${offset}`))?.data?.results
     ftBalance = await Promise.all(ftBalance.map(async (res: { balance: string, token: string }) => {

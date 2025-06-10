@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { Copy, Shield, Wallet, BarChart3, Zap, Settings, PlusCircle, ChevronDown, } from "lucide-react"
+import { Copy, Shield, Wallet, BarChart3, Zap, Settings, PlusCircle, ChevronDown, SwitchCamera, } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
@@ -37,7 +37,9 @@ export default function WalletDashboard() {
   const [searchParams, setSearchParams] = useSearchParams()
   const currentTab = searchParams.get('tab') ?? 'assets'
   const { address } = useParams<{ address: string }>();
-  const [copied, setCopied] = useState(false)
+  const [copiedStx, setStxCopied] = useState(false)
+  const [copiedBtc, setBtcCopied] = useState(false)
+  const [switchBtc, setSwitchBtc] = useState(0)
   const [wallet, setWallet] = useState<UsersData | undefined>()
   const [walletBalance, setWalletBalance] = useState<Balance>()
   const { userData, balance, rates, handleGetBalance, getRates } = useAuth()
@@ -50,6 +52,24 @@ export default function WalletDashboard() {
     }
   }
 
+  const copyStxToClipboard = () => {
+    if (address) {
+      navigator.clipboard.writeText(address)
+      setStxCopied(true)
+      setTimeout(() => setStxCopied(false), 2000)
+    }
+  }
+
+  const copyBtcToClipboard = () => {
+    const btcAddress = userData?.addresses?.btc?.[0]?.address
+    if (btcAddress) {
+      navigator.clipboard.writeText(btcAddress)
+      setBtcCopied(true)
+      setTimeout(() => setBtcCopied(false), 2000)
+    }
+  }
+
+
   useEffect(() => {
     refresh()
     getRates()
@@ -59,13 +79,9 @@ export default function WalletDashboard() {
     setWalletBalance(balance)
   }, [balance, rates, wallet])
 
-  const copyToClipboard = () => {
-    if (address) {
-      navigator.clipboard.writeText(address)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
+  useEffect(() => {
+    console.log({ switchBtc })
+  }, [switchBtc])
 
   if (!wallet) {
     return (
@@ -146,9 +162,33 @@ export default function WalletDashboard() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-sm font-bold truncate max-w-[180px] text-gray-400">{address}</div>
-                <Button variant="ghost" size="icon" onClick={copyToClipboard} className="hover:bg-gray-800">
-                  {copied ? <span className="text-xs text-primary">Copied!</span> : <Copy className="h-4 w-4 text-white" />}
+                <Button variant="ghost" size="icon" onClick={copyStxToClipboard} className="hover:bg-gray-800">
+                  {copiedStx
+                    ? <span className="text-xs text-primary">Copied!</span>
+                    : <Copy className="h-4 w-4 text-white" />
+                  }
                 </Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-bold truncate max-w-[180px] text-gray-400">{userData?.addresses?.btc?.[switchBtc]?.address}</div >
+                <div>
+                  <Button variant="ghost" size="icon" onClick={() => setSwitchBtc((res: number) => {
+                    if (!userData?.addresses?.btc?.length) return 0
+                    let result = res + 1
+                    if (result > userData?.addresses?.btc?.length - 1) {
+                      result = 0
+                    }
+                    return result
+                  })} className="hover:bg-gray-800">
+                    {copiedBtc
+                      ? <span className="text-xs text-primary">switched!</span>
+                      : <SwitchCamera className="h-4 w-4 text-white" />
+                    }
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={copyBtcToClipboard} className="hover:bg-gray-800">
+                    {copiedBtc ? <span className="text-xs text-primary">copied!</span> : <Copy className="h-4 w-4 text-white" />}
+                  </Button>
+                </div>
               </div>
               <div className="mt-2 flex items-center gap-2">
                 <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20">

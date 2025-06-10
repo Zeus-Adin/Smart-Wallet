@@ -125,3 +125,25 @@ export type ClientConfig = {
     explorer: string
     chain: string
 }
+
+export type nftResponseBalanceValues = {
+    asset_identifier: string
+    block_height: number
+    value: { repr: string }
+    tx: {
+        block_time_iso: string
+        tx_status: string
+        tx_id: string
+    }
+}
+
+export type nftBalanceValues = {
+    asset_name: string
+    asset_address: string
+    contract_name: string
+    id: number,
+    tx: string
+    status: string
+    time: string
+    image: string
+}
