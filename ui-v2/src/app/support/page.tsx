@@ -10,14 +10,14 @@ export default function SupportPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1 p-4 md:p-8 bg-black">
+      <main className="flex-1 p-4 md:p-8 bg-black text-gray-500 dark:text-gray-400">
         <div className="mx-auto max-w-4xl space-y-8">
           <div className="space-y-2">
             <Link to="/" className="inline-flex items-center text-sm text-gray-400 hover:text-white mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Home
             </Link>
-            <h1 className="text-3xl font-bold tracking-tight">Expert Support</h1>
+            <h1 className="text-3xl font-bold tracking-tight ">Expert Support</h1>
             <p className="text-gray-500 dark:text-gray-400">
               Get help from our team around the clock. We're here to assist you with any questions or issues.
             </p>

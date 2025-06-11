@@ -93,15 +93,6 @@ export default function NftTab() {
                         }
                     </div>
                 </CardContent>
-                <CardFooter>
-                    <Button
-                        disabled
-                        variant="outline"
-                        className="w-full crypto-button-outline text-white"
-                    >
-                        <Settings className="mr-2 h-4 w-4" /> Manage Wallet Settings
-                    </Button>
-                </CardFooter>
             </Card>
         </TabsContent>
     )

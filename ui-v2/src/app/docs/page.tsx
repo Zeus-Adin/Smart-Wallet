@@ -8,7 +8,7 @@ export default function DocsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1 p-4 md:p-8 bg-black">
+      <main className="flex-1 p-4 md:p-8 bg-black text-gray-500 dark:text-gray-400">
         <div className="mx-auto max-w-4xl space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">Smart Wallet Documentation</h1>
@@ -25,8 +25,8 @@ export default function DocsPage() {
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="space-y-4">
-                <h2 className="text-2xl font-bold">What is Smart Wallet?</h2>
-                <p>
+                <h2 className="text-2xl font-bold ">What is Smart Wallet?</h2>
+                <p className="text-gray-500 dark:text-gray-400">
                   The Smart Wallet is an innovative smart contract solution designed to hold assets in the name of one
                   or more users. This contract offers a streamlined approach to asset management and key rotation,
                   enhancing both security and usability. It is also known as Smart Contract Wallet or Account
@@ -43,7 +43,7 @@ export default function DocsPage() {
                   </div>
                 </div>
                 <h3 className="text-xl font-bold">Benefits</h3>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc pl-6 space-y-2 text-gray-500 dark:text-gray-400">
                   <li>Enhanced security through smart contract logic</li>
                   <li>Simplified key rotation without asset transfers</li>
                   <li>Customizable security settings and limits</li>
@@ -61,11 +61,11 @@ export default function DocsPage() {
                     </div>
                     <h3 className="text-xl font-bold">Key Rotation</h3>
                   </div>
-                  <p>
+                  <p className="text-gray-500 dark:text-gray-400">
                     Update or change private keys without needing to manually transfer each asset individually, reducing
                     the complexity and transaction fees involved.
                   </p>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <ul className="list-disc pl-6 space-y-1 text-gray-500 dark:text-gray-400">
                     <li>Seamless key updates</li>
                     <li>No need to transfer assets</li>
                     <li>Reduced transaction fees</li>
@@ -79,11 +79,11 @@ export default function DocsPage() {
                     </div>
                     <h3 className="text-xl font-bold">Asset Management</h3>
                   </div>
-                  <p>
+                  <p className="text-gray-500 dark:text-gray-400">
                     Conduct various operations such as sending, staking, and managing assets within the smart wallet
                     environment, ensuring security and ease of use.
                   </p>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <ul className="list-disc pl-6 space-y-1 text-gray-500 dark:text-gray-400">
                     <li>Unified asset dashboard</li>
                     <li>Simplified token transfers</li>
                     <li>Staking capabilities</li>
@@ -97,11 +97,11 @@ export default function DocsPage() {
                     </div>
                     <h3 className="text-xl font-bold">Enhanced Security</h3>
                   </div>
-                  <p>
+                  <p className="text-gray-500 dark:text-gray-400">
                     Set transfer limits and recovery mechanisms to protect your assets from unauthorized access and
                     provide peace of mind.
                   </p>
-                  <ul className="list-disc pl-6 space-y-1">
+                  <ul className="list-disc pl-6 space-y-1 text-gray-500 dark:text-gray-400">
                     <li>Daily transfer limits</li>
                     <li>Multi-signature support</li>
                     <li>Recovery addresses</li>
@@ -115,7 +115,7 @@ export default function DocsPage() {
                     </div>
                     <h3 className="text-xl font-bold">Documentation</h3>
                   </div>
-                  <p>
+                  <p className="text-gray-500 dark:text-gray-400">
                     Comprehensive documentation and guides to help you get the most out of your Smart Wallet
                     implementation.
                   </p>
@@ -131,7 +131,7 @@ export default function DocsPage() {
               </div>
             </TabsContent>
             <TabsContent value="nothing" className="space-y-4">
-              <div className="space-y-4">
+              <div className="space-y-4 text-gray-500 dark:text-gray-400">
                 <h2 className="text-2xl font-bold">The Nothing Token ($MNO)</h2>
                 <p>
                   The Nothing token, also known as micro-nothing ($MNO), was created at block 5235 in the Stacks (STX)

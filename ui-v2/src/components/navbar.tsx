@@ -60,7 +60,7 @@ export function Navbar() {
               <Link className="text-sm font-medium hover:text-primary transition-colors" to="/feat">
                 Features
               </Link>
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet">
+              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/docs">
                 Documentation
               </Link>
               <div className="relative group">
@@ -91,14 +91,14 @@ export function Navbar() {
                   ))}
                 </div>
               </div>
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/about">
-                About
+              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/support">
+                Support
               </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
             {!authenticated && !loading && (
-              <Link to="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet" className="hidden md:block">
+              <Link to="docs" className="hidden md:block">
                 <Button variant="outline" size="sm" className="crypto-button-outline">
                   Docs
                 </Button>
@@ -183,8 +183,8 @@ export function Navbar() {
                   </Link>
                 </div>
               </details>
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="#">
-                About
+              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/support">
+                Support
               </Link>
               {!authenticated && !loading && (
                 <Link to="/docs">
