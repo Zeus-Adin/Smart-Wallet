@@ -7,6 +7,7 @@ import CreateWallet from "./dashboard/create-wallet/page";
 import WalletSettings from "./dashboard/wallets/[address]/settings/page";
 import SupportPage from "./support/page";
 import DocsPage from "./docs/page";
+import NotFound from "./404/page";
 
 export function PageRoutes() {
     return (
@@ -19,7 +20,7 @@ export function PageRoutes() {
             <Route path="/dashboard/create-wallet" element={<CreateWallet />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/docs" element={<DocsPage />} />
-
+            <Route path="*" element={<NotFound />} />
         </Routes>
     )
 }
