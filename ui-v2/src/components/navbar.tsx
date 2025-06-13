@@ -57,9 +57,9 @@ export function Navbar() {
               <span className="font-bold text-xl ml-2 crypto-gradient-text">Smart Wallet</span>
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="/feat">
+              {/* <Link className="text-sm font-medium hover:text-primary transition-colors" to="/feat">
                 Features
-              </Link>
+              </Link> */}
               <Link className="text-sm font-medium hover:text-primary transition-colors" to="/docs">
                 Documentation
               </Link>
