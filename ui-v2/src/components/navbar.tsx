@@ -160,9 +160,9 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden glass-effect border-t border-gray-800 py-4">
             <nav className="flex flex-col space-y-4 px-4">
-              <Link className="text-sm font-medium hover:text-primary transition-colors" to="#">
+              {/* <Link className="text-sm font-medium hover:text-primary transition-colors" to="#">
                 Features
-              </Link>
+              </Link> */}
               <Link className="text-sm font-medium hover:text-primary transition-colors" to="/docs">
                 Documentation
               </Link>
