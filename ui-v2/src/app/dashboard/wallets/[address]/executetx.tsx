@@ -111,7 +111,6 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
     }
 
     const executeContractExtensionCall = async () => {
-        console.log({ props })
         if (!props?.values || !props?.action) return
         const { action, amount, cycles, poxAddress, recipient } = props?.values
         const extension_owner = address?.split('.')[0]
@@ -119,13 +118,16 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
         setExecuting(true)
 
         const delegateAmount = formatDecimals(amount, 6, true)
-        const postConditions = [Pc.principal(address).willSendLte(delegateAmount).ustx()]
+        const postConditions = [
+            Pc.principal(address).willSendLte(delegateAmount).ustx(),
+            Pc.principal(address).willSendLte(1).ft(address, 'ect')
+        ]
 
         let serializedPayload
         if (poxAddress?.version && poxAddress?.hashbytes) {
             serializedPayload = hexToBytes(serializeCV(
                 Cl.tuple({
-                    "action": Cl.stringAscii('delegate'),
+                    "action": Cl.stringAscii(action),
                     "amount-ustx": Cl.uint(delegateAmount),
                     "delegate-to": Cl.principal(recipient),
                     "until-burn-ht": Cl.none(),
@@ -138,7 +140,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
         } else {
             serializedPayload = hexToBytes(serializeCV(
                 Cl.tuple({
-                    "action": Cl.stringAscii('delegate'),
+                    "action": Cl.stringAscii(action),
                     "amount-ustx": Cl.uint(delegateAmount),
                     "delegate-to": Cl.principal(recipient),
                     "until-burn-ht": Cl.none(),
@@ -146,6 +148,7 @@ export default function ExecuteTx({ props }: ExecuteTxProps) {
                 })
             ))
         }
+        console.log({ action })
         const txOp: CallContractParams = {
             contract: address,
             functionName: 'extension-call',
