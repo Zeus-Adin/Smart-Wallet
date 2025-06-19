@@ -2,7 +2,7 @@
 ;; version: v1
 ;; summary: Registry for clarity smart wallets
 
-(use-trait commission-trait 'SP3D6PV2ACBPEKYJTCMH7HEN02KP87QSP8KTEH335.commission-trait.commission-trait)
+(use-trait commission-trait 'SP3D6PV2ACBPEKYJTCMH7HEN02KP87QSP8KTEH335.commission-trait.commission)
 (impl-trait 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.nft-trait)
 
 (define-trait csw-trait (
@@ -13,7 +13,7 @@
 ))
 
 ;; token definition
-(define-non-fungible-token csw uint)
+(define-non-fungible-token csw-ownership uint)
 
 ;; Only authorized caller to flip the switch and update URI
 (define-constant DEPLOYER tx-sender)
@@ -84,7 +84,7 @@
 )
 
 ;; Define a map to link NFT IDs to their respective smart wallet.
-(define-map index-to-principal
+(define-map index-to-csw
   uint
   principal
 )
@@ -120,19 +120,21 @@
 ;; @desc SIP-09 compliant function to get the owner of a specific token by its ID
 (define-read-only (get-owner (id uint))
   ;; Check and return the owner of the specified NFT
-  (ok (nft-get-owner? csw id))
+  (ok (nft-get-owner? csw-ownership id))
 )
 
 ;; @desc get owner function
-(define-read-only (get-owner-name (csw <csw-trait>))
+(define-read-only (get-owner-name (clarity-smart-wallet <csw-trait>))
   ;; Check and return the owner of the specified NFT
-  (ok (nft-get-owner? csw (unwrap! (get-id-from-csw (principal-of? csw)) ERR-NO-CSW)))
+  (ok (nft-get-owner? csw-ownership
+    (unwrap! (get-id-from-csw clarity-smart-wallet) ERR-NO-CSW)
+  ))
 )
 
 ;; Defines a read-only function to fetch the unique ID of a BNS name given its name and the namespace it belongs to.
-(define-read-only (get-id-from-csw (csw principal))
+(define-read-only (get-id-from-csw (clarity-smart-wallet <csw-trait>))
   ;; Attempts to retrieve the ID from the 'csw-to-index' map using the provided name and namespace as the key.
-  (map-get? csw-to-index csw)
+  (map-get? csw-to-index (contract-of clarity-smart-wallet))
 )
 
 ;; Defines a read-only function to fetch the BNS name and the namespace given a unique ID.
@@ -163,7 +165,7 @@
   (let (
       ;; Get the csw of the NFT.
       (csw (unwrap! (get-csw-from-id id) ERR-NO-CSW))
-      (nft-current-owner (unwrap! (nft-get-owner? csw id) ERR-NO-CSW))
+      (nft-current-owner (unwrap! (nft-get-owner? csw-ownership id) ERR-NO-CSW))
     )
     ;; Check owner and recipient is not the same
     (asserts! (not (is-eq nft-current-owner recipient))
@@ -180,7 +182,13 @@
     ;; Update primary csw if needed for recipient
     (update-primary-csw-recipient id recipient)
     ;; Execute the NFT transfer.
-    (try! (nft-transfer? csw id nft-current-owner recipient))
+    (try! (nft-transfer? csw-ownership id nft-current-owner recipient))
+    (print {
+      topic: "transfer-csw",
+      owner: recipient,
+      csw: csw,
+      id: id,
+    })
     (ok true)
   )
 )
@@ -204,7 +212,7 @@
       })
     )
     ;; assert that the owner is the contract-caller
-    (asserts! (is-eq (some contract-caller) (nft-get-owner? csw id))
+    (asserts! (is-eq (some contract-caller) (nft-get-owner? csw-ownership id))
       ERR-NOT-AUTHORIZED
     )
     ;; Updates the market map with the new listing details
@@ -227,7 +235,7 @@
       (market-map (unwrap! (map-get? market id) ERR-NOT-LISTED))
     )
     ;; assert that the owner is the contract-caller
-    (asserts! (is-eq (some contract-caller) (nft-get-owner? csw id))
+    (asserts! (is-eq (some contract-caller) (nft-get-owner? csw-ownership id))
       ERR-NOT-AUTHORIZED
     )
     ;; Deletes the listing from the market map
@@ -249,7 +257,7 @@
   )
   (let (
       ;; Retrieves current owner and listing details
-      (owner (unwrap! (nft-get-owner? csw id) ERR-NO-CSW))
+      (owner (unwrap! (nft-get-owner? csw-ownership id) ERR-NO-CSW))
       (listing (unwrap! (map-get? market id) ERR-NOT-LISTED))
       (price (get price listing))
     )
@@ -281,7 +289,7 @@
   (begin
     ;; Verify the contract-caller is the owner of the csw.
     (asserts!
-      (is-eq (unwrap! (nft-get-owner? csw primary-csw-id) ERR-NO-CSW)
+      (is-eq (unwrap! (nft-get-owner? csw-ownership primary-csw-id) ERR-NO-CSW)
         contract-caller
       )
       ERR-NOT-AUTHORIZED
@@ -299,7 +307,7 @@
   (let (
       ;; Calculates the ID for the new csw to be minted.
       (id-to-be-minted (+ (var-get csw-index) u1))
-      (csw (principal-of? clartiy-smart-wallet))
+      (csw (contract-of clarity-smart-wallet))
       (csw-id (map-get? csw-to-index csw))
       (owner (unwrap! (contract-call? clarity-smart-wallet get-owner) ERR-UNWRAP))
     )
@@ -313,11 +321,11 @@
     ;; Update primary csw if needed for owner
     (update-primary-csw-recipient id-to-be-minted owner)
     ;; Mints the new csw NFT.
-    (try! (nft-mint? csw id-to-be-minted owner))
+    (try! (nft-mint? csw-ownership id-to-be-minted owner))
     ;; Log the new csw registration
     (print {
       topic: "new-csw",
-      owner: send-to,
+      owner: owner,
       csw: csw,
       id: id-to-be-minted,
     })
@@ -337,35 +345,19 @@
   )
   (let (
       ;; Attempts to retrieve the name and namespace associated with the given NFT ID.
-      (name-and-namespace (unwrap! (map-get? index-to-csw id) ERR-NO-CSW))
-      ;; Retrieves the properties of the name within the namespace.
-      (name-props (unwrap! (map-get? name-properties name-and-namespace) ERR-NO-CSW))
+      (csw (unwrap! (map-get? index-to-csw id) ERR-NO-CSW))
     )
-    ;; Check owner and recipient is not the same
-    (asserts! (not (is-eq owner recipient)) ERR-OPERATION-UNAUTHORIZED)
-    (asserts! (is-eq owner (get owner name-props)) ERR-NOT-AUTHORIZED)
     ;; Update primary name if needed for owner
     (update-primary-csw-owner id owner)
     ;; Update primary name if needed for recipient
     (update-primary-csw-recipient id recipient)
-    ;; Updates the owner to the recipient.
-    (map-set name-properties name-and-namespace
-      (merge name-props { owner: recipient })
-    )
     ;; Executes the NFT transfer from the current owner to the recipient.
-    (try! (nft-transfer? csw id owner recipient))
+    (try! (nft-transfer? csw-ownership id owner recipient))
     (print {
-      topic: "transfer-name",
+      topic: "transfer-csw",
       owner: recipient,
-      name: {
-        name: (get name name-and-namespace),
-        namespace: (get namespace name-and-namespace),
-      },
+      csw: csw,
       id: id,
-      properties: (map-get? name-properties {
-        name: (get name name-and-namespace),
-        namespace: (get namespace name-and-namespace),
-      }),
     })
     (ok true)
   )
