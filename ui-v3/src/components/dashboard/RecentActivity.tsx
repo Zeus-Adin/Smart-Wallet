@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Activity, ArrowUpRight, ArrowDownLeft, TrendingUp } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import SecondaryButton from "../ui/secondary-button";
 
 interface ActivityItem {
   id: string;
@@ -96,11 +97,11 @@ const RecentActivity = ({ activities = [] }: RecentActivityProps) => {
           <Activity className="mr-2 h-5 w-5 text-purple-400" />
           Recent Activity
         </CardTitle>
-        <Button asChild variant="outline" size="sm" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+        <SecondaryButton asChild size="sm" >
           <Link to={`/history/${walletId}`}>
             View All
           </Link>
-        </Button>
+        </SecondaryButton>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

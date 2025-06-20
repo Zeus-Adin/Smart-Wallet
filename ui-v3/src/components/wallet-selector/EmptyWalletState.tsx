@@ -1,8 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Wallet, Plus } from "lucide-react";
+import PrimaryButton from "../ui/primary-button";
 
 const EmptyWalletState = () => {
   return (
@@ -16,12 +15,12 @@ const EmptyWalletState = () => {
         <p className="text-slate-400 mb-8 max-w-md mx-auto">
           You don't have any smart wallets yet. Smart wallets offer enhanced security features like multi-signature support, time-locks, and programmable conditions.
         </p>
-        <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+        <PrimaryButton asChild>
           <Link to="/create-wallet">
             <Plus className="mr-2 h-4 w-4" />
             Create Your First Smart Wallet
           </Link>
-        </Button>
+        </PrimaryButton>
       </CardContent>
     </Card>
   );

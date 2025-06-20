@@ -1,5 +1,5 @@
-
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Plus, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
@@ -48,7 +48,7 @@ const WalletSelector = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <WalletSelectorHeader 
+      <WalletSelectorHeader
         totalBalance="1,234.56 STX"
         usdValue="$2,469.12"
       />
@@ -61,8 +61,8 @@ const WalletSelector = () => {
                 {isDemoMode ? "Demo Smart Wallets" : "My Smart Wallets"}
               </h1>
               <p className="text-slate-400">
-                {isDemoMode 
-                  ? "Explore the demo wallets to see how smart wallets work." 
+                {isDemoMode
+                  ? "Explore the demo wallets to see how smart wallets work."
                   : "Select a smart wallet to manage or create a new one."
                 }
               </p>
@@ -75,16 +75,16 @@ const WalletSelector = () => {
             </div>
             {!isDemoMode && (
               <div className="flex gap-3">
-                <AddExistingWalletDialog 
+                <AddExistingWalletDialog
                   onWalletAdded={handleWalletAdded}
                   isDemoMode={isDemoMode}
                 />
-                <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+                <PrimaryButton asChild>
                   <Link to="/create-wallet">
                     <Plus className="mr-2 h-4 w-4" />
                     Create New Wallet
                   </Link>
-                </Button>
+                </PrimaryButton>
               </div>
             )}
           </div>
@@ -96,10 +96,10 @@ const WalletSelector = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {walletsToShow.map((wallet) => (
-                <WalletCard 
-                  key={wallet.id} 
-                  wallet={wallet} 
-                  isDemoMode={isDemoMode} 
+                <WalletCard
+                  key={wallet.id}
+                  wallet={wallet}
+                  isDemoMode={isDemoMode}
                 />
               ))}
             </div>

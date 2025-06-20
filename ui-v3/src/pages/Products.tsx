@@ -1,5 +1,6 @@
-
 import { Button } from "@/components/ui/button";
+import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
+import PrimaryButton from "@/components/ui/primary-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Users, Shield, DollarSign, Vote, Target, ArrowRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,12 +17,12 @@ const Products = () => {
               <span className="text-xl font-bold text-white">Smart Wallet</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <Button asChild variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+              <SecondaryButton asChild >
                 <Link to="/">Home</Link>
-              </Button>
-              <Button asChild variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+              </SecondaryButton>
+              <SecondaryButton asChild >
                 <Link to="/about">About</Link>
-              </Button>
+              </SecondaryButton>
             </div>
           </nav>
         </div>
@@ -36,7 +37,7 @@ const Products = () => {
               Smart Wallet Products
             </span>
           </div>
-          
+
           <div className="space-y-6">
             <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
               Choose Your
@@ -47,7 +48,7 @@ const Products = () => {
               <br />
               Solution
             </h1>
-            
+
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
               Whether you're an individual managing personal assets or an organization coordinating complex operations, we have the perfect smart wallet solution for your needs.
             </p>
@@ -73,7 +74,7 @@ const Products = () => {
               <p className="text-slate-300">
                 Perfect for day-to-day asset management with advanced security features and family-friendly inheritance planning.
               </p>
-              
+
               <div className="space-y-4 flex-1">
                 <h4 className="text-lg font-semibold text-white">Key Features:</h4>
                 <div className="space-y-3">
@@ -84,7 +85,7 @@ const Products = () => {
                       <p className="text-slate-400 text-sm">Seamless sending, receiving, and managing of digital assets with intuitive controls.</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -92,7 +93,7 @@ const Products = () => {
                       <p className="text-slate-400 text-sm">Set up beneficiaries and recovery mechanisms to ensure your assets are protected for future generations.</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -100,7 +101,7 @@ const Products = () => {
                       <p className="text-slate-400 text-sm">Configure daily, weekly, or monthly spending limits to maintain financial discipline and security.</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -117,12 +118,12 @@ const Products = () => {
                   <span className="text-slate-300">Starting from $0 - Pay only for transactions</span>
                 </div>
 
-                <Button asChild className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                <PrimaryButton asChild className="w-full">
                   <Link to="/create-wallet?type=personal">
                     Get Personal Wallet
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
-                </Button>
+                </PrimaryButton>
               </div>
             </CardContent>
           </Card>
@@ -144,7 +145,7 @@ const Products = () => {
               <p className="text-slate-300">
                 Designed for decentralized organizations with advanced governance features, milestone tracking, and democratic decision-making.
               </p>
-              
+
               <div className="space-y-4 flex-1">
                 <h4 className="text-lg font-semibold text-white">Key Features:</h4>
                 <div className="space-y-3">
@@ -155,7 +156,7 @@ const Products = () => {
                       <p className="text-slate-400 text-sm">Create and track project milestones with automatic fund release upon completion and approval.</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -163,7 +164,7 @@ const Products = () => {
                       <p className="text-slate-400 text-sm">Built-in governance with customizable voting systems for democratic decision-making processes.</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -171,7 +172,7 @@ const Products = () => {
                       <p className="text-slate-400 text-sm">Require multiple signatures from stakeholders for major financial decisions and fund movements.</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -188,12 +189,12 @@ const Products = () => {
                   <span className="text-slate-300">Enterprise pricing - Contact for quote</span>
                 </div>
 
-                <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <PrimaryButton asChild className="w-full">
                   <Link to="/create-wallet?type=dao">
                     Get DAO Wallet
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
-                </Button>
+                </PrimaryButton>
               </div>
             </CardContent>
           </Card>
@@ -254,15 +255,15 @@ const Products = () => {
             Join the future of digital asset management with our secure, scalable smart wallet solutions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+            <PrimaryButton asChild size="lg">
               <Link to="/">
                 Get Started Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+            </PrimaryButton>
+            <SecondaryButton asChild size="lg" >
               <Link to="/about">Learn More</Link>
-            </Button>
+            </SecondaryButton>
           </div>
         </section>
       </main>

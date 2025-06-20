@@ -6,6 +6,7 @@ import { History, Send, ArrowDown, ArrowUp, Wallet } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import { useBlockchainService } from "@/hooks/useBlockchainService";
+import SecondaryButton from "@/components/ui/secondary-button";
 
 const ActionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,7 +71,7 @@ const ActionHistory = () => {
     }
   };
 
-  const filteredTransactions = useMemo(() => 
+  const filteredTransactions = useMemo(() =>
     transactions.filter(tx =>
       tx.to.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,7 +127,7 @@ const ActionHistory = () => {
                   const txType = getTransactionType(tx);
                   const Icon = getTransactionIcon(tx.assetType);
                   const typeColorClass = getTypeColor(txType);
-                  
+
                   return (
                     <div key={tx.id} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors">
                       <div className="flex items-center space-x-4">
@@ -135,8 +136,8 @@ const ActionHistory = () => {
                         </div>
                         <div>
                           <div className="text-white font-medium">
-                            {tx.assetType === 'nft' ? 'NFT Transfer' : 
-                             txType === 'send' ? 'Sent Assets' : 'Received Assets'}
+                            {tx.assetType === 'nft' ? 'NFT Transfer' :
+                              txType === 'send' ? 'Sent Assets' : 'Received Assets'}
                           </div>
                           <div className="text-slate-400 text-sm">
                             {txType === 'send' ? `To: ${tx.to}` : `From: ${tx.from}`} • {tx.timestamp}
@@ -195,9 +196,9 @@ const ActionHistory = () => {
         </Card>
 
         <div className="flex justify-center">
-          <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+          <SecondaryButton >
             Load More Transactions
-          </Button>
+          </SecondaryButton>
         </div>
       </div>
     </WalletLayout>

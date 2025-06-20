@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import SecondaryButton from "@/components/ui/secondary-button";
+import PrimaryButton from "@/components/ui/primary-button";
 
 const CreateWallet = () => {
   const navigate = useNavigate();
@@ -40,8 +41,8 @@ const CreateWallet = () => {
   const handleExtensionToggle = (extensionId: string) => {
     const extension = sortedExtensions.find(ext => ext.id === extensionId);
     if (extension?.comingSoon) return; // Don't allow toggling coming soon extensions
-    
-    setSelectedExtensions(prev => 
+
+    setSelectedExtensions(prev =>
       prev.includes(extensionId)
         ? prev.filter(id => id !== extensionId)
         : [...prev, extensionId]
@@ -50,7 +51,7 @@ const CreateWallet = () => {
 
   const handleCreateWallet = async () => {
     setIsCreating(true);
-    
+
     // Simulate wallet creation
     setTimeout(() => {
       setIsCreating(false);
@@ -75,16 +76,16 @@ const CreateWallet = () => {
               <Wallet className="h-8 w-8 text-purple-400" />
               <span className="text-xl font-bold text-white">Smart Wallet</span>
             </Link>
-            
+
             <div className="flex items-center space-x-4">
               {/* Connected Wallet Profile Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+                  <SecondaryButton size="sm" >
                     <User className="mr-2 h-4 w-4" />
                     <span className="hidden lg:inline">{getConnectedWalletAddress()}</span>
                     <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
+                  </SecondaryButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
                   <DropdownMenuLabel>Connected Wallet</DropdownMenuLabel>
@@ -101,17 +102,17 @@ const CreateWallet = () => {
               {/* Network Switcher */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+                  <SecondaryButton size="sm">
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden lg:inline">{selectedNetwork}</span>
                     <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
+                  </SecondaryButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48 bg-slate-800 border-slate-700 text-white">
                   <DropdownMenuLabel>Select Network</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-slate-700" />
-                  <DropdownMenuItem 
-                    className="hover:bg-slate-700 focus:bg-slate-700" 
+                  <DropdownMenuItem
+                    className="hover:bg-slate-700 focus:bg-slate-700"
                     onClick={() => handleNetworkSwitch('mainnet')}
                   >
                     <div className="flex items-center justify-between w-full">
@@ -121,8 +122,8 @@ const CreateWallet = () => {
                       )}
                     </div>
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="hover:bg-slate-700 focus:bg-slate-700" 
+                  <DropdownMenuItem
+                    className="hover:bg-slate-700 focus:bg-slate-700"
                     onClick={() => handleNetworkSwitch('testnet')}
                   >
                     <div className="flex items-center justify-between w-full">
@@ -166,7 +167,7 @@ const CreateWallet = () => {
                     className="bg-slate-700/50 border-slate-600 text-white mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-slate-300 text-sm">Description (Optional)</label>
                   <Textarea
@@ -179,10 +180,10 @@ const CreateWallet = () => {
                 </div>
 
                 <div className="pt-4">
-                  <Button
+                  <PrimaryButton
                     onClick={handleCreateWallet}
                     disabled={!walletName || isCreating}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    className="w-full"
                   >
                     {isCreating ? (
                       "Creating Wallet..."
@@ -192,7 +193,7 @@ const CreateWallet = () => {
                         Create Smart Wallet
                       </>
                     )}
-                  </Button>
+                  </PrimaryButton>
                 </div>
               </CardContent>
             </Card>
@@ -208,13 +209,12 @@ const CreateWallet = () => {
                   {sortedExtensions.map((extension) => (
                     <div
                       key={extension.id}
-                      className={`p-3 rounded-lg border transition-colors ${
-                        extension.comingSoon
-                          ? "border-slate-600 bg-slate-700/20 opacity-60 cursor-not-allowed"
-                          : selectedExtensions.includes(extension.id)
-                            ? "border-purple-600/50 bg-purple-600/10 cursor-pointer"
-                            : "border-slate-600 bg-slate-700/30 hover:border-slate-500 cursor-pointer"
-                      }`}
+                      className={`p-3 rounded-lg border transition-colors ${extension.comingSoon
+                        ? "border-slate-600 bg-slate-700/20 opacity-60 cursor-not-allowed"
+                        : selectedExtensions.includes(extension.id)
+                          ? "border-purple-600/50 bg-purple-600/10 cursor-pointer"
+                          : "border-slate-600 bg-slate-700/30 hover:border-slate-500 cursor-pointer"
+                        }`}
                       onClick={() => handleExtensionToggle(extension.id)}
                     >
                       <div className="flex items-start space-x-3">

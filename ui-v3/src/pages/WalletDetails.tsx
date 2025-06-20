@@ -1,11 +1,13 @@
-
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Settings, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import GreenButton from "@/components/ui/green-button";
+import PrimaryButton from "@/components/ui/primary-button";
 
 const WalletDetails = () => {
   const { walletId } = useParams();
@@ -146,23 +148,22 @@ const WalletDetails = () => {
                 {availableExtensions
                   .filter(ext => !activeExtensions.find(active => active.id === ext.id))
                   .map((extension) => (
-                  <div
-                    key={extension.id}
-                    className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
-                  >
-                    <div>
-                      <div className="text-white font-medium">{extension.name}</div>
-                      <div className="text-slate-400 text-sm">{extension.description}</div>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddExtension(extension.id)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    <div
+                      key={extension.id}
+                      className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
                     >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                      <div>
+                        <div className="text-white font-medium">{extension.name}</div>
+                        <div className="text-slate-400 text-sm">{extension.description}</div>
+                      </div>
+                      <PrimaryButton
+                        size="sm"
+                        onClick={() => handleAddExtension(extension.id)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </PrimaryButton>
+                    </div>
+                  ))}
                 {availableExtensions.filter(ext => !activeExtensions.find(active => active.id === ext.id)).length === 0 && (
                   <div className="text-center py-8">
                     <Plus className="h-12 w-12 text-slate-500 mx-auto mb-3" />
@@ -181,12 +182,12 @@ const WalletDetails = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
+              <GreenButton >
                 Open Dashboard
-              </Button>
-              <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+              </GreenButton>
+              <SecondaryButton>
                 Export Configuration
-              </Button>
+              </SecondaryButton>
               <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-600/20">
                 Transfer Ownership
               </Button>

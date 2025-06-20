@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Book, Code, HelpCircle } from "lucide-react";
+import SecondaryButton from "../ui/secondary-button";
 
 const ExternalLinksSection = () => {
   return (
@@ -28,9 +29,9 @@ const ExternalLinksSection = () => {
                   Explore our detailed user materials
                 </p>
               </div>
-              <Button variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500 w-full">
+              <SecondaryButton className="w-full">
                 Learn more
-              </Button>
+              </SecondaryButton>
             </CardContent>
           </Card>
 
@@ -45,9 +46,9 @@ const ExternalLinksSection = () => {
                   Power your app with Smart Wallet APIs
                 </p>
               </div>
-              <Button variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500 w-full">
+              <SecondaryButton className="w-full">
                 Learn more
-              </Button>
+              </SecondaryButton>
             </CardContent>
           </Card>
 
@@ -62,9 +63,9 @@ const ExternalLinksSection = () => {
                   Get help from our team around the clock
                 </p>
               </div>
-              <Button variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500 w-full">
+              <SecondaryButton className="w-full">
                 Contact us
-              </Button>
+              </SecondaryButton>
             </CardContent>
           </Card>
         </div>

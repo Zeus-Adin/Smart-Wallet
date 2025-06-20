@@ -1,12 +1,13 @@
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PrimaryButton from "@/components/ui/primary-button";
+import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
 import { Textarea } from "@/components/ui/textarea";
+import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import { Wallet } from "lucide-react";
 import { useState } from "react";
-import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 
 const GenericActions = () => {
   const [actionType, setActionType] = useState("");
@@ -15,7 +16,7 @@ const GenericActions = () => {
 
   const handleExecuteAction = () => {
     if (!selectedWallet) return;
-    
+
     console.log("Executing action:", {
       wallet: selectedWallet.address,
       actionType,
@@ -67,13 +68,13 @@ const GenericActions = () => {
               />
             </div>
 
-            <Button 
-              className="w-full bg-purple-600 hover:bg-purple-700"
+            <PrimaryButton
+              className="w-full"
               disabled={!actionType || !parameters || !selectedWallet}
               onClick={handleExecuteAction}
             >
               Execute Action
-            </Button>
+            </PrimaryButton>
           </CardContent>
         </Card>
 
@@ -83,33 +84,33 @@ const GenericActions = () => {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
-              <Button variant="outline" className="h-auto p-4 border-slate-600 text-left">
+              <SecondaryButton className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Approve Token</div>
                   <div className="text-slate-400 text-sm">Grant spending permission</div>
                 </div>
-              </Button>
-              
-              <Button variant="outline" className="h-auto p-4 border-slate-600 text-left">
+              </SecondaryButton>
+
+              <SecondaryButton className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Delegate Voting</div>
                   <div className="text-slate-400 text-sm">Delegate governance power</div>
                 </div>
-              </Button>
-              
-              <Button variant="outline" className="h-auto p-4 border-slate-600 text-left">
+              </SecondaryButton>
+
+              <SecondaryButton className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Update Metadata</div>
                   <div className="text-slate-400 text-sm">Change wallet metadata</div>
                 </div>
-              </Button>
-              
-              <Button variant="outline" className="h-auto p-4 border-slate-600 text-left">
+              </SecondaryButton>
+
+              <SecondaryButton className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Batch Transfer</div>
                   <div className="text-slate-400 text-sm">Send to multiple recipients</div>
                 </div>
-              </Button>
+              </SecondaryButton>
             </div>
           </CardContent>
         </Card>

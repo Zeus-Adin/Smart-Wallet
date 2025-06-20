@@ -1,6 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import SecondaryButton from "@/components/ui/secondary-button";
+import PrimaryButton from "@/components/ui/primary-button";
 import { Wallet, Users, Shield, Code, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -16,12 +17,12 @@ const About = () => {
               <span className="text-xl font-bold text-white">Smart Wallet</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <Button asChild variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+              <SecondaryButton asChild >
                 <Link to="/">Home</Link>
-              </Button>
-              <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+              </SecondaryButton>
+              <PrimaryButton asChild >
                 <Link to="/products">View Products</Link>
-              </Button>
+              </PrimaryButton>
             </div>
           </nav>
         </div>
@@ -36,7 +37,7 @@ const About = () => {
               About Smart Wallet
             </span>
           </div>
-          
+
           <div className="space-y-6">
             <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
               Revolutionizing
@@ -47,7 +48,7 @@ const About = () => {
               <br />
               Asset Management
             </h1>
-            
+
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
               Smart Wallet is at the forefront of blockchain innovation, providing secure, scalable, and user-friendly smart contract wallet solutions for individuals and organizations worldwide.
             </p>
@@ -130,15 +131,15 @@ const About = () => {
             Join thousands of users who trust Smart Wallet for their blockchain asset management needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+            <PrimaryButton asChild size="lg">
               <Link to="/products">
                 Explore Products
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+            </PrimaryButton>
+            <SecondaryButton asChild size="lg" >
               <Link to="/">Learn More</Link>
-            </Button>
+            </SecondaryButton>
           </div>
         </section>
       </main>

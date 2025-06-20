@@ -1,9 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet, Send, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import SecondaryButton from "../ui/secondary-button";
+import PrimaryButton from "../ui/primary-button";
 
 const HeroSection = () => {
   const { isWalletConnected, connectWallet, connectDemoWallet, isConnecting } = useWalletConnection();
@@ -35,7 +36,7 @@ const HeroSection = () => {
               ⚡ Next Generation Wallet
             </span>
           </div>
-          
+
           <div className="space-y-6">
             <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
               Deploy Smart Wallets
@@ -46,7 +47,7 @@ const HeroSection = () => {
               <br />
               Ease and Confidence
             </h1>
-            
+
             <div className="space-y-2">
               <p className="text-xl text-slate-300">Seamless. Secure. Scalable.</p>
               <p className="text-slate-400 max-w-md">
@@ -56,24 +57,21 @@ const HeroSection = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
+            <PrimaryButton
               onClick={handleGetStarted}
-              size="lg" 
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8"
+              size="lg"
               disabled={isConnecting}
             >
               {isConnecting ? "Connecting..." : isWalletConnected ? "Go to Dashboard" : "Connect Wallet"}
               <Send className="ml-2 h-4 w-4" />
-            </Button>
-            <Button 
+            </PrimaryButton>
+            <SecondaryButton
               onClick={handleDemoMode}
-              variant="outline" 
-              size="lg" 
-              className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500"
+              size="lg"
             >
               <Play className="mr-2 h-4 w-4" />
               Try Demo
-            </Button>
+            </SecondaryButton>
           </div>
         </div>
 

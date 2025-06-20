@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Search, AlertCircle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import GreenButton from "../ui/green-button";
+import PrimaryButton from "../ui/primary-button";
 
 interface AddExistingWalletDialogProps {
   onWalletAdded: (wallet: any) => void;
@@ -44,7 +45,7 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
     try {
       // Simulate contract verification
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Mock verification result
       const mockWalletData = {
         id: walletAddress,
@@ -59,7 +60,7 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
 
       setWalletData(mockWalletData);
       setVerificationStatus('success');
-      
+
       toast({
         title: "Contract Verified",
         description: "Smart wallet contract verified successfully!",
@@ -83,7 +84,7 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
       setWalletAddress("");
       setWalletData(null);
       setVerificationStatus('idle');
-      
+
       toast({
         title: "Wallet Added",
         description: "Smart wallet has been added to your list successfully!",
@@ -101,8 +102,8 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700/50"
           disabled={isDemoMode}
         >
@@ -117,7 +118,7 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
             Enter the address of an existing smart wallet contract to add it to your list.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="address" className="text-white">
@@ -133,19 +134,18 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
           </div>
 
           {verificationStatus !== 'idle' && (
-            <div className={`flex items-center space-x-2 p-3 rounded-md ${
-              verificationStatus === 'success' 
-                ? 'bg-green-900/20 border border-green-700' 
-                : 'bg-red-900/20 border border-red-700'
-            }`}>
+            <div className={`flex items-center space-x-2 p-3 rounded-md ${verificationStatus === 'success'
+              ? 'bg-green-900/20 border border-green-700'
+              : 'bg-red-900/20 border border-red-700'
+              }`}>
               {verificationStatus === 'success' ? (
                 <CheckCircle className="h-5 w-5 text-green-400" />
               ) : (
                 <AlertCircle className="h-5 w-5 text-red-400" />
               )}
               <div className="text-sm">
-                {verificationStatus === 'success' 
-                  ? 'Smart wallet contract verified successfully!' 
+                {verificationStatus === 'success'
+                  ? 'Smart wallet contract verified successfully!'
                   : 'Failed to verify smart wallet contract.'
                 }
               </div>
@@ -173,13 +173,12 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
           >
             Cancel
           </Button>
-          
+
           {verificationStatus !== 'success' ? (
-            <Button
+            <PrimaryButton
               type="button"
               onClick={handleVerifyContract}
               disabled={isVerifying || !walletAddress.trim()}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               {isVerifying ? (
                 <>
@@ -192,16 +191,15 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
                   Verify Contract
                 </>
               )}
-            </Button>
+            </PrimaryButton>
           ) : (
-            <Button
+            <GreenButton
               type="button"
               onClick={handleAddWallet}
-              className="bg-green-600 hover:bg-green-700 text-white"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Wallet
-            </Button>
+            </GreenButton>
           )}
         </DialogFooter>
       </DialogContent>

@@ -1,8 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import { Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import GreenButton from "../ui/green-button";
+import SecondaryButton from "../ui/secondary-button";
+import PrimaryButton from "../ui/primary-button";
 
 const Header = () => {
   const { isWalletConnected, connectWallet, disconnectWallet, isConnecting, walletData, isDemoMode } = useWalletConnection();
@@ -41,7 +43,7 @@ const Header = () => {
             <span className="text-xl font-bold text-white">Smart Wallet</span>
           </div>
           <div className="hidden md:flex items-center space-x-6">
-            <button 
+            <button
               onClick={scrollToFeatures}
               className="text-slate-300 hover:text-white transition-colors"
             >
@@ -51,41 +53,37 @@ const Header = () => {
             <Link to="/about" className="text-slate-300 hover:text-white transition-colors">About</Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Button 
-              asChild 
-              variant="outline" 
-              className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500"
+            <SecondaryButton
+              asChild
             >
-              <a 
-                href="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet" 
-                target="_blank" 
+              <a
+                href="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet"
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 Docs
               </a>
-            </Button>
+            </SecondaryButton>
             {isWalletConnected ? (
               <div className="flex items-center space-x-2">
-                <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
+                <GreenButton asChild >
                   <Link to="/wallet-selector">My Wallets</Link>
-                </Button>
-                <Button 
+                </GreenButton>
+                <SecondaryButton
                   onClick={handleWalletAction}
-                  variant="outline" 
-                  className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500"
+
                   disabled={isConnecting}
                 >
                   {getButtonText()}
-                </Button>
+                </SecondaryButton>
               </div>
             ) : (
-              <Button 
+              <PrimaryButton
                 onClick={handleWalletAction}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
                 disabled={isConnecting}
               >
                 {getButtonText()}
-              </Button>
+              </PrimaryButton>
             )}
           </div>
         </nav>
