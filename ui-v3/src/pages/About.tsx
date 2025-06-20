@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import SecondaryButton from "@/components/ui/secondary-button";
+import { CardContent } from "@/components/ui/card";
+import CSWCard from "@/components/ui/csw-card";
 import PrimaryButton from "@/components/ui/primary-button";
-import { Wallet, Users, Shield, Code, ArrowRight } from "lucide-react";
+import SecondaryButton from "@/components/ui/secondary-button";
+import { ArrowRight, Code, Shield, Users, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const About = () => {
@@ -74,7 +74,7 @@ const About = () => {
         <section className="mb-16">
           <h2 className="text-4xl font-bold text-center text-white mb-12">Our Values</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <CSWCard>
               <CardContent className="p-6 text-center space-y-4">
                 <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                   <Shield className="h-6 w-6 text-purple-400" />
@@ -84,9 +84,9 @@ const About = () => {
                   Every feature is built with security as the foundation, protecting user assets with advanced encryption and smart contract audits.
                 </p>
               </CardContent>
-            </Card>
+            </CSWCard>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <CSWCard>
               <CardContent className="p-6 text-center space-y-4">
                 <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                   <Users className="h-6 w-6 text-purple-400" />
@@ -96,9 +96,9 @@ const About = () => {
                   We design with users in mind, creating intuitive interfaces that make complex blockchain operations simple and accessible.
                 </p>
               </CardContent>
-            </Card>
+            </CSWCard>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <CSWCard>
               <CardContent className="p-6 text-center space-y-4">
                 <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                   <Code className="h-6 w-6 text-purple-400" />
@@ -108,9 +108,9 @@ const About = () => {
                   We continuously push the boundaries of what's possible in blockchain technology, delivering cutting-edge solutions.
                 </p>
               </CardContent>
-            </Card>
+            </CSWCard>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <CSWCard>
               <CardContent className="p-6 text-center space-y-4">
                 <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                   <Wallet className="h-6 w-6 text-purple-400" />
@@ -120,7 +120,7 @@ const About = () => {
                   Open-source development and clear communication ensure users understand and trust our platform completely.
                 </p>
               </CardContent>
-            </Card>
+            </CSWCard>
           </div>
         </section>
 

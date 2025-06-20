@@ -1,5 +1,4 @@
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -9,9 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Wallet, User, Globe, Settings, ChevronDown, Menu } from "lucide-react";
+import { useWalletConnection } from "@/contexts/WalletConnectionContext";
+import { ChevronDown, Globe, Menu, Settings, User, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useWalletConnection } from "@/hooks/useWalletConnection";
 import SecondaryButton from "./ui/secondary-button";
 
 interface WalletHeaderProps {
@@ -119,9 +118,11 @@ const WalletHeader = ({
                       Switch Wallet
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-slate-700 focus:bg-slate-700">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Wallet Settings
+                  <DropdownMenuItem className="hover:bg-slate-700 focus:bg-slate-700" asChild>
+                    <Link to={`/wallet-details/${currentWallet.contractId}`}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Wallet Settings
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

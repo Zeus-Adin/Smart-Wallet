@@ -1,8 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/primary-button";
 import { Plus, Play } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useWalletConnection } from "@/contexts/WalletConnectionContext";
 import { useBlockchainService } from "@/hooks/useBlockchainService";
 import { useEffect, useState } from "react";
 import WalletSelectorHeader from "@/components/wallet-selector/WalletSelectorHeader";
@@ -21,15 +22,16 @@ const WalletSelector = () => {
 
   useEffect(() => {
     const fetchWalletData = async () => {
-      if (!isDemoMode && walletData?.addresses?.stx?.[0]?.address) {
+      if (isDemoMode) {
+        console.log('Loading demo wallets...');
+        await loadSmartWallets('demo-address');
+      } else if (walletData?.addresses?.stx?.[0]?.address) {
         console.log('Fetching wallet data for:', walletData.addresses.stx[0].address);
         try {
           await loadSmartWallets(walletData.addresses.stx[0].address);
         } catch (error) {
           console.error('Failed to fetch wallet data:', error);
         }
-      } else if (isDemoMode) {
-        await loadSmartWallets('demo-address');
       }
     };
 
@@ -37,10 +39,15 @@ const WalletSelector = () => {
   }, [isDemoMode, walletData, loadSmartWallets]);
 
   useEffect(() => {
-    // Combine detected wallets with imported wallets
-    const allWallets = [...smartWallets, ...importedWallets];
-    setWalletsToShow(allWallets);
-  }, [smartWallets, importedWallets]);
+    // In demo mode, only show the demo wallets from smartWallets
+    // In normal mode, combine detected wallets with imported wallets
+    if (isDemoMode) {
+      setWalletsToShow(smartWallets);
+    } else {
+      const allWallets = [...smartWallets, ...importedWallets];
+      setWalletsToShow(allWallets);
+    }
+  }, [smartWallets, importedWallets, isDemoMode]);
 
   const handleWalletAdded = (newWallet: SmartWallet) => {
     setImportedWallets(prev => [...prev, newWallet]);

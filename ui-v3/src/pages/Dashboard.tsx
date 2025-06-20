@@ -1,14 +1,14 @@
 import WalletLayout from "@/components/WalletLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRight, TrendingUp, Activity, DollarSign } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
-import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import ActiveExtensions from "@/components/dashboard/ActiveExtensions";
 import AssetOverview from "@/components/dashboard/AssetOverview";
 import RecentActivity from "@/components/dashboard/RecentActivity";
-import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import CSWCard from "@/components/ui/csw-card";
 import PrimaryButton from "@/components/ui/primary-button";
+import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
+import { useSelectedWallet } from "@/hooks/useSelectedWallet";
+import { Activity, ArrowUpRight, DollarSign, TrendingUp } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
 
 const Dashboard = () => {
   const { walletId } = useParams();
@@ -69,7 +69,7 @@ const Dashboard = () => {
 
         {/* Balance Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <CSWCard>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-400">Total Balance</CardTitle>
               <DollarSign className="h-4 w-4 text-slate-400" />
@@ -78,9 +78,9 @@ const Dashboard = () => {
               <div className="text-2xl font-bold text-white">{walletData.balance}</div>
               <p className="text-xs text-slate-400">STX Balance</p>
             </CardContent>
-          </Card>
+          </CSWCard>
 
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <CSWCard>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-400">USD Value</CardTitle>
               <TrendingUp className="h-4 w-4 text-slate-400" />
@@ -89,9 +89,9 @@ const Dashboard = () => {
               <div className="text-2xl font-bold text-green-400">{walletData.usdValue}</div>
               <p className="text-xs text-slate-400">Current market value</p>
             </CardContent>
-          </Card>
+          </CSWCard>
 
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <CSWCard>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-400">Activity</CardTitle>
               <Activity className="h-4 w-4 text-slate-400" />
@@ -100,7 +100,7 @@ const Dashboard = () => {
               <div className="text-2xl font-bold text-white">5</div>
               <p className="text-xs text-slate-400">Recent transactions</p>
             </CardContent>
-          </Card>
+          </CSWCard>
         </div>
 
         {/* Active Extensions Section */}

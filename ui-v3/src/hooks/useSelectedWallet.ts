@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useWalletConnection } from "./useWalletConnection";
+import { useWalletConnection } from "@/contexts/WalletConnectionContext";
 
 interface SelectedWallet {
   id: string;

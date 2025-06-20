@@ -1,7 +1,8 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Settings, CheckCircle } from "lucide-react";
+import CSWCard from "@/components/ui/csw-card";
 
 interface ActiveExtensionsProps {
   extensions: string[];
@@ -28,7 +29,7 @@ const ActiveExtensions = ({ extensions }: ActiveExtensionsProps) => {
   };
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+    <CSWCard>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-medium text-white flex items-center">
           <Settings className="mr-2 h-5 w-5 text-purple-400" />
@@ -52,7 +53,7 @@ const ActiveExtensions = ({ extensions }: ActiveExtensionsProps) => {
           ))}
         </div>
       </CardContent>
-    </Card>
+    </CSWCard>
   );
 };
 

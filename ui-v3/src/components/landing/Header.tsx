@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useWalletConnection } from "@/contexts/WalletConnectionContext";
 import GreenButton from "../ui/green-button";
 import SecondaryButton from "../ui/secondary-button";
 import PrimaryButton from "../ui/primary-button";

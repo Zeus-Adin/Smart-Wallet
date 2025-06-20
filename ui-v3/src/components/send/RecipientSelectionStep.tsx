@@ -1,8 +1,9 @@
+
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Recipient } from "@/services/blockchainService";
+import { Recipient } from "@/services/transactionDataService";
 import { Button } from "@/components/ui/button";
 
 interface RecipientSelectionStepProps {

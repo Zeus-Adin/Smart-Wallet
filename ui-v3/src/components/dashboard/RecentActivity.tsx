@@ -1,9 +1,9 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, ArrowUpRight, ArrowDownLeft, TrendingUp } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import SecondaryButton from "../ui/secondary-button";
+import CSWCard from "@/components/ui/csw-card";
 
 interface ActivityItem {
   id: string;
@@ -91,7 +91,7 @@ const RecentActivity = ({ activities = [] }: RecentActivityProps) => {
   };
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+    <CSWCard>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-medium text-white flex items-center">
           <Activity className="mr-2 h-5 w-5 text-purple-400" />
@@ -139,7 +139,7 @@ const RecentActivity = ({ activities = [] }: RecentActivityProps) => {
           })}
         </div>
       </CardContent>
-    </Card>
+    </CSWCard>
   );
 };
 
