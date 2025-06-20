@@ -1,6 +1,7 @@
 
 export interface Transaction {
   id: string;
+  type: 'send' | 'receive' | 'stacking';
   from: string;
   to: string;
   amount: string;
@@ -25,6 +26,7 @@ export class TransactionDataService {
     return [
       {
         id: '1',
+        type: 'send',
         from: walletAddress,
         to: 'SP1ABC...XYZ123',
         amount: '100.50',
@@ -36,6 +38,7 @@ export class TransactionDataService {
       },
       {
         id: '2',
+        type: 'send',
         from: walletAddress,
         to: 'SP2DEF...ABC456',
         amount: '1',

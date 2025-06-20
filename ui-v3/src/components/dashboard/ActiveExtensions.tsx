@@ -2,6 +2,7 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Settings, CheckCircle } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
 import CSWCard from "@/components/ui/csw-card";
 
 interface ActiveExtensionsProps {
@@ -9,6 +10,8 @@ interface ActiveExtensionsProps {
 }
 
 const ActiveExtensions = ({ extensions }: ActiveExtensionsProps) => {
+  const { walletId } = useParams();
+
   const getExtensionIcon = (extension: string) => {
     switch (extension.toLowerCase()) {
       case 'multi-sig':
@@ -35,9 +38,11 @@ const ActiveExtensions = ({ extensions }: ActiveExtensionsProps) => {
           <Settings className="mr-2 h-5 w-5 text-purple-400" />
           Active Extensions
         </CardTitle>
-        <Badge variant="outline" className="border-green-600 text-green-400">
-          {extensions.length} Active
-        </Badge>
+        <Link to={`/wallet-details/${walletId}`}>
+          <Badge variant="outline" className="border-green-600 text-green-400 hover:bg-green-600/10 transition-colors cursor-pointer">
+            {extensions.length} Active
+          </Badge>
+        </Link>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-2">

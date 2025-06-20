@@ -3,15 +3,55 @@ import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowDown, Wallet } from "lucide-react";
+import { ArrowDown, Wallet, Copy, QrCode } from "lucide-react";
 import { useSelectedWallet } from "@/hooks/useSelectedWallet";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import QRCode from "qrcode";
 
 const ReceiveAssets = () => {
   const { selectedWallet } = useSelectedWallet();
+  const { toast } = useToast();
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
 
-  const copyToClipboard = () => {
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (selectedWallet?.address) {
+        try {
+          const dataUrl = await QRCode.toDataURL(selectedWallet.address, {
+            width: 192,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+          setQrCodeDataUrl(dataUrl);
+        } catch (error) {
+          console.error('Failed to generate QR code:', error);
+        }
+      }
+    };
+
+    generateQRCode();
+  }, [selectedWallet?.address]);
+
+  const copyToClipboard = async () => {
     if (selectedWallet?.address) {
-      navigator.clipboard.writeText(selectedWallet.address);
+      try {
+        await navigator.clipboard.writeText(selectedWallet.address);
+        toast({
+          title: "Address Copied!",
+          description: "Wallet address has been copied to clipboard.",
+        });
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        toast({
+          title: "Copy Failed",
+          description: "Failed to copy address to clipboard.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -32,12 +72,20 @@ const ReceiveAssets = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center space-y-4">
-              {/* QR Code Placeholder */}
+              {/* QR Code */}
               <div className="w-48 h-48 mx-auto bg-white rounded-lg flex items-center justify-center">
-                <div className="text-black text-sm text-center">
-                  QR Code<br />
-                  {selectedWallet?.address?.substring(0, 8)}...
-                </div>
+                {qrCodeDataUrl ? (
+                  <img 
+                    src={qrCodeDataUrl} 
+                    alt="Wallet Address QR Code" 
+                    className="w-44 h-44 rounded"
+                  />
+                ) : (
+                  <div className="text-black text-sm text-center flex flex-col items-center">
+                    <QrCode className="h-8 w-8 mb-2" />
+                    Generating QR Code...
+                  </div>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -53,6 +101,7 @@ const ReceiveAssets = () => {
                     className="bg-purple-600 hover:bg-purple-700"
                     disabled={!selectedWallet?.address}
                   >
+                    <Copy className="h-4 w-4 mr-2" />
                     Copy
                   </Button>
                 </div>

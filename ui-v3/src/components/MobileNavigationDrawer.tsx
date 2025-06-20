@@ -7,8 +7,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Wallet, Send, History, ArrowDown, ArrowUp, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import WalletInfoCard from "./mobile-navigation/WalletInfoCard";
+import NavigationMenu from "./mobile-navigation/NavigationMenu";
+import ConnectedWalletSection from "./mobile-navigation/ConnectedWalletSection";
+import NetworkSwitcher from "./mobile-navigation/NetworkSwitcher";
 
 interface MobileNavigationDrawerProps {
   isOpen: boolean;
@@ -21,16 +26,18 @@ interface MobileNavigationDrawerProps {
     extensions?: string[];
   };
   walletId?: string;
+  selectedNetwork?: 'mainnet' | 'testnet';
+  onNetworkSwitch?: (network: 'mainnet' | 'testnet') => void;
 }
 
 const MobileNavigationDrawer = ({ 
   isOpen, 
   onOpenChange, 
   currentWallet, 
-  walletId 
+  walletId,
+  selectedNetwork = 'mainnet',
+  onNetworkSwitch
 }: MobileNavigationDrawerProps) => {
-  const location = useLocation();
-  
   // Check if stacking extension is active
   const isStackingActive = currentWallet.extensions?.some(ext => 
     ext.toLowerCase().includes('stacking') || ext.toLowerCase().includes('stack')
@@ -57,8 +64,8 @@ const MobileNavigationDrawer = ({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-slate-800 border-slate-700">
-        <DrawerHeader className="border-b border-slate-700">
+      <DrawerContent className="bg-slate-800 border-slate-700 h-[85vh]">
+        <DrawerHeader className="border-b border-slate-700 flex-shrink-0">
           <div className="flex items-center justify-between">
             <DrawerTitle className="text-white">Navigation</DrawerTitle>
             <DrawerClose asChild>
@@ -68,57 +75,27 @@ const MobileNavigationDrawer = ({
             </DrawerClose>
           </div>
         </DrawerHeader>
-        <div className="p-4 space-y-4">
-          {/* Wallet Info */}
-          <div className="bg-slate-700/50 rounded-lg p-3">
-            <div className="text-sm text-slate-400">Current Wallet</div>
-            <div className="text-white font-medium">{currentWallet.name}</div>
-            <div className="text-xs text-slate-400 mt-1 font-mono break-all">
-              {currentWallet.contractId}
-            </div>
-          </div>
+        
+        <ScrollArea className="flex-1 px-4">
+          <div className="space-y-4 py-4">
+            <WalletInfoCard currentWallet={currentWallet} />
 
-          {/* Balance - Mobile */}
-          <div className="bg-slate-700/50 rounded-lg p-3 sm:hidden">
-            <div className="flex justify-between">
-              <div>
-                <div className="text-sm text-slate-400">Balance</div>
-                <div className="text-lg font-bold text-white">{currentWallet.balance}</div>
-              </div>
-              <div>
-                <div className="text-sm text-slate-400">USD Value</div>
-                <div className="text-lg font-bold text-green-400">{currentWallet.usdValue}</div>
-              </div>
-            </div>
-          </div>
+            <Separator className="bg-slate-600" />
 
-          {/* Navigation Items */}
-          <div className="space-y-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <DrawerClose key={item.path} asChild>
-                  <Button
-                    asChild
-                    variant={isActive ? "secondary" : "ghost"}
-                    className={`w-full justify-start font-medium ${
-                      isActive 
-                        ? "bg-purple-600/30 text-purple-200 border border-purple-600/50" 
-                        : "text-slate-200 hover:bg-slate-700/60 hover:text-white"
-                    }`}
-                  >
-                    <Link to={item.path}>
-                      <Icon className="mr-2 h-4 w-4" />
-                      {item.label}
-                    </Link>
-                  </Button>
-                </DrawerClose>
-              );
-            })}
+            <NavigationMenu navItems={navItems} />
+
+            <Separator className="bg-slate-600" />
+
+            <ConnectedWalletSection currentWallet={currentWallet} />
+
+            <NetworkSwitcher 
+              selectedNetwork={selectedNetwork} 
+              onNetworkSwitch={onNetworkSwitch} 
+            />
+
+            <div className="h-4"></div>
           </div>
-        </div>
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );

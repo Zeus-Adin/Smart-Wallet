@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import {
   connect,
@@ -101,18 +102,28 @@ export const WalletConnectionProvider = ({ children }: WalletConnectionProviderP
       }
     }
 
-    // On mount, restore demo mode from localStorage
-    const demo = localStorage.getItem("isDemoMode");
-    if (demo === "true") {
-      setIsDemoMode(true);
-      setIsWalletConnected(true);
-      setWalletData(demoWalletData);
+    // On mount, restore demo mode from localStorage only if no real wallet is connected
+    if (!connected) {
+      const demo = localStorage.getItem("isDemoMode");
+      if (demo === "true") {
+        setIsDemoMode(true);
+        setIsWalletConnected(true);
+        setWalletData(demoWalletData);
+      }
     }
   }, []);
 
   const connectWallet = async () => {
     try {
       setIsConnecting(true);
+      
+      // Exit demo mode when connecting real wallet
+      if (isDemoMode) {
+        setIsDemoMode(false);
+        localStorage.removeItem("isDemoMode");
+        console.log("Exiting demo mode to connect real wallet");
+      }
+      
       const response = await connect();
       setIsWalletConnected(true);
 
@@ -128,9 +139,15 @@ export const WalletConnectionProvider = ({ children }: WalletConnectionProviderP
         };
         setWalletData(transformedData);
       }
-      console.log("Wallet connected successfully:", response);
+      console.log("Real wallet connected successfully:", response);
     } catch (error) {
       console.error("Failed to connect wallet:", error);
+      // If connection fails and we were in demo mode, restore demo mode
+      if (localStorage.getItem("isDemoMode") === "true") {
+        setIsDemoMode(true);
+        setIsWalletConnected(true);
+        setWalletData(demoWalletData);
+      }
     } finally {
       setIsConnecting(false);
     }

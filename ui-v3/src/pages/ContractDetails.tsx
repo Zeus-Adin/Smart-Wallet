@@ -1,14 +1,15 @@
-
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Wallet, FileText } from "lucide-react";
+import { Wallet, FileText, Settings } from "lucide-react";
 import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import SecondaryButton from "@/components/ui/secondary-button";
 
 const ContractDetails = () => {
+  const { walletId } = useParams();
   const [contractAddress, setContractAddress] = useState("SP1ABC...XYZ123.smart-wallet-v1");
 
   const contractInfo = {
@@ -60,9 +61,17 @@ const ContractDetails = () => {
   return (
     <WalletLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Contract Details</h1>
-          <p className="text-slate-400">View and interact with smart contract information.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Contract Details</h1>
+            <p className="text-slate-400">View and interact with smart contract information.</p>
+          </div>
+          <SecondaryButton asChild>
+            <Link to={`/wallet-details/${walletId || contractAddress}`}>
+              <Settings className="mr-2 h-4 w-4" />
+              Wallet Settings
+            </Link>
+          </SecondaryButton>
         </div>
 
         <Card className="bg-slate-800/50 border-slate-700">

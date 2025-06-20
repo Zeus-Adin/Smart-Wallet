@@ -51,15 +51,17 @@ const WalletDetails = () => {
 
   return (
     <WalletLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Wallet Details</h1>
-          <p className="text-slate-400">Manage your smart wallet configuration and extensions.</p>
+      <div className="space-y-4 sm:space-y-6 px-1 sm:px-0">
+        <div className="px-1 sm:px-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Wallet Details</h1>
+          <p className="text-slate-400 text-sm sm:text-base">Manage your smart wallet configuration and extensions.</p>
         </div>
 
-        <WalletInformation walletInfo={walletInfo} />
+        <div className="px-1 sm:px-0">
+          <WalletInformation walletInfo={walletInfo} />
+        </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 px-1 sm:px-0">
           <ActiveExtensionsSection
             activeExtensions={activeExtensions}
             onRemoveExtension={handleRemoveExtension}
@@ -69,7 +71,10 @@ const WalletDetails = () => {
             onAddExtension={handleAddExtension}
           />
         </div>
-        <WalletActionsSection />
+        
+        <div className="px-1 sm:px-0">
+          <WalletActionsSection />
+        </div>
       </div>
     </WalletLayout>
   );
