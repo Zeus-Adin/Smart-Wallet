@@ -1,12 +1,13 @@
+
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { History, Send, ArrowDown, ArrowUp, Wallet } from "lucide-react";
+import { History } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import { useBlockchainService } from "@/hooks/useBlockchainService";
 import SecondaryButton from "@/components/ui/secondary-button";
+import TransactionItem from "@/components/transaction/TransactionItem";
 
 const ActionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,57 +20,6 @@ const ActionHistory = () => {
       loadRecentData(selectedWallet.address);
     }
   }, [selectedWallet?.address, loadRecentData]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "text-green-400";
-      case "pending":
-        return "text-yellow-400";
-      case "failed":
-        return "text-red-400";
-      default:
-        return "text-slate-400";
-    }
-  };
-
-  const getAmountColor = (amount: string) => {
-    return amount.startsWith("+") ? "text-green-400" : "text-red-400";
-  };
-
-  const getTransactionIcon = (assetType: string) => {
-    switch (assetType) {
-      case "nft":
-        return Wallet;
-      default:
-        return Send;
-    }
-  };
-
-  const getTransactionType = (transaction: any) => {
-    if (transaction.assetType === 'nft') return 'nft';
-    if (transaction.from === selectedWallet?.address) return 'send';
-    return 'receive';
-  };
-
-  const formatAmount = (transaction: any) => {
-    const isOutgoing = transaction.from === selectedWallet?.address;
-    const prefix = isOutgoing ? '-' : '+';
-    return `${prefix}${transaction.amount} ${transaction.asset}`;
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "send":
-        return "bg-red-600/20 text-red-400";
-      case "receive":
-        return "bg-green-600/20 text-green-400";
-      case "nft":
-        return "bg-purple-600/20 text-purple-400";
-      default:
-        return "bg-blue-600/20 text-blue-400";
-    }
-  };
 
   const filteredTransactions = useMemo(() =>
     transactions.filter(tx =>
@@ -89,30 +39,30 @@ const ActionHistory = () => {
   return (
     <WalletLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Action History</h1>
-          <p className="text-slate-400">
+        <div className="px-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Action History</h1>
+          <p className="text-slate-400 text-sm sm:text-base">
             View all your wallet transactions and activities.
             {isDemoMode && " (Demo data shown)"}
           </p>
         </div>
 
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex items-center">
-                <History className="mr-2 h-5 w-5 text-purple-400" />
+        <Card className="bg-slate-800/50 border-slate-700 mx-1 sm:mx-0">
+          <CardHeader className="px-4 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <CardTitle className="text-white flex items-center text-lg sm:text-xl">
+                <History className="mr-2 h-5 w-5 text-purple-400 flex-shrink-0" />
                 Transaction History
               </CardTitle>
               <Input
                 placeholder="Search transactions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
+                className="w-full sm:max-w-sm bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
               />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-slate-400">Loading transactions...</div>
@@ -123,80 +73,53 @@ const ActionHistory = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredTransactions.map((tx) => {
-                  const txType = getTransactionType(tx);
-                  const Icon = getTransactionIcon(tx.assetType);
-                  const typeColorClass = getTypeColor(txType);
-
-                  return (
-                    <div key={tx.id} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${typeColorClass}`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <div className="text-white font-medium">
-                            {tx.assetType === 'nft' ? 'NFT Transfer' :
-                              txType === 'send' ? 'Sent Assets' : 'Received Assets'}
-                          </div>
-                          <div className="text-slate-400 text-sm">
-                            {txType === 'send' ? `To: ${tx.to}` : `From: ${tx.from}`} • {tx.timestamp}
-                          </div>
-                          <div className="text-slate-500 text-xs">
-                            TX: {tx.txHash}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`font-medium ${getAmountColor(formatAmount(tx))}`}>
-                          {formatAmount(tx)}
-                        </div>
-                        <div className={`text-sm capitalize ${getStatusColor(tx.status)}`}>
-                          {tx.status}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {filteredTransactions.map((tx) => (
+                  <TransactionItem 
+                    key={tx.id} 
+                    transaction={tx} 
+                    showFullDetails={true}
+                    selectedWalletAddress={selectedWallet?.address}
+                  />
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">Transaction Summary</CardTitle>
+        <Card className="bg-slate-800/50 border-slate-700 mx-1 sm:mx-0">
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="text-white text-lg sm:text-xl">Transaction Summary</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                <div className="text-2xl font-bold text-white">{transactionStats.total}</div>
-                <div className="text-slate-400 text-sm">Total Transactions</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="text-center p-3 sm:p-4 bg-slate-700/30 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-white">{transactionStats.total}</div>
+                <div className="text-slate-400 text-xs sm:text-sm">Total</div>
               </div>
-              <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                <div className="text-2xl font-bold text-green-400">
+              <div className="text-center p-3 sm:p-4 bg-slate-700/30 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-green-400">
                   {transactionStats.confirmed}
                 </div>
-                <div className="text-slate-400 text-sm">Confirmed</div>
+                <div className="text-slate-400 text-xs sm:text-sm">Confirmed</div>
               </div>
-              <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-400">
+              <div className="text-center p-3 sm:p-4 bg-slate-700/30 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-yellow-400">
                   {transactionStats.pending}
                 </div>
-                <div className="text-slate-400 text-sm">Pending</div>
+                <div className="text-slate-400 text-xs sm:text-sm">Pending</div>
               </div>
-              <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                <div className="text-2xl font-bold text-red-400">
+              <div className="text-center p-3 sm:p-4 bg-slate-700/30 rounded-lg">
+                <div className="text-xl sm:text-2xl font-bold text-red-400">
                   {transactionStats.failed}
                 </div>
-                <div className="text-slate-400 text-sm">Failed</div>
+                <div className="text-slate-400 text-xs sm:text-sm">Failed</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex justify-center">
-          <SecondaryButton >
+        <div className="flex justify-center px-1">
+          <SecondaryButton className="w-full sm:w-auto">
             Load More Transactions
           </SecondaryButton>
         </div>

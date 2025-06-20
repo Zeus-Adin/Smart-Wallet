@@ -1,5 +1,4 @@
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -9,9 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Wallet, User, Globe, Settings, ChevronDown, Menu } from "lucide-react";
+import { useWalletConnection } from "@/contexts/WalletConnectionContext";
+import { ChevronDown, Globe, Menu, Settings, User, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useEffect, useState } from "react";
+import { usePriceService } from "@/hooks/usePriceService";
 import SecondaryButton from "./ui/secondary-button";
 
 interface WalletHeaderProps {
@@ -33,6 +34,22 @@ const WalletHeader = ({
   onMobileMenuToggle
 }: WalletHeaderProps) => {
   const { walletData, disconnectWallet } = useWalletConnection();
+  const { calculateUsdValue, fetchPrices } = usePriceService();
+  const [calculatedUsdValue, setCalculatedUsdValue] = useState(currentWallet.usdValue);
+
+  useEffect(() => {
+    // Fetch prices for STX and other tokens
+    fetchPrices(['stx', 'btc']);
+  }, [fetchPrices]);
+
+  useEffect(() => {
+    // Calculate USD value when prices are available
+    if (currentWallet.balance) {
+      const balanceAmount = currentWallet.balance.replace(' STX', '');
+      const newUsdValue = calculateUsdValue(balanceAmount, 'stx');
+      setCalculatedUsdValue(newUsdValue);
+    }
+  }, [currentWallet.balance, calculateUsdValue]);
 
   const getConnectedWalletAddress = () => {
     if (walletData?.addresses?.stx && walletData.addresses.stx.length > 0) {
@@ -67,7 +84,7 @@ const WalletHeader = ({
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-4">
-            {/* Balance Card - Responsive */}
+            {/* Balance Card - Responsive with calculated USD value */}
             <Card className="bg-slate-800/50 border-slate-700 hidden sm:block">
               <CardContent className="px-3 py-2 md:px-4">
                 <div className="flex items-center space-x-2 md:space-x-4">
@@ -77,14 +94,14 @@ const WalletHeader = ({
                   </div>
                   <div className="text-right hidden md:block">
                     <div className="text-sm text-slate-400">USD Value</div>
-                    <div className="text-lg font-bold text-green-400">{currentWallet.usdValue}</div>
+                    <div className="text-lg font-bold text-green-400">{calculatedUsdValue}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Mobile Navigation Trigger */}
-            <div className="lg:hidden">
+            <div className="md:hidden">
               <SecondaryButton
                 size="sm"
                 onClick={onMobileMenuToggle}
@@ -106,7 +123,7 @@ const WalletHeader = ({
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </SecondaryButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white z-50">
                   <DropdownMenuLabel>Connected Wallet</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-slate-700" />
                   <DropdownMenuItem className="hover:bg-slate-700 focus:bg-slate-700">
@@ -119,9 +136,11 @@ const WalletHeader = ({
                       Switch Wallet
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-slate-700 focus:bg-slate-700">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Wallet Settings
+                  <DropdownMenuItem className="hover:bg-slate-700 focus:bg-slate-700" asChild>
+                    <Link to={`/wallet-details/${currentWallet.contractId}`}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Wallet Settings
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -136,7 +155,7 @@ const WalletHeader = ({
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </SecondaryButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-slate-800 border-slate-700 text-white">
+                <DropdownMenuContent className="w-48 bg-slate-800 border-slate-700 text-white z-50">
                   <DropdownMenuLabel>Select Network</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-slate-700" />
                   <DropdownMenuItem

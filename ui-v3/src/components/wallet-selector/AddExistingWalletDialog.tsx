@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { Plus, Search, AlertCircle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import GreenButton from "../ui/green-button";
 import PrimaryButton from "../ui/primary-button";
+import SecondaryButton from "../ui/secondary-button";
 
 interface AddExistingWalletDialogProps {
   onWalletAdded: (wallet: any) => void;
@@ -102,14 +104,12 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700/50"
+        <SecondaryButton
           disabled={isDemoMode}
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Existing Wallet
-        </Button>
+        </SecondaryButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-slate-800 border-slate-700 text-white">
         <DialogHeader>

@@ -1,13 +1,16 @@
+
 import { Button } from "@/components/ui/button";
-import { Wallet } from "lucide-react";
+import { Wallet, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useWalletConnection } from "@/contexts/WalletConnectionContext";
 import GreenButton from "../ui/green-button";
 import SecondaryButton from "../ui/secondary-button";
 import PrimaryButton from "../ui/primary-button";
+import { useState } from "react";
 
 const Header = () => {
   const { isWalletConnected, connectWallet, disconnectWallet, isConnecting, walletData, isDemoMode } = useWalletConnection();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleWalletAction = () => {
     if (isWalletConnected) {
@@ -32,6 +35,7 @@ const Header = () => {
     if (featuresSection) {
       featuresSection.scrollIntoView({ behavior: 'smooth' });
     }
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -42,7 +46,9 @@ const Header = () => {
             <Wallet className="h-8 w-8 text-purple-400" />
             <span className="text-xl font-bold text-white">Smart Wallet</span>
           </div>
-          <div className="hidden md:flex items-center space-x-6">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-6">
             <button
               onClick={scrollToFeatures}
               className="text-slate-300 hover:text-white transition-colors"
@@ -52,10 +58,10 @@ const Header = () => {
             <Link to="/products" className="text-slate-300 hover:text-white transition-colors">Products</Link>
             <Link to="/about" className="text-slate-300 hover:text-white transition-colors">About</Link>
           </div>
-          <div className="flex items-center space-x-4">
-            <SecondaryButton
-              asChild
-            >
+
+          {/* Desktop Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            <SecondaryButton asChild>
               <a
                 href="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet"
                 target="_blank"
@@ -66,13 +72,13 @@ const Header = () => {
             </SecondaryButton>
             {isWalletConnected ? (
               <div className="flex items-center space-x-2">
-                <GreenButton asChild >
+                <GreenButton asChild>
                   <Link to="/wallet-selector">My Wallets</Link>
                 </GreenButton>
                 <SecondaryButton
                   onClick={handleWalletAction}
-
                   disabled={isConnecting}
+                  className="hidden lg:flex"
                 >
                   {getButtonText()}
                 </SecondaryButton>
@@ -86,7 +92,65 @@ const Header = () => {
               </PrimaryButton>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-slate-300 hover:text-white"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </nav>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 border-t border-slate-800/50 pt-4">
+            <div className="flex flex-col space-y-4">
+              <button
+                onClick={scrollToFeatures}
+                className="text-slate-300 hover:text-white transition-colors text-left"
+              >
+                Features
+              </button>
+              <Link to="/products" className="text-slate-300 hover:text-white transition-colors">Products</Link>
+              <Link to="/about" className="text-slate-300 hover:text-white transition-colors">About</Link>
+              
+              <div className="pt-2 border-t border-slate-800/50 space-y-3">
+                <SecondaryButton asChild className="w-full">
+                  <a
+                    href="https://polimartlabs.gitbook.io/smart-wallet/overview/why-smart-wallet"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Docs
+                  </a>
+                </SecondaryButton>
+                {isWalletConnected ? (
+                  <div className="space-y-2">
+                    <GreenButton asChild className="w-full">
+                      <Link to="/wallet-selector">My Wallets</Link>
+                    </GreenButton>
+                    <SecondaryButton
+                      onClick={handleWalletAction}
+                      disabled={isConnecting}
+                      className="w-full"
+                    >
+                      {getButtonText()}
+                    </SecondaryButton>
+                  </div>
+                ) : (
+                  <PrimaryButton
+                    onClick={handleWalletAction}
+                    disabled={isConnecting}
+                    className="w-full"
+                  >
+                    {getButtonText()}
+                  </PrimaryButton>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

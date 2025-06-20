@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { HelpCircle } from "lucide-react";
+import CSWCard from "../ui/csw-card";
 
 // Extracted FAQ data as a JSON-like array
 const faqData = [
@@ -54,7 +55,7 @@ const FAQSection = () => {
 				</div>
 
 				<div className="max-w-4xl mx-auto">
-					<Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+					<CSWCard>
 						<CardContent className="p-8">
 							<Accordion type="single" collapsible className="space-y-4">
 								{faqData.map((item, idx) => (
@@ -73,7 +74,7 @@ const FAQSection = () => {
 								))}
 							</Accordion>
 						</CardContent>
-					</Card>
+					</CSWCard>
 				</div>
 			</div>
 		</section>
