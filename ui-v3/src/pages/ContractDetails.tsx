@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Wallet, FileText } from "lucide-react";
 import { useState } from "react";
+import SecondaryButton from "@/components/ui/secondary-button";
 
 const ContractDetails = () => {
   const [contractAddress, setContractAddress] = useState("SP1ABC...XYZ123.smart-wallet-v1");
@@ -120,9 +121,8 @@ const ContractDetails = () => {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
                       <span className="text-white font-medium">{func.name}</span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        func.type === "public" ? "bg-green-600/20 text-green-300" : "bg-blue-600/20 text-blue-300"
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs ${func.type === "public" ? "bg-green-600/20 text-green-300" : "bg-blue-600/20 text-blue-300"
+                        }`}>
                         {func.type}
                       </span>
                     </div>
@@ -154,9 +154,9 @@ const ContractDetails = () => {
               className="bg-slate-900/50 border-slate-600 text-green-300 font-mono text-sm min-h-64"
             />
             <div className="flex justify-end mt-4">
-              <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+              <SecondaryButton>
                 View on Explorer
-              </Button>
+              </SecondaryButton>
             </div>
           </CardContent>
         </Card>

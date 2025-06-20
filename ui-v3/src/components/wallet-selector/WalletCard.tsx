@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Wallet, Settings } from "lucide-react";
+import GreenButton from "../ui/green-button";
 
 interface SmartWallet {
   id: string;
@@ -20,7 +21,7 @@ interface WalletCardProps {
 const WalletCard = ({ wallet, isDemoMode }: WalletCardProps) => {
   // Use "demo" as the wallet ID for demo wallets to enable special routing
   const walletId = isDemoMode ? "demo" : wallet.id;
-  
+
   return (
     <Card className="bg-slate-800/50 border-slate-700 hover:border-purple-600/50 transition-colors">
       <CardHeader>
@@ -53,7 +54,7 @@ const WalletCard = ({ wallet, isDemoMode }: WalletCardProps) => {
           <div className="text-slate-400 text-sm">Contract ID</div>
           <div className="text-white font-mono text-sm">{wallet.id.slice(0, 20)}...</div>
         </div>
-        
+
         <div>
           <div className="text-slate-400 text-sm">Balance</div>
           <div className="text-white font-semibold">{wallet.balance}</div>
@@ -74,14 +75,14 @@ const WalletCard = ({ wallet, isDemoMode }: WalletCardProps) => {
         </div>
 
         <div className="pt-4">
-          <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
+          <GreenButton asChild className="w-full">
             <Link to={`/dashboard/${walletId}`}>
               {isDemoMode ? "Explore Demo" : "Open Wallet"}
             </Link>
-          </Button>
+          </GreenButton>
         </div>
-      </CardContent>
-    </Card>
+      </CardContent >
+    </Card >
   );
 };
 

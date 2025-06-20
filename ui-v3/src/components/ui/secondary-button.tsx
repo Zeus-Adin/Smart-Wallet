@@ -14,7 +14,7 @@ const SecondaryButton = React.forwardRef<HTMLButtonElement, SecondaryButtonProps
         ref={ref}
         variant="outline"
         className={cn(
-          "border-slate-600 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-white hover:border-slate-500",
+          "border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500",
           className
         )}
         {...props}

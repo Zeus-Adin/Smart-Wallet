@@ -1,4 +1,3 @@
-
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,8 @@ import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import ActiveExtensions from "@/components/dashboard/ActiveExtensions";
 import AssetOverview from "@/components/dashboard/AssetOverview";
 import RecentActivity from "@/components/dashboard/RecentActivity";
+import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
+import PrimaryButton from "@/components/ui/primary-button";
 
 const Dashboard = () => {
   const { walletId } = useParams();
@@ -34,17 +35,17 @@ const Dashboard = () => {
   }
 
   // Check if stacking extension is active
-  const isStackingActive = walletData.extensions?.some(ext => 
+  const isStackingActive = walletData.extensions?.some(ext =>
     ext.toLowerCase().includes('stacking') || ext.toLowerCase().includes('stack')
   );
 
   const StackSTXButton = () => (
-    <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+    <PrimaryButton asChild>
       <Link to={`/stacking/${walletId}`}>
         <TrendingUp className="mr-2 h-4 w-4" />
         Stack STX
       </Link>
-    </Button>
+    </PrimaryButton>
   );
 
   return (
@@ -56,12 +57,12 @@ const Dashboard = () => {
             <p className="text-slate-400">Manage your smart wallet assets and activities</p>
           </div>
           <div className="flex space-x-2">
-            <Button asChild variant="outline" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+            <SecondaryButton asChild variant={undefined}>
               <Link to={`/send/${walletId}`}>
                 <ArrowUpRight className="mr-2 h-4 w-4" />
                 Send Assets
               </Link>
-            </Button>
+            </SecondaryButton>
             {isStackingActive && <StackSTXButton />}
           </div>
         </div>
@@ -119,32 +120,32 @@ const Dashboard = () => {
             <CardTitle className="text-white">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button asChild variant="outline" className="h-20 flex-col border-slate-600 bg-slate-700/50 text-slate-200 hover:bg-slate-600 hover:text-white hover:border-slate-500">
+            <SecondaryButton asChild variant={undefined} className="h-20 flex-col">
               <Link to={`/send/${walletId}`}>
                 <ArrowUpRight className="h-6 w-6 mb-2" />
                 Send
               </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col border-slate-600 bg-slate-700/50 text-slate-200 hover:bg-slate-600 hover:text-white hover:border-slate-500">
+            </SecondaryButton>
+            <SecondaryButton asChild variant={undefined} className="h-20 flex-col">
               <Link to={`/receive/${walletId}`}>
                 <ArrowUpRight className="h-6 w-6 mb-2 rotate-180" />
                 Receive
               </Link>
-            </Button>
+            </SecondaryButton>
             {isStackingActive && (
-              <Button asChild variant="outline" className="h-20 flex-col border-slate-600 bg-slate-700/50 text-slate-200 hover:bg-slate-600 hover:text-white hover:border-slate-500">
+              <SecondaryButton asChild variant={undefined} className="h-20 flex-col">
                 <Link to={`/stacking/${walletId}`}>
                   <TrendingUp className="h-6 w-6 mb-2" />
                   Stack
                 </Link>
-              </Button>
+              </SecondaryButton>
             )}
-            <Button asChild variant="outline" className="h-20 flex-col border-slate-600 bg-slate-700/50 text-slate-200 hover:bg-slate-600 hover:text-white hover:border-slate-500">
+            <SecondaryButton asChild variant={undefined} className="h-20 flex-col">
               <Link to={`/history/${walletId}`}>
                 <Activity className="h-6 w-6 mb-2" />
                 History
               </Link>
-            </Button>
+            </SecondaryButton>
           </CardContent>
         </Card>
       </div>

@@ -12,6 +12,7 @@ import {
 import { Wallet, User, Globe, Settings, ChevronDown, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import SecondaryButton from "./ui/secondary-button";
 
 interface WalletHeaderProps {
   currentWallet: {
@@ -25,11 +26,11 @@ interface WalletHeaderProps {
   onMobileMenuToggle: () => void;
 }
 
-const WalletHeader = ({ 
-  currentWallet, 
-  selectedNetwork, 
-  onNetworkSwitch, 
-  onMobileMenuToggle 
+const WalletHeader = ({
+  currentWallet,
+  selectedNetwork,
+  onNetworkSwitch,
+  onMobileMenuToggle
 }: WalletHeaderProps) => {
   const { walletData, disconnectWallet } = useWalletConnection();
 
@@ -57,14 +58,14 @@ const WalletHeader = ({
               <Wallet className="h-6 w-6 md:h-8 md:w-8 text-purple-400" />
               <span className="text-lg md:text-xl font-bold text-white">Smart Wallet</span>
             </Link>
-            
+
             {/* Wallet Name - Hidden on mobile */}
             <div className="hidden lg:block">
               <div className="text-sm text-slate-400">Current Wallet</div>
               <div className="text-white font-medium">{currentWallet.name}</div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2 md:space-x-4">
             {/* Balance Card - Responsive */}
             <Card className="bg-slate-800/50 border-slate-700 hidden sm:block">
@@ -84,14 +85,12 @@ const WalletHeader = ({
 
             {/* Mobile Navigation Trigger */}
             <div className="lg:hidden">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500"
+              <SecondaryButton
+                size="sm"
                 onClick={onMobileMenuToggle}
               >
                 <Menu className="h-4 w-4" />
-              </Button>
+              </SecondaryButton>
             </div>
 
             {/* Desktop User Menu */}
@@ -99,11 +98,13 @@ const WalletHeader = ({
               {/* Connected Wallet Profile Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+                  <SecondaryButton
+                    size="sm"
+                  >
                     <User className="mr-2 h-4 w-4" />
                     <span className="hidden lg:inline">{getConnectedWalletAddress()}</span>
                     <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
+                  </SecondaryButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
                   <DropdownMenuLabel>Connected Wallet</DropdownMenuLabel>
@@ -128,17 +129,18 @@ const WalletHeader = ({
               {/* Network Switcher */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-500">
+                  <SecondaryButton
+                    size="sm">
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden lg:inline">{selectedNetwork}</span>
                     <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
+                  </SecondaryButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48 bg-slate-800 border-slate-700 text-white">
                   <DropdownMenuLabel>Select Network</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-slate-700" />
-                  <DropdownMenuItem 
-                    className="hover:bg-slate-700 focus:bg-slate-700" 
+                  <DropdownMenuItem
+                    className="hover:bg-slate-700 focus:bg-slate-700"
                     onClick={() => handleNetworkSwitch('mainnet')}
                   >
                     <div className="flex items-center justify-between w-full">
@@ -148,8 +150,8 @@ const WalletHeader = ({
                       )}
                     </div>
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="hover:bg-slate-700 focus:bg-slate-700" 
+                  <DropdownMenuItem
+                    className="hover:bg-slate-700 focus:bg-slate-700"
                     onClick={() => handleNetworkSwitch('testnet')}
                   >
                     <div className="flex items-center justify-between w-full">
