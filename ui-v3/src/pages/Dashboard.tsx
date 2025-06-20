@@ -103,23 +103,12 @@ const Dashboard = () => {
           </CSWCard>
         </div>
 
-        {/* Active Extensions Section */}
-        {walletData.extensions && walletData.extensions.length > 0 && (
-          <ActiveExtensions extensions={walletData.extensions} />
-        )}
-
-        {/* Asset Overview and Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AssetOverview />
-          <RecentActivity />
-        </div>
-
         {/* Quick Actions */}
-        <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+        <CSWCard>
           <CardHeader>
             <CardTitle className="text-white">Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <CardContent className={`grid grid-cols-2 ${isStackingActive ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`} >
             <SecondaryButton asChild variant={undefined} className="h-20 flex-col">
               <Link to={`/send/${walletId}`}>
                 <ArrowUpRight className="h-6 w-6 mb-2" />
@@ -147,9 +136,21 @@ const Dashboard = () => {
               </Link>
             </SecondaryButton>
           </CardContent>
-        </Card>
+        </CSWCard>
+
+        {/* Asset Overview and Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <AssetOverview />
+          <RecentActivity />
+        </div>
+
+        {/* Active Extensions Section */}
+        {walletData.extensions && walletData.extensions.length > 0 && (
+          <ActiveExtensions extensions={walletData.extensions} />
+        )}
+
       </div>
-    </WalletLayout>
+    </WalletLayout >
   );
 };
 

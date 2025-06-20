@@ -60,16 +60,15 @@ const WalletDetails = () => {
         <WalletInformation walletInfo={walletInfo} />
 
         <div className="grid lg:grid-cols-2 gap-6">
-          <ActiveExtensionsSection 
+          <ActiveExtensionsSection
             activeExtensions={activeExtensions}
             onRemoveExtension={handleRemoveExtension}
           />
-          <AvailableExtensionsSection 
+          <AvailableExtensionsSection
             availableExtensions={filteredAvailableExtensions}
             onAddExtension={handleAddExtension}
           />
         </div>
-
         <WalletActionsSection />
       </div>
     </WalletLayout>

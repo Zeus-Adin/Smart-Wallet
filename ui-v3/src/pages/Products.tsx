@@ -4,6 +4,7 @@ import PrimaryButton from "@/components/ui/primary-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Users, Shield, DollarSign, Vote, Target, ArrowRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import CSWCard from "@/components/ui/csw-card";
 
 const Products = () => {
   return (
@@ -58,7 +59,7 @@ const Products = () => {
         {/* Products Grid */}
         <div className="grid lg:grid-cols-2 gap-12 mb-16">
           {/* Personal Smart Wallet */}
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden flex flex-col h-full">
+          <CSWCard className="overflow-hidden flex flex-col h-full">
             <CardHeader className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-slate-700">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-purple-600/30 rounded-full flex items-center justify-center">
@@ -126,10 +127,10 @@ const Products = () => {
                 </PrimaryButton>
               </div>
             </CardContent>
-          </Card>
+          </CSWCard>
 
           {/* DAO Smart Wallet */}
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden flex flex-col h-full">
+          <CSWCard className="overflow-hidden flex flex-col h-full">
             <CardHeader className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-b border-slate-700">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-blue-600/30 rounded-full flex items-center justify-center">
@@ -197,7 +198,7 @@ const Products = () => {
                 </PrimaryButton>
               </div>
             </CardContent>
-          </Card>
+          </CSWCard>
         </div>
 
         {/* Comparison Section */}
