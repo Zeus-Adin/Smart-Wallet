@@ -119,6 +119,11 @@ path = 'contracts/csw-registry.clar'
 clarity_version = 3
 epoch = 3.1
 
+[contracts.sip009-nft]
+path = 'contracts/tests/sip009-nft.clar'
+clarity_version = 3
+epoch = 3.1
+
 [repl.analysis]
 passes = ['check_checker']
 
