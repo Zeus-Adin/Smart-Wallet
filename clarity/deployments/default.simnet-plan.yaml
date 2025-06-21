@@ -60,6 +60,11 @@ plan:
     - id: 0
       transactions:
         - emulated-contract-publish:
+            contract-name: sip013-semi-fungible-token-trait
+            emulated-sender: SPDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTKAKKR5V
+            path: "./.cache/requirements/SPDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTKAKKR5V.sip013-semi-fungible-token-trait.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
             contract-name: nft-trait
             emulated-sender: SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9
             path: "./.cache/requirements/SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.clar"
@@ -94,16 +99,8 @@ plan:
             emulated-sender: SP3DX3H4FEYZJZ586MFBS25ZW3HZDMEW92260R2PR
             path: "./.cache/requirements/SP3DX3H4FEYZJZ586MFBS25ZW3HZDMEW92260R2PR.Wrapped-Bitcoin.clar"
             clarity-version: 1
-      epoch: "2.0"
+      epoch: "2.1"
     - id: 1
-      transactions:
-        - emulated-contract-publish:
-            contract-name: sip013-semi-fungible-token-trait
-            emulated-sender: SPDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTKAKKR5V
-            path: "./.cache/requirements/SPDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTKAKKR5V.sip013-semi-fungible-token-trait.clar"
-            clarity-version: 1
-      epoch: "2.05"
-    - id: 2
       transactions:
         - emulated-contract-publish:
             contract-name: nope
@@ -111,7 +108,7 @@ plan:
             path: "./.cache/requirements/SP32AEEF6WW5Y0NMJ1S8SBSZDAY8R5J32NBZFPKKZ.nope.clar"
             clarity-version: 2
       epoch: "2.4"
-    - id: 3
+    - id: 2
       transactions:
         - emulated-contract-publish:
             contract-name: og-bitcoin-pizza-leather-edition
@@ -119,6 +116,24 @@ plan:
             path: "./.cache/requirements/SP16GEW6P7GBGZG0PXRXFJEMR3TJHJEY2HJKBP1P5.og-bitcoin-pizza-leather-edition.clar"
             clarity-version: 2
       epoch: "2.5"
+    - id: 3
+      transactions:
+        - emulated-contract-publish:
+            contract-name: sbtc-registry
+            emulated-sender: SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4
+            path: "./.cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-registry.clar"
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: sbtc-token
+            emulated-sender: SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4
+            path: "./.cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token.clar"
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: sbtc-deposit
+            emulated-sender: SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4
+            path: "./.cache/requirements/SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-deposit.clar"
+            clarity-version: 3
+      epoch: "3.0"
     - id: 4
       transactions:
         - emulated-contract-publish:
@@ -142,19 +157,49 @@ plan:
             path: contracts/extensions/ext-delegate-stx-pox-4.clar
             clarity-version: 3
         - emulated-contract-publish:
+            contract-name: ext-sponsored-sbtc-transfer
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/extensions/ext-sponsored-sbtc-transfer.clar
+            clarity-version: 3
+        - emulated-contract-publish:
             contract-name: ext-sponsored-transfer
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/extensions/ext-sponsored-transfer.clar
             clarity-version: 3
         - emulated-contract-publish:
-            contract-name: ext-test
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/tests/ext-test.clar
-            clarity-version: 3
-        - emulated-contract-publish:
             contract-name: ext-unsafe-sip010-transfer
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/extensions/ext-unsafe-sip010-transfer.clar
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: smart-wallet-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/smart-wallet-trait.clar
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: smart-wallet-endpoint
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/smart-wallet-endpoint.clar
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: smart-wallet-standard
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/smart-wallet-standard.clar
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: ext-delegate-stx-pox-4_flow_test
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/extensions/ext-delegate-stx-pox-4_flow_test.clar
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: ext-sponsored-sbtc-transfer_test
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/extensions/ext-sponsored-sbtc-transfer_test.clar
+            clarity-version: 3
+        - emulated-contract-publish:
+            contract-name: ext-test
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/tests/ext-test.clar
             clarity-version: 3
         - emulated-contract-publish:
             contract-name: smart-wallet-with-rules-trait
@@ -177,19 +222,9 @@ plan:
             path: contracts/rule-set-trait.clar
             clarity-version: 3
         - emulated-contract-publish:
-            contract-name: smart-wallet-trait
+            contract-name: smart-wallet-standard_test
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/smart-wallet-trait.clar
-            clarity-version: 3
-        - emulated-contract-publish:
-            contract-name: smart-wallet-endpoint
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/smart-wallet-endpoint.clar
-            clarity-version: 3
-        - emulated-contract-publish:
-            contract-name: smart-wallet-standard
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/smart-wallet-standard.clar
+            path: contracts/smart-wallet-standard_test.clar
             clarity-version: 3
         - emulated-contract-publish:
             contract-name: standard-rules
