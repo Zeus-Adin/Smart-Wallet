@@ -78,25 +78,28 @@ const WizardStepRenderer = ({
 
       case "assetDetails":
          return assetType === "token" ? (
-            <TokenSelectionStep
-               asset={asset}
-               amount={amount}
-               selectedWallet={selectedWallet}
-               onAssetChange={onAssetChange}
-               onAmountChange={onAmountChange}
-               onNext={() => {
-                  if (!asset) {
-                     toast({
-                        title: "No selected token",
-                        description: "Select a token to send",
-                        variant: "destructive",
-                     });
-                     return;
-                  }
-                  onStepChange("recipient");
-               }}
-               onBack={() => onStepChange("assetType")}
-            />
+            <>
+               <TokenSelectionStep
+                  asset={asset}
+                  amount={amount}
+                  selectedWallet={selectedWallet}
+                  onAssetChange={onAssetChange}
+                  onAmountChange={onAmountChange}
+                  onNext={() => {
+                     if (!asset) {
+                        toast({
+                           title: "No selected token",
+                           description: "Select a token to send",
+                           variant: "destructive",
+                        });
+                        return;
+                     }
+                     onStepChange("recipient");
+                  }}
+                  onBack={() => onStepChange("assetType")}
+               />
+               <Toaster />
+            </>
          ) : (
             <>
                <NFTSelectionStep
