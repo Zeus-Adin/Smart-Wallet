@@ -1,2 +1,0 @@
-# Clarity Smart Wallets (CSW)
-
