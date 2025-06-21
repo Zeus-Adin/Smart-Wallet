@@ -1,7 +1,6 @@
 
-import { CardContent } from "@/components/ui/card";
-import { Send, Shield, Wallet } from "lucide-react";
-import CSWCard from "../ui/csw-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Send, Wallet, Shield } from "lucide-react";
 
 const FeaturesSection = () => {
   return (
@@ -17,7 +16,7 @@ const FeaturesSection = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <CSWCard>
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
             <CardContent className="p-8 text-center space-y-4">
               <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                 <Send className="h-6 w-6 text-purple-400" />
@@ -27,9 +26,9 @@ const FeaturesSection = () => {
                 Update or change private keys without needing to manually transfer each asset individually.
               </p>
             </CardContent>
-          </CSWCard>
+          </Card>
 
-          <CSWCard>
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
             <CardContent className="p-8 text-center space-y-4">
               <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                 <Wallet className="h-6 w-6 text-purple-400" />
@@ -39,9 +38,9 @@ const FeaturesSection = () => {
                 Conduct operations such as sending, staking, and managing assets within the smart wallet environment.
               </p>
             </CardContent>
-          </CSWCard>
+          </Card>
 
-          <CSWCard>
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
             <CardContent className="p-8 text-center space-y-4">
               <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                 <Shield className="h-6 w-6 text-purple-400" />
@@ -51,7 +50,7 @@ const FeaturesSection = () => {
                 Set transfer limits and recovery mechanisms to protect your assets from unauthorized access.
               </p>
             </CardContent>
-          </CSWCard>
+          </Card>
         </div>
       </div>
     </section>
