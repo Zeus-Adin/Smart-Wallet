@@ -147,7 +147,7 @@ const NFTSelectionStep = ({
                   </SecondaryButton>
                   <PrimaryButton
                      className="flex-1"
-                     // disabled={!isValid}
+                     disabled={!isValid}
                      onClick={onNext}
                   >
                      Next
