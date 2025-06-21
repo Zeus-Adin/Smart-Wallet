@@ -1,7 +1,6 @@
 
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coins, Image, TrendingUp } from "lucide-react";
-import CSWCard from "@/components/ui/csw-card";
 
 interface Asset {
   name: string;
@@ -53,7 +52,7 @@ const AssetOverview = ({ assets = [] }: AssetOverviewProps) => {
   }, 0);
 
   return (
-    <CSWCard>
+    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-medium text-white flex items-center">
           <TrendingUp className="mr-2 h-5 w-5 text-purple-400" />
@@ -93,7 +92,7 @@ const AssetOverview = ({ assets = [] }: AssetOverviewProps) => {
           })}
         </div>
       </CardContent>
-    </CSWCard>
+    </Card>
   );
 };
 

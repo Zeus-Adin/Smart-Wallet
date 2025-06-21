@@ -9,7 +9,6 @@ export class MockTransactionDataService {
     return [
       {
         id: 'demo-1',
-        type: 'send',
         from: walletAddress,
         to: 'SP1ABC...DEMO123',
         amount: '500.00',
@@ -21,7 +20,6 @@ export class MockTransactionDataService {
       },
       {
         id: 'demo-2',
-        type: 'receive',
         from: 'SP2DEF...DEMO456',
         to: walletAddress,
         amount: '1,250.75',
@@ -33,7 +31,6 @@ export class MockTransactionDataService {
       },
       {
         id: 'demo-3',
-        type: 'send',
         from: walletAddress,
         to: 'SP3GHI...DEMO789',
         amount: '1',
@@ -45,7 +42,6 @@ export class MockTransactionDataService {
       },
       {
         id: 'demo-4',
-        type: 'send',
         from: walletAddress,
         to: 'SP4JKL...DEMO000',
         amount: '100.00',

@@ -1,7 +1,7 @@
 
-import { CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Book, Code, HelpCircle } from "lucide-react";
-import CSWCard from "../ui/csw-card";
 import SecondaryButton from "../ui/secondary-button";
 
 const ExternalLinksSection = () => {
@@ -18,7 +18,7 @@ const ExternalLinksSection = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <CSWCard>
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
             <CardContent className="p-8 flex flex-col items-center text-center space-y-6 h-full">
               <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center">
                 <Book className="h-8 w-8 text-purple-400" />
@@ -33,9 +33,9 @@ const ExternalLinksSection = () => {
                 Learn more
               </SecondaryButton>
             </CardContent>
-          </CSWCard>
+          </Card>
 
-          <CSWCard>
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
             <CardContent className="p-8 flex flex-col items-center text-center space-y-6 h-full">
               <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center">
                 <Code className="h-8 w-8 text-purple-400" />
@@ -50,9 +50,9 @@ const ExternalLinksSection = () => {
                 Learn more
               </SecondaryButton>
             </CardContent>
-          </CSWCard>
+          </Card>
 
-          <CSWCard>
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
             <CardContent className="p-8 flex flex-col items-center text-center space-y-6 h-full">
               <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center">
                 <HelpCircle className="h-8 w-8 text-purple-400" />
@@ -67,7 +67,7 @@ const ExternalLinksSection = () => {
                 Contact us
               </SecondaryButton>
             </CardContent>
-          </CSWCard>
+          </Card>
         </div>
       </div>
     </section>

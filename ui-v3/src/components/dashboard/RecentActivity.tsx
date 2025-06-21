@@ -1,13 +1,9 @@
 
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Activity, ArrowUpRight, ArrowDownLeft, TrendingUp } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useBlockchainService } from "@/hooks/useBlockchainService";
 import SecondaryButton from "../ui/secondary-button";
-import CSWCard from "@/components/ui/csw-card";
-import TransactionItem from "../transaction/TransactionItem";
-import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 
 interface ActivityItem {
   id: string;
@@ -24,81 +20,126 @@ interface RecentActivityProps {
 
 const RecentActivity = ({ activities = [] }: RecentActivityProps) => {
   const { walletId } = useParams();
-  const { selectedWallet } = useSelectedWallet();
-  const { loadRecentData, transactions, isLoading } = useBlockchainService();
-  const [weeklyTransactionCount, setWeeklyTransactionCount] = useState(0);
 
-  useEffect(() => {
-    if (walletId) {
-      loadRecentData(walletId);
+  // Default mock activities if none provided
+  const defaultActivities: ActivityItem[] = [
+    {
+      id: '1',
+      type: 'receive',
+      asset: 'STX',
+      amount: '+500.00',
+      timestamp: '2 hours ago',
+      status: 'confirmed'
+    },
+    {
+      id: '2',
+      type: 'send',
+      asset: 'STX',
+      amount: '-100.50',
+      timestamp: '1 day ago',
+      status: 'confirmed'
+    },
+    {
+      id: '3',
+      type: 'stacking',
+      asset: 'STX',
+      amount: '+25.00',
+      timestamp: '3 days ago',
+      status: 'confirmed'
     }
-  }, [walletId, loadRecentData]);
+  ];
 
-  useEffect(() => {
-    // Calculate transactions from the last week
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const displayActivities = activities.length > 0 ? activities : defaultActivities;
 
-    const weeklyTransactions = transactions.filter(tx => {
-      // Parse timestamp and check if it's within the last week
-      const txDate = new Date();
-      if (tx.timestamp.includes('hour') || tx.timestamp.includes('day')) {
-        const num = parseInt(tx.timestamp);
-        if (tx.timestamp.includes('hour')) {
-          txDate.setHours(txDate.getHours() - num);
-        } else if (tx.timestamp.includes('day')) {
-          txDate.setDate(txDate.getDate() - num);
-        }
-      } else if (tx.timestamp.includes('week')) {
-        const weeks = parseInt(tx.timestamp);
-        txDate.setDate(txDate.getDate() - (weeks * 7));
-      }
-      
-      return txDate >= oneWeekAgo;
-    });
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'send':
+        return ArrowUpRight;
+      case 'receive':
+        return ArrowDownLeft;
+      case 'stacking':
+        return TrendingUp;
+      default:
+        return Activity;
+    }
+  };
 
-    setWeeklyTransactionCount(weeklyTransactions.length);
-  }, [transactions]);
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'send':
+        return 'text-red-400';
+      case 'receive':
+        return 'text-green-400';
+      case 'stacking':
+        return 'text-purple-400';
+      default:
+        return 'text-slate-400';
+    }
+  };
 
-  // Use fetched transactions or fallback to provided activities
-  const displayActivities = transactions.length > 0 ? transactions.slice(0, 3) : activities.slice(0, 3);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'text-green-400';
+      case 'pending':
+        return 'text-yellow-400';
+      case 'failed':
+        return 'text-red-400';
+      default:
+        return 'text-slate-400';
+    }
+  };
 
   return (
-    <CSWCard>
+    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-medium text-white flex items-center">
           <Activity className="mr-2 h-5 w-5 text-purple-400" />
           Recent Activity
         </CardTitle>
-        <SecondaryButton asChild size="sm">
+        <SecondaryButton asChild size="sm" >
           <Link to={`/history/${walletId}`}>
             View All
           </Link>
         </SecondaryButton>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="text-slate-400 text-center py-4">Loading transactions...</div>
-        ) : (
-          <>
-            <div className="mb-4 p-3 bg-slate-700/30 rounded-lg">
-              <div className="text-sm text-slate-400">Last 7 Days</div>
-              <div className="text-xl font-bold text-white">{weeklyTransactionCount} Transactions</div>
-            </div>
-            
-            <div className="space-y-3">
-              {displayActivities.map((activity) => (
-                <TransactionItem 
-                  key={activity.id} 
-                  transaction={activity} 
-                  selectedWalletAddress={selectedWallet?.address}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        <div className="space-y-3">
+          {displayActivities.map((activity) => {
+            const Icon = getActivityIcon(activity.type);
+            const activityColor = getActivityColor(activity.type);
+            const statusColor = getStatusColor(activity.status);
+
+            return (
+              <div
+                key={activity.id}
+                className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full bg-slate-600/50 flex items-center justify-center`}>
+                    <Icon className={`h-4 w-4 ${activityColor}`} />
+                  </div>
+                  <div>
+                    <div className="text-white font-medium capitalize">
+                      {activity.type} {activity.asset}
+                    </div>
+                    <div className="text-slate-400 text-sm">{activity.timestamp}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`font-medium ${activityColor}`}>
+                    {activity.amount} {activity.asset}
+                  </div>
+                  <div className={`text-sm capitalize ${statusColor}`}>
+                    {activity.status}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </CardContent>
-    </CSWCard>
+    </Card>
   );
 };
 

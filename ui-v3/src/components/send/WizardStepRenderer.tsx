@@ -1,10 +1,11 @@
+
 import AssetTypeSelector from "@/components/send/AssetTypeSelector";
 import TokenSelectionStep from "@/components/send/TokenSelectionStep";
 import NFTSelectionStep from "@/components/send/NFTSelectionStep";
 import RecipientSelectionStep from "@/components/send/RecipientSelectionStep";
 import TransactionSummaryStep from "@/components/send/TransactionSummaryStep";
 import PrimaryButton from "@/components/ui/primary-button";
-import { Recipient } from "@/services/transactionDataService";
+import { Recipient } from "@/services/blockchainService";
 
 type WizardStep = 'assetType' | 'assetDetails' | 'recipient' | 'summary';
 
