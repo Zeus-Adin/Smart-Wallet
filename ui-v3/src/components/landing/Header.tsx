@@ -5,7 +5,7 @@ import { useWalletConnection } from "@/hooks/useWalletConnection";
 import GreenButton from "../ui/green-button";
 import SecondaryButton from "../ui/secondary-button";
 import PrimaryButton from "../ui/primary-button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Header = () => {
   const { isWalletConnected, connectWallet, disconnectWallet, isConnecting, walletData } = useWalletConnection();
@@ -22,7 +22,7 @@ const Header = () => {
   const getButtonText = () => {
     if (isConnecting) return "Connecting...";
     if (isWalletConnected) {
-      console.log({walletData})
+      console.log({ walletData })
       const address = walletData.addresses.stx[0].address;
       return `${address.slice(0, 6)}...${address.slice(-4)}`;
     }
@@ -35,6 +35,9 @@ const Header = () => {
       featuresSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+  }, [isWalletConnected])
 
   return (
     <header className="border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-sm">

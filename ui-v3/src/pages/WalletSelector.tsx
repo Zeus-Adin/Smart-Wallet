@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/primary-button";
 import { Plus, Play } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { useBlockchainService } from "@/hooks/useBlockchainService";
 import { useEffect, useState } from "react";
@@ -14,26 +14,37 @@ import { SmartWallet, WalletType } from "@/services/smartWalletContractService";
 import Notice from "@/components/wallet-selector/Notice";
 
 const WalletSelector = () => {
-  const [isDemoMode, setIsDemo] = useState<boolean>(true)
+  const [isDemoMode, setIsDemo] = useState<boolean>(false)
+  const [isPageLoading, setIsPageLoading] = useState<boolean>(true)
   const [walletsToShow, setWalletsToShow] = useState<SmartWallet[]>([]);
   const [importedWallets, setImportedWallets] = useState<SmartWallet[]>([]);
-  const { walletData } = useWalletConnection();
+  const { walletData, isWalletConnected } = useWalletConnection();
   const { loadSmartWallets, smartWallets, isLoading } = useBlockchainService();
+  const nav = useNavigate()
 
   useEffect(() => {
-    const fetchWalletData = async () => {
-      if (walletData?.addresses?.stx?.[0]?.address) {
-        console.log('Fetching wallet data for:', walletData.addresses.stx[0].address);
+    const initPage = async () => {
+      if (isWalletConnected) {
         try {
-          await loadSmartWallets(walletData.addresses.stx[0].address);
+          await loadSmartWallets(walletData.addresses.stx[0].address)
         } catch (error) {
-          console.error('Failed to fetch wallet data:', error);
+          console.error('Failed to fetch wallet data:', error)
         }
       }
-    };
+    }
 
-    fetchWalletData();
-  }, [isDemoMode, walletData, loadSmartWallets]);
+    if (!isPageLoading) {
+      if (isWalletConnected) {
+        initPage()
+      } else {
+        nav('/')
+      }
+    }
+
+    if (isPageLoading) {
+      setIsPageLoading(false)
+    }
+  }, [isPageLoading, walletData, isWalletConnected, loadSmartWallets]);
 
   useEffect(() => {
     // Combine detected wallets with imported wallets
