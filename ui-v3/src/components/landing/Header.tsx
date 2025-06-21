@@ -8,7 +8,7 @@ import PrimaryButton from "../ui/primary-button";
 import { useState } from "react";
 
 const Header = () => {
-  const { isWalletConnected, connectWallet, disconnectWallet, isConnecting, walletData, isDemoMode } = useWalletConnection();
+  const { isWalletConnected, connectWallet, disconnectWallet, isConnecting, walletData } = useWalletConnection();
   const [mobileMenue, setMobileMenue] = useState<boolean>(false)
 
   const handleWalletAction = () => {
@@ -21,10 +21,10 @@ const Header = () => {
 
   const getButtonText = () => {
     if (isConnecting) return "Connecting...";
-    if (isWalletConnected && walletData?.addresses?.stx && walletData.addresses.stx.length > 0) {
+    if (isWalletConnected) {
+      console.log({walletData})
       const address = walletData.addresses.stx[0].address;
-      const prefix = isDemoMode ? "Demo: " : "";
-      return `${prefix}${address.slice(0, 6)}...${address.slice(-4)}`;
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
     }
     return "Connect Wallet";
   };
