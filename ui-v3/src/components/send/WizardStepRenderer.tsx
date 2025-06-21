@@ -5,6 +5,8 @@ import RecipientSelectionStep from "@/components/send/RecipientSelectionStep";
 import TransactionSummaryStep from "@/components/send/TransactionSummaryStep";
 import PrimaryButton from "@/components/ui/primary-button";
 import { Recipient } from "@/services/blockchainService";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "../ui/toaster";
 
 type WizardStep = "assetType" | "assetDetails" | "recipient" | "summary";
 
