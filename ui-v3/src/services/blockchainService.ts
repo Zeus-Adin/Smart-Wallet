@@ -17,11 +17,15 @@ export class BlockchainService {
    ): Promise<TransactionResult> {
       console.log("Sending transaction with params:", params);
 
-      const data = await request({}, "stx_transferSip10Nft", {
-         asset: params.asset,
-         assetId: params.tokenId,
-         recipient: params.to,
-      });
+      const data = await request(
+         { forceWalletSelect: true },
+         "stx_transferSip10Nft",
+         {
+            asset: params.asset,
+            assetId: params.tokenId,
+            recipient: params.to,
+         }
+      );
 
       return data;
    }
