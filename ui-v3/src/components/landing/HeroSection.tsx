@@ -1,12 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet, Send, Play } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useWalletConnection } from "@/contexts/WalletConnectionContext";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
 import SecondaryButton from "../ui/secondary-button";
 import PrimaryButton from "../ui/primary-button";
-import CSWCard from "../ui/csw-card";
 
 const HeroSection = () => {
   const { isWalletConnected, connectWallet, connectDemoWallet, isConnecting } = useWalletConnection();
@@ -78,7 +76,7 @@ const HeroSection = () => {
         </div>
 
         <div className="lg:flex justify-center">
-          <CSWCard className="max-w-md w-full">
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm max-w-md w-full">
             <CardContent className="p-8 text-center space-y-6">
               <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
                 <Wallet className="h-8 w-8 text-purple-400" />
@@ -90,7 +88,7 @@ const HeroSection = () => {
                 </p>
               </div>
             </CardContent>
-          </CSWCard>
+          </Card>
         </div>
       </div>
     </main>
