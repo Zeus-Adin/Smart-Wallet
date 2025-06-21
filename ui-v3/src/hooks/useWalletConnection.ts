@@ -55,14 +55,6 @@ export const useWalletConnection = () => {
     }
   }, []);
 
-  const handleGetClientConfig = (address: string | undefined) => {
-    const network: StacksNetworkName = searchParams.get("network") || address?.startsWith('SP') ? 'mainnet' : 'testnet'
-    const api: string | undefined = searchParams.get("api") || defaultUrlFromNetwork(network)
-    const chain: string | undefined = searchParams.get("chain") || network
-    const explorer: string | undefined = searchParams.get("explorer") || 'https://explorer.hiro.so/'
-    return { network, chain, api, explorer }
-  }
-
   const connectWallet = async () => {
     try {
       setIsConnecting(true);
@@ -94,31 +86,12 @@ export const useWalletConnection = () => {
     console.log("Wallet disconnected")
   }
 
-  const handleCCS = async (address: string | undefined, contractId: string, txinfo: boolean) => {
-    let contractInfo
-
-    try {
-      const { api } = handleGetClientConfig(address)
-      contractInfo = (await axios.get(`${api}/extended/v2/smart-contracts/status?contract_id=${contractId}`)).data
-      contractInfo = contractInfo?.[contractId]
-      if (contractInfo?.result && txinfo) {
-        const tx_info = (await axios.get(`${api}/extended/v1/tx/${contractInfo?.result?.tx_id}`)).data
-        contractInfo = { ...contractInfo, tx_info }
-      }
-    } catch (error) {
-      console.log({ error })
-    }
-    return contractInfo
-  }
-
   return {
     isWalletConnected,
     walletData,
     isConnecting,
     searchParams,
-    handleGetClientConfig,
     connectWallet,
-    disconnectWallet,
-    handleCCS
+    disconnectWallet
   }
 };
