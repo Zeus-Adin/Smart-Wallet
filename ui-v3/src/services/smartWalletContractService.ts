@@ -1,7 +1,6 @@
 import { ContractTypes } from "@/lib/const";
 import { defaultUrlFromNetwork, StacksNetworkName } from "@stacks/network";
 import axios from "axios";
-import { useSearchParams } from "react-router-dom";
 
 export interface SmartWallet {
   label: string;
