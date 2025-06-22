@@ -28,6 +28,12 @@ const RecentActivity = ({ activities = [] }: RecentActivityProps) => {
   const { loadRecentData, transactions, isLoading } = useBlockchainService();
   const [weeklyTransactionCount, setWeeklyTransactionCount] = useState(0);
 
+const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [stxUsd, setStxUsd] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     if (walletId) {
       loadRecentData(walletId);
@@ -77,26 +83,75 @@ const RecentActivity = ({ activities = [] }: RecentActivityProps) => {
         </SecondaryButton>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="text-slate-400 text-center py-4">Loading transactions...</div>
-        ) : (
-          <>
-            <div className="mb-4 p-3 bg-slate-700/30 rounded-lg">
-              <div className="text-sm text-slate-400">Last 7 Days</div>
-              <div className="text-xl font-bold text-white">{weeklyTransactionCount} Transactions</div>
-            </div>
-            
-            <div className="space-y-3">
-              {displayActivities.map((activity) => (
-                <TransactionItem 
-                  key={activity.id} 
-                  transaction={activity} 
-                  selectedWalletAddress={selectedWallet?.address}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        {error && <div className="text-red-400 mb-2">{error}</div>}
+        <div className="space-y-3">
+          {loading && activities.length === 0 ? (
+            [...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-3 w-32 mb-1" />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <Skeleton className="h-4 w-16 mb-2" />
+                  <Skeleton className="h-3 w-10" />
+                </div>
+              </div>
+            ))
+          ) : (
+            activities.slice(0, 5).map((activity) => {
+              const Icon = getActivityIcon(activity.action);
+              const activityColor = getActivityColor(activity.action);
+              const statusColor = getStatusColor(activity.status);
+              return (
+                <div
+                  key={activity.id}
+                  className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-8 h-8 rounded-full bg-slate-600/50 flex items-center justify-center`}>
+                      <Icon className={`h-4 w-4 ${activityColor}`} />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium capitalize">
+                        {activity.action} {activity.asset}
+                      </div>
+                      <div className="text-slate-400 text-sm">{activity.timestamp}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`font-medium ${activityColor}`}>
+                      {activity.action === 'sent' ? '-' : '+'}{formatAmount(activity.amount, 6)} {activity.asset}
+                      {activity.asset === 'STX' && stxUsd && (
+                        <span className="text-xs text-slate-400 ml-2">
+                          (${((Number(activity.amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
+                        </span>
+                      )}
+                    </div>
+                    <div className={`text-sm capitalize ${statusColor}`}>
+                      {activity.status}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+        {/* Only show the button if there are more than 5 activities */}
+        <div className="flex justify-end mt-4">
+          <Button 
+            onClick={handleRefresh} 
+            variant="secondary"
+            className="flex items-center justify-center min-w-[90px]"
+            disabled={refreshing || loading}
+          >
+            {refreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Refresh
+          </Button>
+        </div>
       </CardContent>
     </CSWCard>
   );
