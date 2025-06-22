@@ -7,14 +7,7 @@ import { Wallet, Plus, Check, Clock, User, Globe, ChevronDown } from "lucide-rea
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getSortedExtensions } from "@/data/walletExtensions";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import SecondaryButton from "@/components/ui/secondary-button";
 import PrimaryButton from "@/components/ui/primary-button";

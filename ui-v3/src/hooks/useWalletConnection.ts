@@ -30,8 +30,6 @@ export const useWalletConnection = () => {
   useEffect(() => {
     // Check if user is already connected on component mount
     const connected = isConnected();
-    setIsWalletConnected(connected);
-
     if (connected) {
       try {
         const userData = getLocalStorage();
@@ -48,6 +46,7 @@ export const useWalletConnection = () => {
             },
           }
           setWalletData(transformedData)
+          setIsWalletConnected(connected);
         }
       } catch (error) {
         console.error("Error getting wallet data:", error)
