@@ -352,27 +352,7 @@ const ActionHistory = () => {
               )}
             </div>
             <style>{`
-              .custom-scrollbar {
-                scrollbar-width: thin;
-                scrollbar-color: rgba(100,116,139,0.2) transparent;
-              }
-              .custom-scrollbar::-webkit-scrollbar {
-                width: 6px;
-                background: transparent;
-              }
-              .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: rgba(100,116,139,0.15);
-                border-radius: 6px;
-              }
-              .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: rgba(100,116,139,0.25);
-              }
-              .custom-scrollbar::-webkit-scrollbar-button:single-button:vertical:decrement {
-                display: none;
-              }
-              .custom-scrollbar::-webkit-scrollbar-track {
-                background: transparent;
-              }
+              
             `}</style>
             <div className="absolute bottom-6 right-6 z-20">
               <SecondaryButton
