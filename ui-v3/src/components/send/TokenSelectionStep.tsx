@@ -69,7 +69,6 @@ const TokenSelectionStep = ({
 
       (async () => {
          const balance = await fetchNFTBalance();
-         console.log(balance);
          setFTBalance(balance);
       })();
    }, [walletId]);
