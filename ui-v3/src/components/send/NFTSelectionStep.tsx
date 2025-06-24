@@ -52,13 +52,13 @@ const NFTSelectionStep = ({
    onBack,
 }: NFTSelectionStepProps) => {
    const isValid = asset && tokenId && contractAddress;
-   const [NFTBalance, setNFTBalance] = useState<NFTBalanceResponse[]>([]);
+   const [nftBalance, setNftBalance] = useState<NFTBalanceResponse[]>([]);
    const [selectedNft, setSelectedNft] = useState<string>("");
-   const { walletId } = useParams<{ walletId: string }>();
+   const { walletId } = useParams<{ walletId: `${string}.${string}` }>();
 
    useEffect(() => {
       async function fetchNFTBalance() {
-         return await new AccountBalanceService().getNFTBalance(
+         return await new AccountBalanceService().getNftBalance(
             walletId,
             "",
             0
@@ -67,13 +67,13 @@ const NFTSelectionStep = ({
 
       (async () => {
          const balance = await fetchNFTBalance();
-         setNFTBalance(balance);
+         setNftBalance(balance);
       })();
    }, [walletId]);
 
    return (
       <div className="space-y-6">
-         {NFTBalance.length !== 0 ? (
+         {nftBalance.length !== 0 ? (
             <>
                <h3 className="text-lg font-semibold text-white">
                   Select NFT Details
@@ -87,7 +87,7 @@ const NFTSelectionStep = ({
                      value={selectedNft}
                      onValueChange={(value) => {
                         setSelectedNft(value);
-                        const nft = NFTBalance.find((nft) => nft.id === value);
+                        const nft = nftBalance.find((nft) => nft.id === value);
 
                         if (!nft) return;
                         onAssetChange(nft.asset_name);
@@ -100,7 +100,7 @@ const NFTSelectionStep = ({
                         <SelectValue placeholder="Choose an NFT to send" />
                      </SelectTrigger>
                      <SelectContent className="bg-slate-700 border-slate-600">
-                        {NFTBalance.map((nft) => (
+                        {nftBalance.map((nft) => (
                            <SelectItem
                               value={nft.id}
                               key={nft.id}
