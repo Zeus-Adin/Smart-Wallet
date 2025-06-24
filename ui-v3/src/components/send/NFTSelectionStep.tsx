@@ -10,6 +10,8 @@ import {
    SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { AccountBalanceService } from "@/services/accountBalanceService";
+import { useParams } from "react-router-dom";
 
 interface NFTSelectionStepProps {
    asset: string;
@@ -22,6 +24,23 @@ interface NFTSelectionStepProps {
    onBack: () => void;
 }
 
+export type NFTBalanceResponse = {
+   asset_address: string;
+   asset_name: string;
+   contract_name: string;
+   config?: never; // Consider replacing `any` with a specific AxiosRequestConfig type if you're using Axios
+   data: string;
+   headers?: {
+      [key: string]: string;
+   };
+   id: string;
+   request?: XMLHttpRequest;
+   status: string;
+   statusText: string;
+   time: string;
+   tx: string;
+};
+
 const NFTSelectionStep = ({
    asset,
    tokenId,
@@ -33,37 +52,28 @@ const NFTSelectionStep = ({
    onBack,
 }: NFTSelectionStepProps) => {
    const isValid = asset && tokenId && contractAddress;
-   const [nftBalance, setNftBalance] = useState<
-      { name: string; contractAddress: string; id: string }[]
-   >([]);
+   const [NFTBalance, setNFTBalance] = useState<NFTBalanceResponse[]>([]);
    const [selectedNft, setSelectedNft] = useState<string>("");
+   const { walletId } = useParams<{ walletId: string }>();
 
    useEffect(() => {
-      const fetchNftBalance = () => {
-         // Simulate fetching NFT balance
-         return [
-            {
-               name: "Cool NFT #123",
-               contractAddress: "SP1ABC...XYZ123",
-               id: "123",
-            },
-            {
-               name: "oyeins.dev #153",
-               contractAddress: "SP1DEF...XYZ456",
-               id: "153",
-            },
-            {
-               name: "Rare Collectible #456",
-               contractAddress: "SP1GHI...XYZ789",
-               id: "456",
-            },
-         ];
-      };
-      setNftBalance(fetchNftBalance());
-   }, []);
+      async function fetchNFTBalance() {
+         return await new AccountBalanceService().getNFTBalance(
+            walletId,
+            "",
+            0
+         );
+      }
+
+      (async () => {
+         const balance = await fetchNFTBalance();
+         setNFTBalance(balance);
+      })();
+   }, [walletId]);
+
    return (
       <div className="space-y-6">
-         {nftBalance.length !== 0 ? (
+         {NFTBalance.length !== 0 ? (
             <>
                <h3 className="text-lg font-semibold text-white">
                   Select NFT Details
@@ -77,14 +87,12 @@ const NFTSelectionStep = ({
                      value={selectedNft}
                      onValueChange={(value) => {
                         setSelectedNft(value);
-                        const nft = nftBalance.find(
-                           (nft) => nft.contractAddress === value
-                        );
+                        const nft = NFTBalance.find((nft) => nft.id === value);
 
                         if (!nft) return;
-                        onAssetChange(nft.name);
+                        onAssetChange(nft.asset_name);
                         onTokenIdChange(nft.id);
-                        onContractAddressChange(nft.contractAddress);
+                        onContractAddressChange(nft.asset_address);
                      }}
                      required={true}
                   >
@@ -92,13 +100,13 @@ const NFTSelectionStep = ({
                         <SelectValue placeholder="Choose an NFT to send" />
                      </SelectTrigger>
                      <SelectContent className="bg-slate-700 border-slate-600">
-                        {nftBalance.map((nft) => (
+                        {NFTBalance.map((nft) => (
                            <SelectItem
-                              value={`${nft.contractAddress}`}
+                              value={nft.id}
                               key={nft.id}
                               className="text-white hover:bg-slate-600 focus:bg-slate-600"
                            >
-                              {nft.name}
+                              {nft.asset_name}
                            </SelectItem>
                         ))}
                      </SelectContent>
