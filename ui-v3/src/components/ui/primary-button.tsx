@@ -8,12 +8,13 @@ interface PrimaryButtonProps extends ButtonProps {
 }
 
 const PrimaryButton = React.forwardRef<HTMLButtonElement, PrimaryButtonProps>(
-  ({ className, children, ...props }, ref) => {
+  ({ disabled, className, children, ...props }, ref) => {
     return (
       <Button
         ref={ref}
         className={cn(
-          "bg-purple-600 hover:bg-purple-700 text-white",
+          disabled ? "border-slate-600 bg-purple-700/20 opacity-60 cursor-not-allowed hover:bg-purple-700/20" :
+            "bg-purple-600 hover:bg-purple-700 text-white",
           className
         )}
         {...props}
