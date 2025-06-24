@@ -118,11 +118,13 @@ export class AccountBalanceService {
                   "nft"
                );
                const tokenMetadata = await axios.get(tokenMeta?.token_uri);
+					const [asset_address, asset_name] = asset.split("::");
+					const [_, contract_name] = asset_address.split(".");
 					
                return {
-                  asset_name: asset?.split("::")[1],
-                  asset_address: asset?.split("::")[0],
-                  contract_name: asset?.split("::")[0]?.split(".")[1],
+                  asset_name,
+                  asset_address,
+                  contract_name,
                   id,
                   ...tokenMeta,
                   ...tokenMetadata,
