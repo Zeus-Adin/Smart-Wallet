@@ -4,14 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowDown, Wallet } from "lucide-react";
-import { useSelectedWallet } from "@/hooks/useSelectedWallet";
+import QRCode from 'react-qr-code';
+import { useParams } from "react-router-dom";
 
 const ReceiveAssets = () => {
-  const { selectedWallet } = useSelectedWallet();
+  const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
 
   const copyToClipboard = () => {
-    if (selectedWallet?.address) {
-      navigator.clipboard.writeText(selectedWallet.address);
+    if (walletId) {
+      navigator.clipboard.writeText(walletId);
     }
   };
 
@@ -34,24 +35,23 @@ const ReceiveAssets = () => {
             <div className="text-center space-y-4">
               {/* QR Code Placeholder */}
               <div className="w-48 h-48 mx-auto bg-white rounded-lg flex items-center justify-center">
-                <div className="text-black text-sm text-center">
-                  QR Code<br />
-                  {selectedWallet?.address?.substring(0, 8)}...
+                <div className="text-black text-sm text-center flex items-center justify-center">
+                  <QRCode value={walletId} size={150} />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <p className="text-slate-400 text-sm">Your Smart Wallet Address:</p>
                 <div className="flex items-center space-x-2">
                   <Input
-                    value={selectedWallet?.address || "Loading..."}
+                    value={walletId || "Loading..."}
                     readOnly
                     className="bg-slate-700/50 border-slate-600 text-white text-center"
                   />
-                  <Button 
-                    onClick={copyToClipboard} 
+                  <Button
+                    onClick={copyToClipboard}
                     className="bg-purple-600 hover:bg-purple-700"
-                    disabled={!selectedWallet?.address}
+                    disabled={!walletId}
                   >
                     Copy
                   </Button>
@@ -76,7 +76,7 @@ const ReceiveAssets = () => {
                   <div className="text-slate-400 text-sm">Native Stacks token</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3 p-3 bg-slate-700/30 rounded-lg">
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold">B</span>
@@ -86,7 +86,7 @@ const ReceiveAssets = () => {
                   <div className="text-slate-400 text-sm">Wrapped Bitcoin</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3 p-3 bg-slate-700/30 rounded-lg">
                 <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold">U</span>
@@ -96,7 +96,7 @@ const ReceiveAssets = () => {
                   <div className="text-slate-400 text-sm">USD Coin</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3 p-3 bg-slate-700/30 rounded-lg">
                 <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold">N</span>
