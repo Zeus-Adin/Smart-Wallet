@@ -49,6 +49,7 @@ const WalletSelector = () => {
   useEffect(() => {
     // Combine detected wallets with imported wallets
     const allWallets = [...smartWallets, ...importedWallets];
+    console.log({ allWallets })
     setWalletsToShow(allWallets);
   }, [smartWallets, importedWallets]);
 
