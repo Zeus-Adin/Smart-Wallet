@@ -4,14 +4,15 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 
 export interface SmartWallet {
-  label: string;
-  id: number;
-  name: string;
-  contractId: string;
-  stxHolding: number;
-  btcHolding: number;
-  extensions: string[];
-  createdAt: string;
+  label: string
+  id: number
+  name: string
+  contractId: string
+  ext: boolean
+  stxHolding: number
+  btcHolding: number
+  extensions: string[]
+  createdAt: string
 }
 export interface WalletActivity {
   id: string;
@@ -23,14 +24,15 @@ export interface WalletActivity {
 }
 
 export type WalletType = {
-  label: string;
-  id: number;
-  name: string;
-  contractId: string;
-  stxHolding: number;
-  btcHolding: number;
-  extensions: string[];
-  createdAt: string;
+  label: string
+  id: number
+  name: string
+  contractId: string
+  ext: boolean
+  stxHolding: number
+  btcHolding: number
+  extensions: string[]
+  createdAt: string
 };
 
 export const smartWalletName = "smart-wallet";
@@ -77,21 +79,13 @@ export const handleCCS = async (
 };
 
 export class SmartWalletContractService {
-  async getSmartWallets(
-    walletAddress: string,
-    searchParams: URLSearchParams
-  ): Promise<SmartWallet[]> {
+  async getSmartWallets(walletAddress: string, searchParams: URLSearchParams): Promise<SmartWallet[]> {
     const allDeployedWallets: WalletType[] = (
       await Promise.all(
         ContractTypes.map(async (wallets) => {
-          const wr = await handleCCS(
-            walletAddress,
-            `${walletAddress}.${smartWalletName}`,
-            true,
-            searchParams
-          );
+          const wr = await handleCCS(walletAddress, `${walletAddress}.${wallets.name}`, true, searchParams);
           if (!wr?.found) return null;
-
+          console.log({ wr })
           const w: WalletType = {
             id: wr.tx_index,
             name: wr.smart_contract.contract_id.split(".")[1],
@@ -104,18 +98,7 @@ export class SmartWalletContractService {
           return w;
         })
       )
-    ).filter(Boolean) as WalletType[]; // Remove nulls
-
-    // {
-    //   id: "SP1ABC...XYZ123.smart-wallet-v1",
-    //     name: "Personal Wallet",
-    //       contractId: "SP1ABC...XYZ123.smart-wallet-v1",
-    //         balance: "1,234.56 STX",
-    //           usdValue: "$2,469.12",
-    //             extensions: ["Multi-sig", "Time-lock"],
-    //               createdAt: "2024-01-15"
-    // }
-
+    ).filter(Boolean) as WalletType[]; // Remove nulls 
     return allDeployedWallets;
   }
 
