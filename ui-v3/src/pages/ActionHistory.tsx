@@ -9,6 +9,10 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import { Transaction, TransactionDataService } from "@/services/transactionDataService";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
 import { Skeleton } from "@/components/ui/skeleton";
+import{ formatAddressField, formatAmount } from "@/lib/txFormatUtils"
+import { useParams } from "react-router-dom";
+import { getClientConfig } from "@/utils/chain-config"
+
 
 const transactionService = new TransactionDataService();
 
@@ -26,12 +30,17 @@ const ActionHistory = () => {
   const [filterAction, setFilterAction] = useState<string>("all");
   const [showFilter, setShowFilter] = useState(false);
 
-  console.log(selectedWallet);
+  const { walletId } = useParams<{walletId:`${string}.${string}`}>()
+  console.log("walletId", walletId);
   const fetchTransactions = useCallback(async (currentOffset: number = 0) => {
-    if (!selectedWallet?.address) return;
+
+    if (!walletId) return;
     setIsLoading(true);
     try {
-      const txs = await transactionService.getRecentTransactions(selectedWallet.address, currentOffset);
+      const txs = await transactionService.getRecentTransactions(
+        walletId ? walletId : selectedWallet?.address,
+        currentOffset
+      );
       if (currentOffset === 0) {
         setTransactions(txs);
         setHasMore(txs.length === 20);
@@ -45,7 +54,7 @@ const ActionHistory = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedWallet?.address]);
+  }, [selectedWallet, walletId]);
 
   useEffect(() => {
     setOffset(0);
@@ -115,6 +124,8 @@ const ActionHistory = () => {
     return History;
   };
 
+  const config = getClientConfig(walletId ? walletId : selectedWallet?.address);
+
   const transactionStats = useMemo(() => ({
     total: transactions.length,
     confirmed: transactions.filter(tx => tx.status === 'confirmed').length,
@@ -122,40 +133,6 @@ const ActionHistory = () => {
     failed: transactions.filter(tx => tx.status === 'failed').length
   }), [transactions]);
 
-  // Helper to trim and format address fields to max 3 lines
-  const formatAddressField = (value: string | undefined, lineLength = 48, maxLines = 3) => {
-    if (!value) return '';
-    // Remove list prefix if present
-    const clean = value.replace(/^\(list |\[|\]|'|\)/g, '').replace(/'/g, '').trim();
-    // Split by whitespace for lists, otherwise chunk
-    const parts = clean.split(/\s+/);
-    let lines: string[] = [];
-    let current = '';
-    for (const part of parts) {
-      if ((current + ' ' + part).trim().length > lineLength) {
-        lines.push(current.trim());
-        current = part;
-        if (lines.length === maxLines) break;
-      } else {
-        current += (current ? ' ' : '') + part;
-      }
-    }
-    if (lines.length < maxLines && current) lines.push(current.trim());
-    if (lines.length > maxLines) lines = lines.slice(0, maxLines);
-    let result = lines.join('\n');
-    if (parts.length > 0 && lines.length === maxLines && (parts.slice(lines.join(' ').split(/\s+/).length).length > 0 || clean.length > lineLength * maxLines)) {
-      result += '\n...';
-    }
-    return result;
-  };
-
-  // Format amount with commas and token decimals
-  const formatAmount = (amount: string, decimals: number = 6) => {
-    if (!amount) return '';
-    const num = Number(amount) / Math.pow(10, decimals);
-    if (isNaN(num)) return amount;
-    return num.toLocaleString(undefined, { maximumFractionDigits: decimals });
-  };
 
   // Helper to get a user-friendly label for each transaction type/action
   const getTxLabel = (tx: Transaction) => {
@@ -320,7 +297,7 @@ const ActionHistory = () => {
                             <div className="text-slate-500 text-xs flex items-center gap-2">
                               TX: {tx.txHash}
                               <a
-                                href={`https://explorer.stacks.co/txid/${tx.txHash}?chain=mainnet`}
+                                href={`${config.explorer(`/tx/${tx.txHash}`)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-purple-400 hover:underline flex items-center"
