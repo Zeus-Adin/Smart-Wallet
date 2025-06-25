@@ -17,7 +17,7 @@ interface RecentActivityProps {
 const transactionService = new TransactionDataService();
 
 const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityProps) => {
-  const { id: urlWalletId } = useParams();
+  const { walletId } = useParams<{walletId:`${string}.${string}`}>()
   const [activities, setActivities] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -132,7 +132,7 @@ const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityPro
           Recent Activity {smartWalletAddress ? <span className="ml-2 text-xs text-blue-400">(Smart Wallet)</span> : walletAddress ? <span className="ml-2 text-xs text-green-400">(Connected Wallet)</span> : null}
         </CardTitle>
         <SecondaryButton asChild size="sm">
-          <Link to={`/history/${urlWalletId}`}>
+          <Link to={`/history/${walletId}`}>
             View All
           </Link>
         </SecondaryButton>
