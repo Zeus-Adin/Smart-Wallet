@@ -57,7 +57,7 @@ const WalletLayout = ({ children }: WalletLayoutProps) => {
       name: selectedWallet.name,
       contractId: selectedWallet.contractId,
       balance: stxBalance ? `${formatNumber(+stxBalance.actual_balance, 2)} STX` : "0.00",
-      usdValue: stxBalance && stxRate ? `$${formatNumber(+stxBalance.actual_balance * +stxRate.current_price, 2)}` : "0.00",
+      usdValue: stxBalance && stxRate ? `$${formatNumber(+stxBalance.actual_balance * +stxRate.current_price, 2)}` : "$0.00",
    };
 
    return (
