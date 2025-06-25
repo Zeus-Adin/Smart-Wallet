@@ -16,14 +16,13 @@ import { BlockchainService } from "@/services/blockchainService";
 import axios from "axios";
 
 const CreateWallet = () => {
-  const navigate = useNavigate();
-  const { walletData } = useWalletConnection();
-  const [walletName, setWalletName] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedContract, setSelectedContract] = useState<ContractType>();
-
-  const [isCreating, setIsCreating] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState<'mainnet' | 'testnet'>('mainnet');
+  const navigate = useNavigate()
+  const { walletData } = useWalletConnection()
+  const [walletName, setWalletName] = useState("")
+  const [description, setDescription] = useState("")
+  const [selectedContract, setSelectedContract] = useState<ContractType>()
+  const [isCreating, setIsCreating] = useState(false)
+  const [selectedNetwork, setSelectedNetwork] = useState<'mainnet' | 'testnet'>('mainnet')
   const [verifiedContracts, setVerifiedContracts] = useState<ContractType[]>([])
 
   const getConnectedWalletAddress = () => {
