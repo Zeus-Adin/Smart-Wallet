@@ -14,7 +14,7 @@ import { formatNumber } from "@/utils/numbers";
 import useGetRates from "@/hooks/useGetRates";
 
 const Dashboard = () => {
-  const { walletId } = useParams();
+   const { walletId } = useParams<{walletId:`${string}.${string}`}>()
   const { selectedWallet: walletData, isLoading } = useSelectedWallet();
   const { stxBalance, nftBalance, ftBalance, loading, error } = useAccountBalanceService(walletId)
   const { rates: stxRate } = useGetRates("stx")
@@ -120,8 +120,8 @@ const Dashboard = () => {
 
         {/* Asset Overview and Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AssetOverview assets={[]} stx={stxBalance} fts={ftBalance} nfts={nftBalance} stxRate={stxRate} btcRate={btcRate} />
-          <RecentActivity walletAddress={walletData.address} />
+          <AssetOverview />
+          <RecentActivity walletAddress={walletData.address} smartWalletAddress={walletId} />
         </div>
 
         {/* Quick Actions */}
