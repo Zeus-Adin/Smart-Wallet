@@ -1,6 +1,7 @@
 import { NFTBalanceResponse } from "@/components/send/NFTSelectionStep";
 import { TokenBalanceInfo } from "@/components/send/TokenSelectionStep";
 import axios from "axios";
+import { getClientConfig } from "@/utils/chain-config";
 
 export interface AccountBalance {
    stxBalance: StxBalance;
@@ -34,22 +35,6 @@ export interface nftResponseBalanceValues {
 };
 
 export class AccountBalanceService {
-   private getClientConfig(walletAddress: string) {
-      // Automatic detection based on address prefix
-      // Mainnet: SP, SM; Testnet: ST, SN
-      if (/^(ST|SN)/i.test(walletAddress)) {
-         return {
-            api: "https://api.testnet.hiro.so",
-            chain: "testnet",
-         };
-      } else {
-         return {
-            api: "https://api.mainnet.hiro.so", // fixed mainnet endpoint
-            chain: "mainnet",
-         };
-      }
-   }
-
    private handleGetMeta = async (
       walletAddress: string | undefined,
       asset_identifiers: string,
@@ -58,7 +43,7 @@ export class AccountBalanceService {
    ) => {
       let response;
       try {
-         const { api } = this.getClientConfig(walletAddress);
+         const { api } = getClientConfig(walletAddress)
          let res;
          if (asset === "ft") {
             response = (
@@ -91,8 +76,8 @@ export class AccountBalanceService {
       }
    };
 
-   async getSTXBalance(walletAddress: string, offset: number): Promise<StxBalance> {
-      const { api } = this.getClientConfig(walletAddress);
+   async getStxBalance(walletAddress: string, offset: number) {
+      const { api } = getClientConfig(walletAddress);
       const response = (
          await axios.get(
             `${api}/extended/v2/addresses/${walletAddress}/balances/stx?offset=${offset}`
@@ -115,13 +100,13 @@ export class AccountBalanceService {
       return stxBalance;
    }
 
-   async getNFTBalance(
+   async getNftBalance(
       walletAddress: string,
       asset_identifiers: string,
       offset: number
    ): Promise<NFTBalanceResponse[]> {
       try {
-         const { api } = this.getClientConfig(walletAddress);
+         const { api } = getClientConfig(walletAddress);
 
          const nftBalanceResponse = (
             await axios.get(
@@ -144,10 +129,13 @@ export class AccountBalanceService {
                   "nft"
                );
                const tokenMetadata = await axios.get(tokenMeta?.token_uri);
+					const [asset_address, asset_name] = asset.split("::");
+					const [_, contract_name] = asset_address.split(".");
+					
                return {
-                  asset_name: asset?.split("::")[1],
-                  asset_address: asset?.split("::")[0],
-                  contract_name: asset?.split("::")[0]?.split(".")[1],
+                  asset_name,
+                  asset_address,
+                  contract_name,
                   id,
                   ...tokenMeta,
                   ...tokenMetadata,
@@ -164,11 +152,11 @@ export class AccountBalanceService {
       }
    }
 
-   async getFTBalance(
+   async getFtBalance(
       walletAddress: string,
       offset: number
    ): Promise<TokenBalanceInfo[]> {
-      const { api, chain } = this.getClientConfig(walletAddress);
+      const { api } = getClientConfig(walletAddress);
       try {
          let ftBalance = (
             await axios.get(
@@ -210,9 +198,9 @@ export class AccountBalanceService {
       asset_identifiers: string
    ): Promise<AccountBalance> {
       console.log("Fetching account balances for:", walletAddress);
-      const stxBalance = await this.getSTXBalance(walletAddress, 0);
-      const ftBalance = await this.getFTBalance(walletAddress, 0);
-      const nftBalance = await this.getNFTBalance(
+      const stxBalance = await this.getStxBalance(walletAddress, 0);
+      const ftBalances = await this.getFtBalance(walletAddress, 0);
+      const nftBalances = await this.getNftBalance(
          walletAddress,
          asset_identifiers,
          0
