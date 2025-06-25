@@ -5,6 +5,9 @@ import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import WalletHeader from "./WalletHeader";
 import MobileNavigationDrawer from "./MobileNavigationDrawer";
 import DesktopSidebar from "./DesktopSidebar";
+import { useAccountBalanceService } from "@/hooks/useAccountBalanceService";
+import useGetRates from "@/hooks/useGetRates";
+import { formatNumber } from "@/utils/numbers";
 
 interface WalletLayoutProps {
    children: ReactNode;
@@ -18,6 +21,9 @@ const WalletLayout = ({ children }: WalletLayoutProps) => {
    >("mainnet");
    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
    const [networkParams, setNetworkParams] = useSearchParams();
+
+	const { stxBalance, loading, error } = useAccountBalanceService(walletId)
+  const { rates: stxRate } = useGetRates("stx")
 
    const handleNetworkSwitch = (network: "mainnet" | "testnet") => {
       setSelectedNetwork(network);
@@ -50,8 +56,8 @@ const WalletLayout = ({ children }: WalletLayoutProps) => {
    const currentWallet = {
       name: selectedWallet.name,
       contractId: selectedWallet.contractId,
-      balance: selectedWallet.balance,
-      usdValue: selectedWallet.usdValue,
+      balance: stxBalance ? `${formatNumber(+stxBalance.actual_balance, 2)} STX` : "0.00",
+      usdValue: stxBalance && stxRate ? `$${formatNumber(+stxBalance.actual_balance * +stxRate.current_price, 2)}` : "0.00",
    };
 
    return (

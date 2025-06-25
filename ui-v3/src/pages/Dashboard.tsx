@@ -9,12 +9,18 @@ import AssetOverview from "@/components/dashboard/AssetOverview";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
 import PrimaryButton from "@/components/ui/primary-button";
+import { useAccountBalanceService } from "@/hooks/useAccountBalanceService";
+import { formatNumber } from "@/utils/numbers";
+import useGetRates from "@/hooks/useGetRates";
 
 const Dashboard = () => {
   const { walletId } = useParams();
   const { selectedWallet: walletData, isLoading } = useSelectedWallet();
+  const { stxBalance, nftBalance, ftBalance, loading, error } = useAccountBalanceService(walletId)
+  const { rates: stxRate } = useGetRates("stx")
+  const { rates: btcRate } = useGetRates("btc")
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <WalletLayout>
         <div className="flex items-center justify-center h-64">
@@ -75,7 +81,9 @@ const Dashboard = () => {
               <DollarSign className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{walletData.balance}</div>
+              <div className="text-2xl font-bold text-white">
+					{stxBalance ? <p>{formatNumber(Number(stxBalance.actual_balance), 2)} STX</p> : <p>0.00 STX</p>}
+				  </div>
               <p className="text-xs text-slate-400">STX Balance</p>
             </CardContent>
           </Card>
@@ -86,7 +94,9 @@ const Dashboard = () => {
               <TrendingUp className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">{walletData.usdValue}</div>
+              <div className="text-2xl font-bold text-green-400">
+					{stxBalance && stxRate ? <p>${formatNumber(Number(stxBalance.actual_balance) * Number(stxRate.current_price), 2)}</p> : <p>$0.00</p>}
+				  </div>
               <p className="text-xs text-slate-400">Current market value</p>
             </CardContent>
           </Card>
@@ -110,7 +120,7 @@ const Dashboard = () => {
 
         {/* Asset Overview and Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AssetOverview />
+          <AssetOverview assets={[]} stx={stxBalance} fts={ftBalance} nfts={nftBalance} stxRate={stxRate} btcRate={btcRate} />
           <RecentActivity walletAddress={walletData.address} />
         </div>
 

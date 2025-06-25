@@ -3,14 +3,26 @@ import { TokenBalanceInfo } from "@/components/send/TokenSelectionStep";
 import axios from "axios";
 
 export interface AccountBalance {
-   asset: string;
-   symbol: string;
-   balance: string;
-   usdValue: string;
-   icon: string;
+   stxBalance: StxBalance;
+	nftBalance: NFTBalanceResponse[];
+	ftBalance: TokenBalanceInfo[]
 }
+export interface StxBalance {
+	actual_balance: string
+	balance: string
+	burnchain_lock_height: number
+	burnchain_unlock_height: number
+	decimals: number
+	image: string
+	lock_height: number
+	lock_tx_id: string
+	locked: string
+	name: string
+	symbol: string
+	total_miner_rewards_received: string
+ }
 
-export type nftResponseBalanceValues = {
+export interface nftResponseBalanceValues {
    asset_identifier: string;
    block_height: number;
    value: { repr: string };
@@ -79,8 +91,8 @@ export class AccountBalanceService {
       }
    };
 
-   async getSTXBalance(walletAddress: string, offset: number) {
-      const { api, chain } = this.getClientConfig(walletAddress);
+   async getSTXBalance(walletAddress: string, offset: number): Promise<StxBalance> {
+      const { api } = this.getClientConfig(walletAddress);
       const response = (
          await axios.get(
             `${api}/extended/v2/addresses/${walletAddress}/balances/stx?offset=${offset}`
@@ -196,16 +208,16 @@ export class AccountBalanceService {
    async getAccountBalances(
       walletAddress: string,
       asset_identifiers: string
-   ): Promise<AccountBalance[]> {
+   ): Promise<AccountBalance> {
       console.log("Fetching account balances for:", walletAddress);
       const stxBalance = await this.getSTXBalance(walletAddress, 0);
-      const ftBalances = await this.getFTBalance(walletAddress, 0);
-      const nftBalances = await this.getNFTBalance(
+      const ftBalance = await this.getFTBalance(walletAddress, 0);
+      const nftBalance = await this.getNFTBalance(
          walletAddress,
          asset_identifiers,
          0
       );
 
-      return [stxBalance, ftBalances, nftBalances];
+      return {stxBalance, ftBalance, nftBalance};
    }
 }
