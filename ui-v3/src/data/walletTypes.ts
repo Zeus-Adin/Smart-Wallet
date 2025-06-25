@@ -49,5 +49,9 @@ export const getVerifiedContracts = async (walletId: string): Promise<ContractTy
         return { ...info, isDeployed: found?.found }
     }))
 
-    return deployedContractCheck
+    return [...deployedContractCheck].sort((a, b) => {
+        if ((a.comingSoon && !b.comingSoon) || (a.isDeployed && !b.isDeployed)) return 1;
+        if ((!a.comingSoon && b.comingSoon) || (!a.isDeployed && b.isDeployed)) return -1;
+        return 0;
+    })
 };
