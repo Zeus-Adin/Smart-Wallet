@@ -4,24 +4,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Wallet, Plus, Check, Clock, User, Globe, ChevronDown } from "lucide-react";
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import { getSortedExtensions } from "@/data/walletExtensions";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import SecondaryButton from "@/components/ui/secondary-button";
 import PrimaryButton from "@/components/ui/primary-button";
+import { ContractTypes, getVerifiedContracts, type ContractType } from "@/data/walletTypes";
+import { BlockchainService } from "@/services/blockchainService";
+import axios from "axios";
 
 const CreateWallet = () => {
-  const navigate = useNavigate();
-  const { walletData } = useWalletConnection();
-  const [walletName, setWalletName] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedExtensions, setSelectedExtensions] = useState<string[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState<'mainnet' | 'testnet'>('mainnet');
-
-  const sortedExtensions = getSortedExtensions();
+  const navigate = useNavigate()
+  const { walletData } = useWalletConnection()
+  const [walletName, setWalletName] = useState("")
+  const [description, setDescription] = useState("")
+  const [selectedContract, setSelectedContract] = useState<ContractType>()
+  const [isCreating, setIsCreating] = useState(false)
+  const [selectedNetwork, setSelectedNetwork] = useState<'mainnet' | 'testnet'>('mainnet')
+  const [verifiedContracts, setVerifiedContracts] = useState<ContractType[]>([])
 
   const getConnectedWalletAddress = () => {
     if (walletData?.addresses?.stx && walletData.addresses.stx.length > 0) {
@@ -31,26 +33,22 @@ const CreateWallet = () => {
     return "Not Connected";
   };
 
-  const handleExtensionToggle = (extensionId: string) => {
-    const extension = sortedExtensions.find(ext => ext.id === extensionId);
-    if (extension?.comingSoon) return; // Don't allow toggling coming soon extensions
-
-    setSelectedExtensions(prev =>
-      prev.includes(extensionId)
-        ? prev.filter(id => id !== extensionId)
-        : [...prev, extensionId]
-    );
+  const handleExtensionToggle = (contract: ContractType) => {
+    setSelectedContract(contract)
   };
 
   const handleCreateWallet = async () => {
     setIsCreating(true);
-
+    const deployContract = new BlockchainService
+    const clarityCode: string = (await axios.get(selectedContract?.src)).data;
+    deployContract.deployContract({
+      name: selectedContract.name,
+      clarityCode: clarityCode,
+      clarityVersion: 3
+    })
     // Simulate wallet creation
     setTimeout(() => {
       setIsCreating(false);
-      // Navigate to the new wallet dashboard
-      const mockWalletId = "SP1NEW...WALLET123.smart-wallet-v1";
-      navigate(`/dashboard/${mockWalletId}`);
     }, 2000);
   };
 
@@ -58,6 +56,15 @@ const CreateWallet = () => {
     setSelectedNetwork(network);
     console.log(`Switched to ${network}`);
   };
+
+  useEffect(() => {
+    async function init() {
+      const vContracts = await getVerifiedContracts(walletData?.addresses?.stx[0]?.address)
+      console.log({ vContracts })
+      setVerifiedContracts(vContracts)
+    }
+    init()
+  }, [walletData])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -154,7 +161,8 @@ const CreateWallet = () => {
                 <div>
                   <label className="text-slate-300 text-sm">Wallet Name</label>
                   <Input
-                    value={walletName}
+                    disabled
+                    value={selectedContract?.name}
                     onChange={(e) => setWalletName(e.target.value)}
                     placeholder="e.g., My Personal Wallet"
                     className="bg-slate-700/50 border-slate-600 text-white mt-1"
@@ -164,7 +172,8 @@ const CreateWallet = () => {
                 <div>
                   <label className="text-slate-300 text-sm">Description (Optional)</label>
                   <Textarea
-                    value={description}
+                    disabled
+                    value={selectedContract?.description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Brief description of this wallet's purpose..."
                     className="bg-slate-700/50 border-slate-600 text-white mt-1"
@@ -175,7 +184,7 @@ const CreateWallet = () => {
                 <div className="pt-4">
                   <PrimaryButton
                     onClick={handleCreateWallet}
-                    disabled={!walletName || isCreating}
+                    disabled={isCreating}
                     className="w-full"
                   >
                     {isCreating ? (
@@ -199,42 +208,42 @@ const CreateWallet = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {sortedExtensions.map((extension) => (
+                  {verifiedContracts.map((contract) => (
                     <div
-                      key={extension.id}
-                      className={`p-3 rounded-lg border transition-colors ${extension.comingSoon
+                      key={contract.name}
+                      className={`p-3 rounded-lg border transition-colors ${contract.comingSoon
                         ? "border-slate-600 bg-slate-700/20 opacity-60 cursor-not-allowed"
-                        : selectedExtensions.includes(extension.id)
+                        : selectedContract?.name === contract.name
                           ? "border-purple-600/50 bg-purple-600/10 cursor-pointer"
                           : "border-slate-600 bg-slate-700/30 hover:border-slate-500 cursor-pointer"
                         }`}
-                      onClick={() => handleExtensionToggle(extension.id)}
+                      onClick={contract.isDeployed ? null : () => handleExtensionToggle(contract)}
                     >
                       <div className="flex items-start space-x-3">
                         <Checkbox
-                          checked={selectedExtensions.includes(extension.id)}
-                          disabled={extension.comingSoon}
-                          onChange={() => handleExtensionToggle(extension.id)}
+                          checked={selectedContract?.name === contract.name}
+                          disabled={contract.isDeployed}
+                          onChange={() => handleExtensionToggle(contract)}
                           className="mt-1"
                         />
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
-                            <span className="text-lg">{extension.icon}</span>
-                            <span className={`font-medium ${extension.comingSoon ? 'text-slate-400' : 'text-white'}`}>
-                              {extension.name}
+                            <span className="text-lg">{contract.icon}</span>
+                            <span className={`font-medium ${contract.comingSoon ? 'text-slate-400' : 'text-white'}`}>
+                              {contract.name}
                             </span>
-                            {extension.comingSoon && (
+                            {contract.comingSoon && (
                               <div className="flex items-center space-x-1 px-2 py-1 bg-slate-600/50 rounded-full">
                                 <Clock className="h-3 w-3 text-slate-400" />
                                 <span className="text-xs text-slate-400">Coming Soon</span>
                               </div>
                             )}
-                            {selectedExtensions.includes(extension.id) && !extension.comingSoon && (
+                            {selectedContract?.name === contract.name && !contract.comingSoon && (
                               <Check className="h-4 w-4 text-green-400" />
                             )}
                           </div>
-                          <p className={`text-sm mt-1 ${extension.comingSoon ? 'text-slate-500' : 'text-slate-400'}`}>
-                            {extension.description}
+                          <p className={`text-sm mt-1 ${contract.comingSoon ? 'text-slate-500' : 'text-slate-400'}`}>
+                            {contract.description}
                           </p>
                         </div>
                       </div>
@@ -246,28 +255,26 @@ const CreateWallet = () => {
           </div>
 
           {/* Summary */}
-          {(walletName || selectedExtensions.length > 0) && (
-            <Card className="bg-blue-900/20 border-blue-700/50">
-              <CardContent className="p-6">
-                <h3 className="text-blue-300 font-medium mb-3">Creation Summary</h3>
-                <div className="space-y-2 text-sm">
-                  {walletName && (
-                    <div className="text-blue-200">
-                      <span className="text-blue-300">Name:</span> {walletName}
-                    </div>
-                  )}
-                  {selectedExtensions.length > 0 && (
-                    <div className="text-blue-200">
-                      <span className="text-blue-300">Extensions:</span> {selectedExtensions.length} selected
-                    </div>
-                  )}
-                  <div className="text-blue-200">
-                    <span className="text-blue-300">Estimated Gas:</span> ~0.05 STX
-                  </div>
+
+          <Card className="bg-blue-900/20 border-blue-700/50">
+            <CardContent className="p-6">
+              <h3 className="text-blue-300 font-medium mb-3">Creation Summary</h3>
+              <div className="space-y-2 text-sm">
+                <div className="text-blue-200">
+                  <span className="text-blue-300">Name:</span> {selectedContract?.label}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+
+                <div className="text-blue-200">
+                  <span className="text-blue-300">Contract Name:</span> {selectedContract?.name}
+                </div>
+
+                <div className="text-blue-200">
+                  <span className="text-blue-300">Estimated Gas:</span> ~0.05 STX
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
         </div>
       </div>
     </div>

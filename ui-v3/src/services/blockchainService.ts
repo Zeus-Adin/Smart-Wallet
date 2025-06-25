@@ -1,5 +1,5 @@
 import { request } from "@stacks/connect";
-import { TransactionResult } from "@stacks/connect/dist/types/methods";
+import { DeployContractParams, TransactionResult } from "@stacks/connect/dist/types/methods";
 
 export interface TransactionParams {
    from: string;
@@ -12,6 +12,13 @@ export interface TransactionParams {
 }
 
 export class BlockchainService {
+   // Handles contract deploys
+   async deployContract(params: DeployContractParams) {
+      await request('stx_deployContract', params)
+         .then((tx) => tx)
+         .catch((e) => { console.log({ e }) })
+   }
+
    async sendTransaction(
       params: TransactionParams
    ): Promise<TransactionResult> {
