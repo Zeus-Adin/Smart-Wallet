@@ -15,7 +15,7 @@ export const useBlockchainService = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
+  const [accountBalances, setAccountBalances] = useState<AccountBalance>();
   const [smartWallets, setSmartWallets] = useState<SmartWallet[]>([]);
   const [walletActivity, setWalletActivity] = useState<WalletActivity[]>([]);
   const [searchParams] = useSearchParams();
@@ -73,7 +73,7 @@ export const useBlockchainService = () => {
   const loadSmartWallets = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
     try {
-      const wallets = await smartWalletService.getSmartWallets(walletAddress, searchParams);
+      const wallets = await smartWalletService.getSmartWallets(walletAddress);
       setSmartWallets(wallets);
     } catch (error) {
       console.error('Failed to load smart wallets:', error);
