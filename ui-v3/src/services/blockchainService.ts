@@ -25,7 +25,7 @@ export class BlockchainService {
       console.log("Sending transaction with params:", params);
 
       const data = await request(
-         { forceWalletSelect: true },
+         {},
          "stx_transferSip10Nft",
          {
             asset: params.asset,
