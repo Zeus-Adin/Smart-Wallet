@@ -44,7 +44,7 @@ const WalletSelector = () => {
     if (isPageLoading) {
       setIsPageLoading(false)
     }
-  }, [isPageLoading, walletData, isWalletConnected, loadSmartWallets]);
+  }, [isPageLoading, walletData, isWalletConnected, loadSmartWallets, nav]);
 
   useEffect(() => {
     // Combine detected wallets with imported wallets

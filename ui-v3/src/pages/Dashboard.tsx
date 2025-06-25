@@ -11,7 +11,7 @@ import SecondaryButton from "@/components/ui/secondary-button"; // Add this impo
 import PrimaryButton from "@/components/ui/primary-button";
 
 const Dashboard = () => {
-  const { walletId } = useParams();
+   const { walletId } = useParams<{walletId:`${string}.${string}`}>()
   const { selectedWallet: walletData, isLoading } = useSelectedWallet();
 
   if (isLoading) {
@@ -111,7 +111,7 @@ const Dashboard = () => {
         {/* Asset Overview and Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AssetOverview />
-          <RecentActivity walletAddress={walletData.address} />
+          <RecentActivity walletAddress={walletData.address} smartWalletAddress={walletId} />
         </div>
 
         {/* Quick Actions */}
