@@ -4,14 +4,26 @@ import axios from "axios";
 import { getClientConfig } from "@/utils/chain-config";
 
 export interface AccountBalance {
-   asset: string;
-   symbol: string;
-   balance: string;
-   usdValue: string;
-   icon: string;
+   stxBalance: StxBalance;
+	nftBalance: NFTBalanceResponse[];
+	ftBalance: TokenBalanceInfo[]
 }
+export interface StxBalance {
+	actual_balance: string
+	balance: string
+	burnchain_lock_height: number
+	burnchain_unlock_height: number
+	decimals: number
+	image: string
+	lock_height: number
+	lock_tx_id: string
+	locked: string
+	name: string
+	symbol: string
+	total_miner_rewards_received: string
+ }
 
-export type nftResponseBalanceValues = {
+export interface nftResponseBalanceValues {
    asset_identifier: string;
    block_height: number;
    value: { repr: string };
@@ -64,7 +76,7 @@ export class AccountBalanceService {
       }
    };
 
-   async getStxBalance(walletAddress: string, offset: number) {
+   async getStxBalance(walletAddress: string, offset: number): Promise<StxBalance> {
       const { api } = getClientConfig(walletAddress);
       const response = (
          await axios.get(
@@ -184,16 +196,16 @@ export class AccountBalanceService {
    async getAccountBalances(
       walletAddress: string,
       asset_identifiers: string
-   ): Promise<AccountBalance[]> {
+   ): Promise<AccountBalance> {
       console.log("Fetching account balances for:", walletAddress);
       const stxBalance = await this.getStxBalance(walletAddress, 0);
-      const ftBalances = await this.getFtBalance(walletAddress, 0);
-      const nftBalances = await this.getNftBalance(
+      const ftBalance = await this.getFtBalance(walletAddress, 0);
+      const nftBalance = await this.getNftBalance(
          walletAddress,
          asset_identifiers,
          0
       );
 
-      return [stxBalance, ftBalances, nftBalances];
+      return {stxBalance, ftBalance, nftBalance};
    }
 }

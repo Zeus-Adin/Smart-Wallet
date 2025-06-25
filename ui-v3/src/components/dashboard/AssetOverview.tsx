@@ -1,6 +1,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, Image, TrendingUp } from "lucide-react";
+import { StxBalance } from "@/services/accountBalanceService";
+import { Coins, Icon, Image, TrendingUp } from "lucide-react";
+import { NFTBalanceResponse } from "../send/NFTSelectionStep";
+import { TokenBalanceInfo } from "../send/TokenSelectionStep";
+import { formatNumber } from "@/utils/numbers";
+import { TokenMarketData } from "@/hooks/useGetRates";
 
 interface Asset {
   name: string;
@@ -10,46 +15,13 @@ interface Asset {
   type: 'token' | 'nft';
 }
 
-interface AssetOverviewProps {
-  assets?: Asset[];
-}
-
-const AssetOverview = ({ assets = [] }: AssetOverviewProps) => {
-  // Default mock assets if none provided
-  const defaultAssets: Asset[] = [
-    {
-      name: "Stacks",
-      symbol: "STX",
-      balance: "10,000.00",
-      usdValue: "$20,000.00",
-      type: "token"
-    },
-    {
-      name: "Bitcoin",
-      symbol: "BTC",
-      balance: "0.5",
-      usdValue: "$25,000.00",
-      type: "token"
-    },
-    {
-      name: "Cool NFTs",
-      symbol: "NFT",
-      balance: "3",
-      usdValue: "$1,500.00",
-      type: "nft"
-    }
-  ];
-
-  const displayAssets = assets.length > 0 ? assets : defaultAssets;
+const AssetOverview = ({ assets = [], stx, nfts, fts, stxRate, btcRate }: { assets: Asset[], stx: StxBalance, nfts: NFTBalanceResponse[], fts: TokenBalanceInfo[], stxRate: { [key: string]: TokenMarketData } | TokenMarketData, btcRate: { [key: string]: TokenMarketData } | TokenMarketData }) => {
 
   const getAssetIcon = (type: string) => {
     return type === 'nft' ? Image : Coins;
   };
 
-  const totalUsdValue = displayAssets.reduce((total, asset) => {
-    const value = parseFloat(asset.usdValue.replace(/[$,]/g, ''));
-    return total + value;
-  }, 0);
+  const NftIcon = getAssetIcon("nft")
 
   return (
     <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
@@ -61,36 +33,71 @@ const AssetOverview = ({ assets = [] }: AssetOverviewProps) => {
         <div className="text-right">
           <div className="text-sm text-slate-400">Total Value</div>
           <div className="text-lg font-bold text-green-400">
-            ${totalUsdValue.toLocaleString()}
+            {/* ${totalUsdValue.toLocaleString()} */}
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {displayAssets.map((asset, index) => {
-            const Icon = getAssetIcon(asset.type);
-            return (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-purple-400" />
-                  </div>
-                  <div>
-                    <div className="text-white font-medium">{asset.name}</div>
-                    <div className="text-slate-400 text-sm">{asset.symbol}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-white font-medium">{asset.balance}</div>
-                  <div className="text-slate-400 text-sm">{asset.usdValue}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <CardContent className="flex flex-col gap-3">
+			<div className="space-y-3">
+				<div
+					className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+				>
+					<div className="flex items-center space-x-3">
+					<div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center">
+						<NftIcon className="h-4 w-4 text-purple-400" />
+					</div>
+					<div>
+						<div className="text-white font-medium">STX</div>
+						<div className="text-slate-400 text-sm">{formatNumber(Number(stx.actual_balance), stx.decimals)} STX</div>
+
+					</div>
+					</div>
+					<div className="text-right">
+						<div className="text-white text-sm font-medium">
+							{stx && stxRate ? <p>${formatNumber(Number(stx.actual_balance) * Number(stxRate.current_price), 2)}</p> : <p>$0.00</p>}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{fts.map(ft => <div className="space-y-3">
+				<div
+					className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+				>
+					<div className="flex items-center space-x-3">
+					<div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center">
+						<NftIcon className="h-4 w-4 text-purple-400" />
+					</div>
+					<div>
+						<div className="text-white font-medium">{ft.symbol}</div>
+						<div className="text-slate-400 text-sm">{formatNumber(Number(ft.actual_balance), ft.decimals)} {ft.symbol}</div>
+					</div>
+					</div>
+					<div className="text-right">
+						<div className="text-white text-sm font-medium">${formatNumber(Number(ft.actual_balance) * Number(btcRate.current_price), 2)}</div>
+					</div>
+				</div>
+			</div>)}
+
+			<div className="space-y-3">
+				<div
+					className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+				>
+					<div className="flex items-center space-x-3">
+					<div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center">
+						<NftIcon className="h-4 w-4 text-purple-400" />
+					</div>
+					<div>
+						<div className="text-white font-medium">NFTs</div>
+						{/* <div className="text-slate-400 text-sm">Nft</div> */}
+					</div>
+					</div>
+					<div className="text-right">
+					<div className="text-white font-medium">{nfts.length}</div>
+					{/* <div className="text-slate-400 text-sm">{asset.usdValue}</div> */}
+					</div>
+				</div>
+			</div>
       </CardContent>
     </Card>
   );
