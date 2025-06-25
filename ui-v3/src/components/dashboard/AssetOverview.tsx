@@ -53,7 +53,9 @@ const AssetOverview = ({ assets = [], stx, nfts, fts, stxRate, btcRate }: { asse
 					</div>
 					</div>
 					<div className="text-right">
-						<div className="text-white text-sm font-medium">${formatNumber(Number(stx.actual_balance) * Number(stxRate.current_price), 2)}</div>
+						<div className="text-white text-sm font-medium">
+							{stx && stxRate ? <p>${formatNumber(Number(stx.actual_balance) * Number(stxRate.current_price), 2)}</p> : <p>$0.00</p>}
+						</div>
 					</div>
 				</div>
 			</div>
