@@ -20,7 +20,7 @@ export const useBlockchainService = () => {
   const [walletActivity, setWalletActivity] = useState<WalletActivity[]>([]);
   const [searchParams] = useSearchParams();
 
-  const { isDemoMode } = useWalletConnection();
+  // const { isDemMode } = useWalletConnection();
 
   // Select the appropriate services based on demo mode
   const blockchainService = new BlockchainService();
@@ -32,7 +32,6 @@ export const useBlockchainService = () => {
     setIsLoading(true);
     try {
       const result = await blockchainService.sendTransaction(params);
-      console.log(`${isDemoMode ? 'Mock' : 'Real'} transaction sent:`, result);
       return result;
     } catch (error) {
       console.error('Failed to send transaction:', error);
@@ -57,19 +56,19 @@ export const useBlockchainService = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isDemoMode]);
+  }, []);
 
   const loadAccountBalances = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
     try {
-      const balances = await accountBalanceService.getAccountBalances(walletAddress);
+      const balances = await accountBalanceService.getAccountBalances(walletAddress, '');
       setAccountBalances(balances);
     } catch (error) {
       console.error('Failed to load account balances:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [isDemoMode]);
+  }, []);
 
   const loadSmartWallets = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
@@ -81,7 +80,7 @@ export const useBlockchainService = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isDemoMode]);
+  }, []);
 
   const loadWalletActivity = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
@@ -93,7 +92,7 @@ export const useBlockchainService = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isDemoMode]);
+  }, []);
 
   const getTransactionStatus = async (txHash: string) => {
     try {
@@ -117,6 +116,6 @@ export const useBlockchainService = () => {
     smartWallets,
     walletActivity,
     isLoading,
-    isDemoMode
+    // isDemoMode
   };
 };
