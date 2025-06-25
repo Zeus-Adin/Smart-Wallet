@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
 import PrimaryButton from "@/components/ui/primary-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Users, Shield, DollarSign, Vote, Target, ArrowRight, Check } from "lucide-react";
+import { Wallet, Users, Shield, DollarSign, Vote, Target, ArrowRight, Check, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Products = () => {
@@ -128,7 +128,7 @@ const Products = () => {
             </CardContent>
           </Card>
 
-          {/* DAO Smart Wallet */}
+          {/* Project Smart Wallet */}
           <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden flex flex-col h-full">
             <CardHeader className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-b border-slate-700">
               <div className="flex items-center space-x-3">
@@ -136,48 +136,45 @@ const Products = () => {
                   <Users className="h-6 w-6 text-blue-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl text-white">DAO Smart Wallet</CardTitle>
-                  <p className="text-slate-400">For organizations and DAOs</p>
+                  <CardTitle className="text-2xl text-white">Project Smart Wallet</CardTitle>
+                  <p className="text-slate-400">For teams, groups, and project admins</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
               <p className="text-slate-300">
-                Designed for decentralized organizations with advanced governance features, milestone tracking, and democratic decision-making.
+                Ideal for collaborative projects, enabling secure group management of funds, milestone-based payouts, and transparent decision-making.
               </p>
 
               <div className="space-y-4 flex-1">
-                <h4 className="text-lg font-semibold text-white">Key Features:</h4>
+                <h4 className="text-lg font-semibold text-white">Key Benefits:</h4>
                 <div className="space-y-3">
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h5 className="text-white font-medium">Milestone Handling</h5>
-                      <p className="text-slate-400 text-sm">Create and track project milestones with automatic fund release upon completion and approval.</p>
+                      <h5 className="text-white font-medium">Milestone-Based Fund Release</h5>
+                      <p className="text-slate-400 text-sm">Funds are released as project milestones are completed and approved, ensuring accountability.</p>
                     </div>
                   </div>
-
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h5 className="text-white font-medium">Voting Mechanisms</h5>
-                      <p className="text-slate-400 text-sm">Built-in governance with customizable voting systems for democratic decision-making processes.</p>
+                      <h5 className="text-white font-medium">Collaborative Spending Controls</h5>
+                      <p className="text-slate-400 text-sm">Require multiple approvals for large transactions to enhance security and group consensus.</p>
                     </div>
                   </div>
-
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h5 className="text-white font-medium">Multi-Sig Governance</h5>
-                      <p className="text-slate-400 text-sm">Require multiple signatures from stakeholders for major financial decisions and fund movements.</p>
+                      <h5 className="text-white font-medium">Role-Based Permissions</h5>
+                      <p className="text-slate-400 text-sm">Assign roles to team members for flexible and secure wallet management.</p>
                     </div>
                   </div>
-
                   <div className="flex items-start space-x-3">
                     <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h5 className="text-white font-medium">Treasury Management</h5>
-                      <p className="text-slate-400 text-sm">Advanced tools for managing organizational funds, budgets, and financial reporting.</p>
+                      <h5 className="text-white font-medium">Budget Tracking & Reporting</h5>
+                      <p className="text-slate-400 text-sm">Monitor project budgets and expenses in real time with transparent reporting.</p>
                     </div>
                   </div>
                 </div>
@@ -189,10 +186,18 @@ const Products = () => {
                   <span className="text-slate-300">Enterprise pricing - Contact for quote</span>
                 </div>
 
-                <PrimaryButton asChild className="w-full">
-                  <Link to="/create-wallet?type=dao">
-                    Get DAO Wallet
+
+                <PrimaryButton asChild className="w-full"
+                  disabled>
+                  <Link to="/create-wallet?type=project">
+                    <div className="flex items-center space-x-1 px-2 py-1 bg-slate-600/50 rounded-full">
+                      <Clock className="h-3 w-3 text-slate-400" />
+                      <span className="text-xs text-slate-400">Coming Soon</span>
+                    </div>
+                    {/*
+                    Get Project Wallet
                     <ArrowRight className="ml-2 h-4 w-4" />
+                    */}
                   </Link>
                 </PrimaryButton>
               </div>
@@ -209,7 +214,7 @@ const Products = () => {
                 <tr className="border-b border-slate-700">
                   <th className="pb-4 text-slate-400 font-medium">Feature</th>
                   <th className="pb-4 text-center text-purple-400 font-medium">Personal</th>
-                  <th className="pb-4 text-center text-blue-400 font-medium">DAO</th>
+                  <th className="pb-4 text-center text-blue-400 font-medium">Project</th>
                 </tr>
               </thead>
               <tbody className="space-y-4">
@@ -227,11 +232,6 @@ const Products = () => {
                   <td className="py-3 text-white">Inheritance Planning</td>
                   <td className="py-3 text-center"><Check className="h-5 w-5 text-green-400 mx-auto" /></td>
                   <td className="py-3 text-center text-slate-500">-</td>
-                </tr>
-                <tr className="border-b border-slate-700/50">
-                  <td className="py-3 text-white">Voting System</td>
-                  <td className="py-3 text-center text-slate-500">-</td>
-                  <td className="py-3 text-center"><Check className="h-5 w-5 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-slate-700/50">
                   <td className="py-3 text-white">Milestone Tracking</td>
@@ -256,7 +256,7 @@ const Products = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <PrimaryButton asChild size="lg">
-              <Link to="/">
+              <Link to="/wallet-selector">
                 Get Started Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
