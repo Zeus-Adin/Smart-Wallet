@@ -1,7 +1,7 @@
 import { NFTBalanceResponse } from "@/components/send/NFTSelectionStep";
 import { TokenBalanceInfo } from "@/components/send/TokenSelectionStep";
 import axios from "axios";
-import { ConfigService } from "./configService";
+import { getClientConfig } from "@/utils/chain-config";
 
 export interface AccountBalance {
    asset: string;
@@ -23,7 +23,6 @@ export type nftResponseBalanceValues = {
 };
 
 export class AccountBalanceService {
-	private client = new ConfigService()
    private handleGetMeta = async (
       walletAddress: string | undefined,
       asset_identifiers: string,
@@ -32,7 +31,7 @@ export class AccountBalanceService {
    ) => {
       let response;
       try {
-         const { api } = this.client.getClientConfig(walletAddress)
+         const { api } = getClientConfig(walletAddress)
          let res;
          if (asset === "ft") {
             response = (
@@ -66,7 +65,7 @@ export class AccountBalanceService {
    };
 
    async getStxBalance(walletAddress: string, offset: number) {
-      const { api } = this.client.getClientConfig(walletAddress);
+      const { api } = getClientConfig(walletAddress);
       const response = (
          await axios.get(
             `${api}/extended/v2/addresses/${walletAddress}/balances/stx?offset=${offset}`
@@ -95,7 +94,7 @@ export class AccountBalanceService {
       offset: number
    ): Promise<NFTBalanceResponse[]> {
       try {
-         const { api } = this.client.getClientConfig(walletAddress);
+         const { api } = getClientConfig(walletAddress);
 
          const nftBalanceResponse = (
             await axios.get(
@@ -145,7 +144,7 @@ export class AccountBalanceService {
       walletAddress: string,
       offset: number
    ): Promise<TokenBalanceInfo[]> {
-      const { api } = this.client.getClientConfig(walletAddress);
+      const { api } = getClientConfig(walletAddress);
       try {
          let ftBalance = (
             await axios.get(
