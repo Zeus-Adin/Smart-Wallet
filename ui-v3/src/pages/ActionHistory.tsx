@@ -31,14 +31,15 @@ const ActionHistory = () => {
   const [showFilter, setShowFilter] = useState(false);
 
   const { walletId } = useParams<{walletId:`${string}.${string}`}>()
+  const [useWalletIdFromUrl, setUseWalletIdFromUrl] = useState(!!walletId);
   console.log("walletId", walletId);
   const fetchTransactions = useCallback(async (currentOffset: number = 0) => {
-
-    if (!walletId) return;
+    const addressToUse = useWalletIdFromUrl && walletId ? walletId : selectedWallet?.address;
+    if (!addressToUse) return;
     setIsLoading(true);
     try {
       const txs = await transactionService.getRecentTransactions(
-        walletId ? walletId : selectedWallet?.address,
+        addressToUse,
         currentOffset
       );
       if (currentOffset === 0) {
@@ -54,7 +55,7 @@ const ActionHistory = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedWallet, walletId]);
+  }, [selectedWallet, walletId, useWalletIdFromUrl]);
 
   useEffect(() => {
     setOffset(0);
@@ -124,7 +125,7 @@ const ActionHistory = () => {
     return History;
   };
 
-  const config = getClientConfig(walletId ? walletId : selectedWallet?.address);
+  const config = getClientConfig(useWalletIdFromUrl && walletId ? walletId : selectedWallet?.address);
 
   const transactionStats = useMemo(() => ({
     total: transactions.length,
@@ -166,7 +167,7 @@ const ActionHistory = () => {
                 Transaction History
               </CardTitle>
               <div className="relative flex items-center gap-2">
-                 {/* Active filters display */}
+                {/* Active filters display */}
                 {(filterType !== 'all' || filterAction !== 'all') && (
                   <div className="flex items-center gap-2 mr-2">
                     {filterType !== 'all' && (
@@ -297,7 +298,7 @@ const ActionHistory = () => {
                             <div className="text-slate-500 text-xs flex items-center gap-2">
                               TX: {tx.txHash}
                               <a
-                                href={`${config.explorer(`/tx/${tx.txHash}`)}`}
+                                href={`${config.explorer(`tx/${tx.txHash}`)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-purple-400 hover:underline flex items-center"
@@ -331,7 +332,19 @@ const ActionHistory = () => {
             <style>{`
               
             `}</style>
-            <div className="absolute bottom-6 right-6 z-20">
+            <div className="absolute bottom-6 right-6 z-20 flex flex-col items-end gap-2">
+              {/* Subtle toggle for walletId vs selectedWallet */}
+              {walletId && (
+                <button
+                  onClick={() => setUseWalletIdFromUrl((prev) => !prev)}
+                  className="text-xs text-slate-500 hover:text-slate-300 bg-transparent border-none p-0 mb-2 underline cursor-pointer focus:outline-none"
+                  style={{ background: 'none' }}
+                  tabIndex={0}
+                  aria-label="Toggle wallet source"
+                >
+                  {useWalletIdFromUrl ? `Using walletId from URL` : `Using selected wallet`}
+                </button>
+              )}
               <SecondaryButton
                 onClick={() => setDisplayCount(displayCount + 5)}
                 disabled={isLoading || displayCount >= filteredTransactions.length || !hasMore}
