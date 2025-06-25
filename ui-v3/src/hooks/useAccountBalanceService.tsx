@@ -18,9 +18,9 @@ export function useAccountBalanceService(walletAddress: string) {
 
     // Fetch balances in parallel
     Promise.all([
-      balancesService.getSTXBalance(walletAddress, 0),
-      balancesService.getNFTBalance(walletAddress, "", 0),
-      balancesService.getFTBalance(walletAddress, 0),
+      balancesService.getStxBalance(walletAddress, 0),
+      balancesService.getNftBalance(walletAddress, "", 0),
+      balancesService.getFtBalance(walletAddress, 0),
     ])
       .then(([stx, nft, ft]) => {
         setStxBalance(stx);
