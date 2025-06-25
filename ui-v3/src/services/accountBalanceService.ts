@@ -76,7 +76,7 @@ export class AccountBalanceService {
       }
    };
 
-   async getStxBalance(walletAddress: string, offset: number) {
+   async getStxBalance(walletAddress: string, offset: number): Promise<StxBalance> {
       const { api } = getClientConfig(walletAddress);
       const response = (
          await axios.get(
@@ -199,8 +199,8 @@ export class AccountBalanceService {
    ): Promise<AccountBalance> {
       console.log("Fetching account balances for:", walletAddress);
       const stxBalance = await this.getStxBalance(walletAddress, 0);
-      const ftBalances = await this.getFtBalance(walletAddress, 0);
-      const nftBalances = await this.getNftBalance(
+      const ftBalance = await this.getFtBalance(walletAddress, 0);
+      const nftBalance = await this.getNftBalance(
          walletAddress,
          asset_identifiers,
          0
