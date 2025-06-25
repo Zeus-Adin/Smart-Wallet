@@ -31,15 +31,14 @@ const ActionHistory = () => {
   const [showFilter, setShowFilter] = useState(false);
 
   const { walletId } = useParams<{walletId:`${string}.${string}`}>()
-  const [useWalletIdFromUrl, setUseWalletIdFromUrl] = useState(!!walletId);
   console.log("walletId", walletId);
   const fetchTransactions = useCallback(async (currentOffset: number = 0) => {
-    const addressToUse = useWalletIdFromUrl && walletId ? walletId : selectedWallet?.address;
-    if (!addressToUse) return;
+
+    if (!walletId) return;
     setIsLoading(true);
     try {
       const txs = await transactionService.getRecentTransactions(
-        addressToUse,
+        walletId ? walletId : selectedWallet?.address,
         currentOffset
       );
       if (currentOffset === 0) {
@@ -55,7 +54,7 @@ const ActionHistory = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedWallet, walletId, useWalletIdFromUrl]);
+  }, [selectedWallet, walletId]);
 
   useEffect(() => {
     setOffset(0);
@@ -125,7 +124,7 @@ const ActionHistory = () => {
     return History;
   };
 
-  const config = getClientConfig(useWalletIdFromUrl && walletId ? walletId : selectedWallet?.address);
+  const config = getClientConfig(walletId ? walletId : selectedWallet?.address);
 
   const transactionStats = useMemo(() => ({
     total: transactions.length,
@@ -167,7 +166,7 @@ const ActionHistory = () => {
                 Transaction History
               </CardTitle>
               <div className="relative flex items-center gap-2">
-                {/* Active filters display */}
+                 {/* Active filters display */}
                 {(filterType !== 'all' || filterAction !== 'all') && (
                   <div className="flex items-center gap-2 mr-2">
                     {filterType !== 'all' && (
@@ -332,19 +331,7 @@ const ActionHistory = () => {
             <style>{`
               
             `}</style>
-            <div className="absolute bottom-6 right-6 z-20 flex flex-col items-end gap-2">
-              {/* Subtle toggle for walletId vs selectedWallet */}
-              {walletId && (
-                <button
-                  onClick={() => setUseWalletIdFromUrl((prev) => !prev)}
-                  className="text-xs text-slate-500 hover:text-slate-300 bg-transparent border-none p-0 mb-2 underline cursor-pointer focus:outline-none"
-                  style={{ background: 'none' }}
-                  tabIndex={0}
-                  aria-label="Toggle wallet source"
-                >
-                  {useWalletIdFromUrl ? `Using walletId from URL` : `Using selected wallet`}
-                </button>
-              )}
+            <div className="absolute bottom-6 right-6 z-20">
               <SecondaryButton
                 onClick={() => setDisplayCount(displayCount + 5)}
                 disabled={isLoading || displayCount >= filteredTransactions.length || !hasMore}
