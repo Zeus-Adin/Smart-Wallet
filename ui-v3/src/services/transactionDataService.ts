@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
+import { getClientConfig } from '../utils/chain-config';
 
 export interface Transaction {
   id: string;
@@ -72,21 +73,7 @@ export class TransactionDataService {
   private cache: TransactionCache = {};
   private readonly CACHE_TTL = 30000; // 30 seconds cache TTL
 
-  private getClientConfig(address: string) {
-    // Automatic detection based on address prefix
-    // Mainnet: SP, SM; Testnet: ST, SN
-    if (/^(ST|SN)/i.test(address)) {
-      return {
-        api: 'https://api.testnet.hiro.so',
-        chain: 'testnet'
-      };
-    } else {
-      return {
-        api: 'https://api.mainnet.hiro.so', // fixed mainnet endpoint
-        chain: 'mainnet'
-      };
-    }
-  }
+
 
   private isCacheValid(address: string): boolean {
     const cached = this.cache[address];
@@ -158,7 +145,7 @@ export class TransactionDataService {
     }
 
     try {
-      const { api } = this.getClientConfig(walletAddress);
+      const { api } = getClientConfig(walletAddress);
       const response = await axios.get<{ results: StacksTransactionEvent[] }>(
         `${api}/extended/v2/addresses/${walletAddress}/transactions?limit=20&offset=${offset}`
       );
@@ -222,3 +209,4 @@ export class TransactionDataService {
     }
   }
 }
+

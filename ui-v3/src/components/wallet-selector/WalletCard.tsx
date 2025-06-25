@@ -22,24 +22,31 @@ const WalletCard = ({ wallet, isDemoMode }: WalletCardProps) => {
           <CardTitle className="text-white flex items-center">
             <Wallet className="mr-2 h-5 w-5 text-purple-400" />
             {wallet?.label}
+            {wallet.ext && (
+              <span className="ml-2 px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded">
+                Extension
+              </span>
+            )}
           </CardTitle>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-slate-400 hover:text-white"
-            asChild
-          >
-            <Link to={`/wallet-details/${wallet.contractId}`}>
-              <Settings className="h-4 w-4" />
-            </Link>
-          </Button>
+          {!wallet.ext &&
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white"
+              asChild
+            >
+              <Link to={`/wallet-details/${wallet.contractId}`}>
+                <Settings className="h-4 w-4" />
+              </Link>
+            </Button>
+          }
 
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <div className="text-slate-400 text-sm">Contract ID</div>
+          <div className="text-slate-400 text-sm">Contract Id</div>
           <div className="text-white font-mono text-sm">{wallet.contractId.slice(0, 5)}...{wallet.contractId.slice(wallet.contractId.length - 15, wallet.contractId.length)}</div>
         </div>
 
@@ -48,32 +55,38 @@ const WalletCard = ({ wallet, isDemoMode }: WalletCardProps) => {
           <div className="text-white font-semibold">{wallet.stxHolding}</div>
         </div>
 
-        <div>
-          <div className="text-slate-400 text-sm">Extensions</div>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {wallet.extensions.map((extension, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded"
-              >
-                {extension}
-              </span>
-            ))}
+        {wallet.extensions.length > 0 &&
+          <div>
+            <div className="text-slate-400 text-sm">Extensions</div>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {wallet.extensions.map((extension, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded"
+                >
+                  {extension}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        }
 
         <div>
           <div className="text-slate-400 text-sm">Created</div>
           <div className="text-white font-semibold">{wallet.createdAt}</div>
         </div>
 
-        <div className="pt-4">
-          <GreenButton asChild className="w-full">
-            <Link to={`/dashboard/${walletId}`}>
-              Open Wallet
-            </Link>
-          </GreenButton>
-        </div>
+        {
+          !wallet.ext &&
+          <div className="pt-4">
+            <GreenButton asChild className="w-full">
+              <Link to={`/dashboard/${walletId}`}>
+                Open Wallet
+              </Link>
+            </GreenButton>
+          </div>
+        }
+
       </CardContent >
     </Card >
   );
