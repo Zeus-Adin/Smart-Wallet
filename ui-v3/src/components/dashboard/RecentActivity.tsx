@@ -4,7 +4,7 @@ import { Activity, ArrowUpRight, ArrowDownLeft, TrendingUp, Loader2 } from "luci
 import { Link, useParams } from "react-router-dom";
 import SecondaryButton from "../ui/secondary-button";
 import { useCallback, useEffect, useState } from "react";
-import { Transaction, TransactionDataService } from "@/services/transactionDataService";
+import { TxInfo, TransactionDataService } from "@/services/transactionDataService";
 import { formatAmount } from "@/lib/txFormatUtils";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +18,7 @@ const transactionService = new TransactionDataService();
 
 const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityProps) => {
   const { walletId } = useParams<{walletId:`${string}.${string}`}>()
-  const [activities, setActivities] = useState<Transaction[]>([]);
+  const [activities, setActivities] = useState<TxInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityPro
   // Determine which address to use
   const addressToUse = smartWalletAddress || walletAddress;
 
-  const fetchTransactions = useCallback(async (currentOffset: number = 0) => {
+  const fetchTransactions = useCallback((currentOffset: number = 0) => {
     if (!addressToUse) {
       console.warn("No wallet address provided to RecentActivity. Nothing to fetch.");
       setActivities([]);
@@ -36,24 +36,26 @@ const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityPro
     }
     setLoading(true);
     setError(null);
-    console.log("[RecentActivity] Fetching transactions for address:", addressToUse, "offset:", currentOffset);
-    try {
-      const transactions = await transactionService.getRecentTransactions(addressToUse, currentOffset);
-      console.log("[RecentActivity] Transactions fetched:", transactions);
-      if (currentOffset === 0) {
-        setActivities(transactions);
-      } else {
-        setActivities(prev => {
-          const newTxs = transactions.filter(tx => !prev.some(existing => existing.id === tx.id));
-          return [...prev, ...newTxs];
-        });
+    transactionService.handleGetSwTx(
+      addressToUse,
+      currentOffset,
+      (cb) => {
+        if (currentOffset === 0) {
+          const txs = cb([]);
+          setActivities(txs);
+          setLoading(false);
+          return txs;
+        } else {
+          setActivities(prev => {
+            const txs = cb(prev);
+            const newTxs = txs.filter(tx => !prev.some(existing => existing.tx === tx.tx));
+            setLoading(false);
+            return [...prev, ...newTxs];
+          });
+          return [];
+        }
       }
-    } catch (error) {
-      setError('Failed to fetch transactions. See console for details.');
-      console.error('[RecentActivity] Error fetching transactions:', error);
-    } finally {
-      setLoading(false);
-    }
+    );
   }, [addressToUse]);
 
   useEffect(() => {
@@ -160,10 +162,12 @@ const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityPro
             activities.slice(0, 5).map((activity) => {
               const Icon = getActivityIcon(activity.action);
               const activityColor = getActivityColor(activity.action);
-              const statusColor = getStatusColor(activity.status);
+              const statusColor = getStatusColor(activity.tx_status);
+              const asset = activity.assets[0]?.symbol || 'STX';
+              const amount = activity.assets[0]?.amount || '0';
               return (
                 <div
-                  key={activity.id}
+                  key={activity.tx}
                   className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
@@ -172,22 +176,22 @@ const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityPro
                     </div>
                     <div>
                       <div className="text-white font-medium capitalize">
-                        {activity.action} {activity.asset}
+                        {activity.action} {asset}
                       </div>
-                      <div className="text-slate-400 text-sm">{activity.timestamp}</div>
+                      <div className="text-slate-400 text-sm">{activity.stamp}</div>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className={`font-medium ${activityColor}`}>
-                      {activity.action === 'sent' ? '-' : '+'}{formatAmount(activity.amount, 6)} {activity.asset}
-                      {activity.asset === 'STX' && stxUsd && (
+                      {activity.action === 'sent' ? '-' : '+'}{formatAmount(amount, asset === 'SBTC' ? 8 : 6)} {asset}
+                      {asset === 'STX' && stxUsd && (
                         <span className="text-xs text-slate-400 ml-2">
-                          (${((Number(activity.amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
+                          (${((Number(amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
                         </span>
                       )}
                     </div>
                     <div className={`text-sm capitalize ${statusColor}`}>
-                      {activity.status}
+                      {activity.tx_status}
                     </div>
                   </div>
                 </div>
