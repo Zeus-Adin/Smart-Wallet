@@ -1,5 +1,5 @@
 {
-	"dependencies": {
-		"@stacks/network": "^7.0.2"
-	}
+  "dependencies": {
+    "@stacks/transactions": "^7.1.0"
+  }
 }

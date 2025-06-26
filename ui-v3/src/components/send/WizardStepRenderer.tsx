@@ -4,7 +4,6 @@ import NFTSelectionStep from "@/components/send/NFTSelectionStep";
 import RecipientSelectionStep from "@/components/send/RecipientSelectionStep";
 import TransactionSummaryStep from "@/components/send/TransactionSummaryStep";
 import PrimaryButton from "@/components/ui/primary-button";
-import { Recipient } from "@/services/blockchainService";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
 
@@ -24,7 +23,7 @@ interface WizardStepRendererProps {
    contractAddress: string;
    recipient: string;
    selectedWallet: SelectedWallet | null;
-   recipients: Recipient[];
+   recipients: any[];
    isLoading: boolean;
    onAssetTypeChange: (type: "token" | "nft") => void;
    onAssetChange: (asset: string) => void;

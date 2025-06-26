@@ -1,5 +1,6 @@
 import { request } from "@stacks/connect";
-import { TransactionResult } from "@stacks/connect/dist/types/methods";
+import { DeployContractParams, TransactionResult } from "@stacks/connect/dist/types/methods";
+import { Cl } from '@stacks/transactions'
 
 export interface TransactionParams {
    from: string;
@@ -12,18 +13,25 @@ export interface TransactionParams {
 }
 
 export class BlockchainService {
+   // Handles contract deploys
+   async deployContract(params: DeployContractParams) {
+      await request('stx_deployContract', params)
+         .then((tx) => tx)
+         .catch((e) => { console.log({ e }) })
+   }
+
    async sendTransaction(
       params: TransactionParams
    ): Promise<TransactionResult> {
-      console.log("Sending transaction with params:", params);
+		const [address, contractName] = params.contractAddress.split(".")
 
       const data = await request(
-         { forceWalletSelect: true },
-         "stx_transferSip10Nft",
+         {},
+         "stx_callContract",
          {
-            asset: params.asset,
-            assetId: params.tokenId,
-            recipient: params.to,
+            contract: `${address}.${contractName}`,
+				functionName: "sip009-transfer",
+				functionArgs: [Cl.uint(params.tokenId), Cl.principal(params.to), Cl.contractPrincipal(address, contractName)]
          }
       );
 

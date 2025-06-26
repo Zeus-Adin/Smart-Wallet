@@ -1,4 +1,4 @@
-import { ContractTypes } from "@/lib/const";
+import { ContractTypes } from "@/data/walletTypes";
 import { getClientConfig } from "@/utils/chain-config";
 import { defaultUrlFromNetwork, StacksNetworkName } from "@stacks/network";
 import axios from "axios";
@@ -72,17 +72,18 @@ export const handleCCS = async (
       contractInfo = { ...contractInfo, ...tx_info };
     }
   } catch (error) {
+    contractInfo = { found: false }
     console.log({ error });
   }
   return contractInfo;
 };
 
 export class SmartWalletContractService {
-  async getSmartWallets(walletAddress: string, searchParams: URLSearchParams): Promise<SmartWallet[]> {
+  async getSmartWallets(walletAddress: string): Promise<SmartWallet[]> {
     const allDeployedWallets: WalletType[] = (
       await Promise.all(
         ContractTypes.map(async (wallets) => {
-          const wr = await handleCCS(walletAddress, `${walletAddress}.${wallets.name}`, true, searchParams);
+          const wr = await handleCCS(walletAddress, `${walletAddress}.${wallets.name}`, true);
           if (!wr?.found) return null;
           console.log({ wr })
           const w: WalletType = {
