@@ -6,7 +6,7 @@ import { History ,ArrowDownLeft, ArrowUpRight, TrendingUp, Loader2, ExternalLink
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import SecondaryButton from "@/components/ui/secondary-button";
-import { Transaction, TransactionDataService } from "@/services/transactionDataService";
+import { TxInfo, TransactionDataService } from "@/services/transactionDataService";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
 import { Skeleton } from "@/components/ui/skeleton";
 import{ formatAddressField, formatAmount } from "@/lib/txFormatUtils"
@@ -19,41 +19,38 @@ const transactionService = new TransactionDataService();
 const ActionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { selectedWallet } = useSelectedWallet();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TxInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [stxUsd, setStxUsd] = useState<number | null>(null);
   const [displayCount, setDisplayCount] = useState(5);
   const [refreshing, setRefreshing] = useState(false);
-  const [filterType, setFilterType] = useState<string>("all");
   const [filterAction, setFilterAction] = useState<string>("all");
   const [showFilter, setShowFilter] = useState(false);
+  const [stxUsd, setStxUsd] = useState<number | null>(null);
 
-  const { walletId } = useParams<{walletId:`${string}.${string}`}>()
-  console.log("walletId", walletId);
-  const fetchTransactions = useCallback(async (currentOffset: number = 0) => {
-
-    if (!walletId) return;
+  const { walletId } = useParams<{walletId:`${string}.${string}`}>();
+  const fetchTransactions = useCallback((currentOffset: number = 0) => {
+    if (!walletId && !selectedWallet?.address) return;
     setIsLoading(true);
-    try {
-      const txs = await transactionService.getRecentTransactions(
-        walletId ? walletId : selectedWallet?.address,
-        currentOffset
-      );
-      if (currentOffset === 0) {
-        setTransactions(txs);
-        setHasMore(txs.length === 20);
-      } else {
-        setTransactions(prev => {
-          const newTxs = txs.filter(tx => !prev.some(existing => existing.id === tx.id));
-          return [...prev, ...newTxs];
-        });
-        setHasMore(txs.length === 20);
+    transactionService.handleGetSwTx(
+      walletId ? walletId : selectedWallet?.address,
+      currentOffset,
+      (cb) => {
+        if (currentOffset === 0) {
+          setTransactions(cb([]));
+          setHasMore(cb([]).length === 20);
+        } else {
+          setTransactions(prev => {
+            const newTxs = cb(prev).filter(tx => !prev.some(existing => existing.tx === tx.tx));
+            setHasMore(newTxs.length === 20);
+            return [...prev, ...newTxs];
+          });
+        }
+        setIsLoading(false);
+        return [];
       }
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }, [selectedWallet, walletId]);
 
   useEffect(() => {
@@ -65,34 +62,29 @@ const ActionHistory = () => {
     fetchStxUsdPrice().then(setStxUsd);
   }, []);
 
-  const loadMore = () => {
-    const newOffset = offset + 20;
-    setOffset(newOffset);
-    fetchTransactions(newOffset);
-  };
+  // const loadMore = () => {
+  //   const newOffset = offset + 20;
+  //   setOffset(newOffset);
+  //   fetchTransactions(newOffset);
+  // };
 
   const handleRefresh = async () => {
     setRefreshing(true);
     setOffset(0);
     setDisplayCount(5);
-    await fetchTransactions(0);
+    fetchTransactions(0);
     setRefreshing(false);
   };
 
   const handleClearSearch = () => setSearchTerm("");
 
-  // Unique types and actions for dropdowns
-  const txTypes = useMemo(() => Array.from(new Set(transactions.map(tx => tx.assetType || "other"))), [transactions]);
-  const txActions = useMemo(() => Array.from(new Set(transactions.map(tx => tx.action || "other"))), [transactions]);
-
   const filteredTransactions = useMemo(() =>
     transactions.filter(tx =>
-      (filterType === "all" || tx.assetType === filterType) &&
       (filterAction === "all" || tx.action === filterAction) &&
-      (tx.asset?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.to?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.from?.toLowerCase().includes(searchTerm.toLowerCase()))
-    ), [transactions, searchTerm, filterType, filterAction]
+      (tx.assets[0]?.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tx.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tx.tx?.toLowerCase().includes(searchTerm.toLowerCase()))
+    ), [transactions, searchTerm, filterAction]
   );
 
   const visibleTransactions = filteredTransactions.slice(0, displayCount);
@@ -119,7 +111,7 @@ const ActionHistory = () => {
     if (assetType === "nft") return Wallet;
     if (action === "receive") return Send;
     if (action === "pending") return Clock;
-    if (action === "contract_call") return FileCode;
+    if (action === "contract_call" || action === "smart_contract") return FileCode;
     if (action === "refresh") return RefreshCw;
     return History;
   };
@@ -128,14 +120,14 @@ const ActionHistory = () => {
 
   const transactionStats = useMemo(() => ({
     total: transactions.length,
-    confirmed: transactions.filter(tx => tx.status === 'confirmed').length,
-    pending: transactions.filter(tx => tx.status === 'pending').length,
-    failed: transactions.filter(tx => tx.status === 'failed').length
+    confirmed: transactions.filter(tx => tx.tx_status === 'confirmed').length,
+    pending: transactions.filter(tx => tx.tx_status === 'pending').length,
+    failed: transactions.filter(tx => tx.tx_status === 'failed').length
   }), [transactions]);
 
 
   // Helper to get a user-friendly label for each transaction type/action
-  const getTxLabel = (tx: Transaction) => {
+  const getTxLabel = (tx: TxInfo) => {
     if (tx.action === 'sent') return 'Send';
     if (tx.action === 'receive') return 'Receive';
     if (tx.action === 'contract_call') return 'Contract Call';
@@ -144,8 +136,13 @@ const ActionHistory = () => {
     if (tx.action?.toLowerCase().includes('send-many')) return 'Send-Many';
     if (tx.action?.toLowerCase().includes('mint')) return 'Mint';
     if (tx.action?.toLowerCase().includes('transfer')) return 'Token Transfer';
-    if (tx.assetType === 'nft') return 'NFT Transfer';
     return tx.action?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Other';
+  };
+
+  const assetDecimals = (symbol: string) => {
+    if (symbol === 'STX') return 6;
+    if (symbol === 'SBTC') return 8;
+    return 6;
   };
 
   return (
@@ -167,19 +164,11 @@ const ActionHistory = () => {
               </CardTitle>
               <div className="relative flex items-center gap-2">
                  {/* Active filters display */}
-                {(filterType !== 'all' || filterAction !== 'all') && (
+                {(filterAction !== 'all') && (
                   <div className="flex items-center gap-2 mr-2">
-                    {filterType !== 'all' && (
-                      <span className="flex items-center bg-slate-700 text-white rounded px-2 py-1 text-xs">
-                        {filterType}
-                        <button onClick={() => setFilterType('all')} className="ml-1 text-slate-400 hover:text-white focus:outline-none">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    )}
                     {filterAction !== 'all' && (
                       <span className="flex items-center bg-slate-700 text-white rounded px-2 py-1 text-xs">
-                        {getTxLabel({action: filterAction, assetType: undefined} as Transaction)}
+                        {getTxLabel({action: filterAction, assets: [], sender: '', stamp: '', time: '', tx: '', tx_status: ''} as TxInfo)}
                         <button onClick={() => setFilterAction('all')} className="ml-1 text-slate-400 hover:text-white focus:outline-none">
                           <X className="w-3 h-3" />
                         </button>
@@ -222,17 +211,10 @@ const ActionHistory = () => {
                       onMouseEnter={() => setShowFilter(true)}
                     >
                       <div className="mb-2">
-                        <label className="block text-xs text-slate-400 mb-1">Type</label>
-                        <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full bg-slate-700 text-white rounded p-1 focus:ring-2 focus:ring-purple-400">
-                          <option value="all">All</option>
-                          {txTypes.map(type => <option key={type} value={type}>{type}</option>)}
-                        </select>
-                      </div>
-                      <div>
                         <label className="block text-xs text-slate-400 mb-1">Action</label>
                         <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className="w-full bg-slate-700 text-white rounded p-1 focus:ring-2 focus:ring-purple-400">
                           <option value="all">All</option>
-                          {txActions.map(action => <option key={action} value={action}>{getTxLabel({action, assetType: undefined} as Transaction)}</option>)}
+                          {/* {txActions.map(action => <option key={action} value={action}>{getTxLabel({action, assetType: undefined} as TxInfo)}</option>)} */}
                         </select>
                       </div>
                     </div>
@@ -276,50 +258,55 @@ const ActionHistory = () => {
               ) : (
                 <div className="space-y-3">
                   {visibleTransactions.map((tx) => {
-                    const Icon = getTransactionIcon(tx.action, tx.assetType);
+                    const Icon = getTransactionIcon(tx.action);
                     const amountPrefix = tx.action === 'sent' ? '-' : '+';
+                    const asset = tx.assets[0]?.symbol || 'STX';
+                    const amount = tx.assets[0]?.amount || '0';
+                    const isSmartContractCall = tx.action === 'contract_call' || tx.action === 'smart_contract';
+                    const isContractDeploy = tx.action === 'contract_deploy';
+                    const hideAmount = (isSmartContractCall && (!amount || amount === '0'));
                     return (
-                      <div key={tx.id} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors">
+                      <div key={tx.tx} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors">
                         <div className="flex items-center space-x-4">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getAmountColor(tx.action)} bg-slate-600/20`}>
                             <Icon className={`h-5 w-5 ${tx.action === 'receive' ? 'text-green-400 rotate-180' : ''}`} />
                           </div>
                           <div>
                             <div className="text-white font-medium capitalize">
-                              {getTxLabel(tx)} {tx.asset}
+                              {getTxLabel(tx)}{!(isSmartContractCall || isContractDeploy) ? ` ${asset}` : ''}
                             </div>
                             <div className="text-slate-400 text-sm whitespace-pre-line">
                               {tx.action === 'sent'
-                                ? `To: ${formatAddressField(tx.to)}`
-                                : `From: ${formatAddressField(tx.from)}`}
-                            {' • '}{tx.timestamp}
+                                ? `To: ${tx.sender}`
+                                : `From: ${tx.sender}`}
+                              {' • '}{tx.stamp}
                             </div>
                             <div className="text-slate-500 text-xs flex items-center gap-2">
-                              TX: {tx.txHash}
+                              TX: {tx.tx}
                               <a
-                                href={`${config.explorer(`tx/${tx.txHash}`)}`}
+                                href={`${config.explorer(`txid/${tx.tx}`)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-purple-400 hover:underline flex items-center"
-                                title="View on Stacks Explorer"
-                              >
-                                <ExternalLink className="w-4 h-4 ml-1" />
+                                className="flex items-center gap-1 text-slate-400 hover:text-white">
+                               <ExternalLink
+                                  className="w-4 h-4 text-slate-400 hover:text-white"/>
                               </a>
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className={`font-medium ${getAmountColor(tx.action)}`}>
-                            {/*defaulting to 6 decimals for STX, other assets would require a more complex solution and wouls be an issue */}
-                            {amountPrefix}{formatAmount(tx.amount, tx.asset === 'STX' ? 6 : (6))} {tx.asset}
-                            {tx.asset === 'STX' && stxUsd && (
-                              <span className="text-xs text-slate-400 ml-2">
-                                (${((Number(tx.amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
-                              </span>
-                            )}
-                          </div>
-                          <div className={`text-sm capitalize ${getStatusColor(tx.status)}`}>
-                            {tx.status}
+                          {!hideAmount && (
+                            <div className={`font-medium ${getAmountColor(tx.action)}`}>
+                              {amountPrefix}{formatAmount(amount, assetDecimals(asset))} {asset}
+                              {asset === 'STX' && stxUsd && (
+                                <span className="text-xs text-slate-400 ml-2">
+                                  (${((Number(amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className={`text-sm capitalize ${getStatusColor(tx.tx_status)}`}>
+                            {tx.tx_status}
                           </div>
                         </div>
                       </div>
@@ -334,11 +321,11 @@ const ActionHistory = () => {
             <div className="absolute bottom-6 right-6 z-20">
               <SecondaryButton
                 onClick={() => setDisplayCount(displayCount + 5)}
-                disabled={isLoading || displayCount >= filteredTransactions.length || !hasMore}
+                disabled={isLoading || displayCount >= filteredTransactions.length }
                 className="min-w-[180px]"
               >
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {displayCount >= filteredTransactions.length || !hasMore ? 'All Transactions Loaded' : 'Load More Transactions'}
+                {displayCount >= filteredTransactions.length ? 'All Transactions Loaded' : 'Load More Transactions'}
               </SecondaryButton>
             </div>
           </CardContent>

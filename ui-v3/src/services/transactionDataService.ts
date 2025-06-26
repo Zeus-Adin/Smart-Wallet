@@ -2,6 +2,22 @@ import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
 import { getClientConfig } from '../utils/chain-config';
 
+export type TxAssetInfo = {
+    amount: string
+    name: string
+    asset: string
+    symbol: string
+}
+
+export type TxInfo = {
+    action: string
+    sender: string
+    stamp: string
+    time: string
+    assets: TxAssetInfo[]
+    tx: string
+    tx_status: string
+}
 export interface Transaction {
   id: string;
   action: 'sent' | 'receive' | string;
@@ -72,13 +88,19 @@ interface TransactionCache {
 export class TransactionDataService {
   private cache: TransactionCache = {};
   private readonly CACHE_TTL = 30000; // 30 seconds cache TTL
-
-
+  private swTxCache: TransactionCache = {};
+  private readonly SW_TX_CACHE_TTL = 30000; // 30 seconds
 
   private isCacheValid(address: string): boolean {
     const cached = this.cache[address];
     if (!cached) return false;
     return Date.now() - cached.lastFetched < this.CACHE_TTL;
+  }
+
+  private isSwTxCacheValid(address: string): boolean {
+    const cached = this.swTxCache[address];
+    if (!cached) return false;
+    return Date.now() - cached.lastFetched < this.SW_TX_CACHE_TTL;
   }
 
   private processTransactionData(tx: StacksTransactionEvent): Transaction {
@@ -208,5 +230,127 @@ export class TransactionDataService {
       return [];
     }
   }
+
+   handleGetSwTx = async (address: string, offset: number, setSwTx: (cb: (prev: TxInfo[]) => TxInfo[]) => TxInfo[]) => {
+        if (this.isSwTxCacheValid(address) && offset === 0) {
+          setSwTx(() => this.swTxCache[address].transactions as unknown as TxInfo[]);
+          return;
+        }
+        const { api } = getClientConfig(address);
+        try {
+          const res = await axios.get(`${api}/extended/v2/addresses/${address}/transactions?limit=20&offset=${offset}`);
+          if (res?.data?.results) {
+            const { results } = res.data;
+            const constructTx = results.map((info: StacksTransactionEvent) => {
+              const { stx_sent, stx_received, tx } = info;
+              const stxsent = Number(stx_sent);
+              const stxreceived = Number(stx_received);
+              let normalizedStatus = tx.tx_status;
+              if (normalizedStatus === 'success') normalizedStatus = 'confirmed';
+              const failedStatuses = [
+                'abort_by_post_condition',
+                'abort_by_response',
+                'dropped',
+                'error',
+                'failed',
+                'rejected',
+                'abort',
+              ];
+              if (failedStatuses.includes(normalizedStatus)) {
+                normalizedStatus = 'failed';
+              }
+              const pcAssetsAndAmounts = tx?.post_conditions?.length > 0
+                ? tx?.post_conditions.map((c) => {
+                    const asset = c?.asset?.contract_address
+                      ? `${c?.asset?.contract_address}.${c?.asset?.contract_name}`
+                      : 'STX';
+                    const symbol = c?.asset?.asset_name?.replace('-token', '');
+                    return {
+                      name: c?.asset?.asset_name ?? 'Stacks',
+                      amount: c.amount ?? '0',
+                      asset,
+                      symbol: symbol ?? 'STX',
+                    };
+                  })
+                : tx?.tx_type === 'token_transfer'
+                ? [
+                    {
+                      name: 'Stacks',
+                      amount: tx?.token_transfer?.amount ?? '0',
+                      asset: 'STX',
+                      symbol: 'STX',
+                    },
+                  ]
+                : [];
+              const pcSender = tx?.post_conditions?.[0]?.principal?.contract_name
+                ? `${tx?.post_conditions?.[0]?.principal?.address}.${tx?.post_conditions?.[0]?.principal?.contract_name}`
+                : tx?.post_conditions?.[0]?.principal?.address;
+              const txSender = tx?.contract_call?.function_args[1]?.repr?.replace("'", '') ?? tx?.sender_address;
+              const isStx = stxsent > 0 || stxreceived > 0;
+              // Special handling for contract_deploy
+              if (tx.tx_type === 'contract_deploy') {
+                if (normalizedStatus !== 'confirmed') {
+                  console.log('Contract deploy not successful:', tx.tx_id, 'status:', normalizedStatus);
+                  return {
+                    action: tx?.contract_call?.function_name ?? tx.tx_type,
+                    sender: txSender,
+                    stamp: formatDistanceToNow(tx?.block_time_iso),
+                    time: tx?.block_time_iso,
+                    assets: [],
+                    tx: tx?.tx_id,
+                    tx_status: normalizedStatus,
+                  };
+                }
+              }
+              if (isStx) {
+                return {
+                  action: stxsent > 0 ? 'sent' : 'receive',
+                  sender: stxreceived > 0 ? txSender : stxsent > 0 ? txSender : pcSender,
+                  stamp: formatDistanceToNow(tx?.block_time_iso),
+                  assets: pcAssetsAndAmounts,
+                  tx: tx?.tx_id,
+                  tx_status: normalizedStatus,
+                };
+              } else {
+                return {
+                  action:
+                    tx?.post_conditions?.length === 0
+                      ? tx?.contract_call?.function_name
+                        ? tx?.contract_call?.function_name
+                        : tx?.tx_type
+                      : pcSender === address
+                      ? 'sent'
+                      : 'receive',
+                  sender: tx?.post_conditions?.length > 0 ? pcSender : txSender,
+                  stamp: formatDistanceToNow(tx?.block_time_iso),
+                  time: tx?.block_time_iso,
+                  assets: pcAssetsAndAmounts,
+                  tx: tx?.tx_id,
+                  tx_status: normalizedStatus,
+                };
+              }
+            });
+            if (offset === 0) {
+              this.swTxCache[address] = {
+                transactions: constructTx,
+                lastFetched: Date.now(),
+              };
+              setSwTx(() => constructTx);
+            } else if (this.swTxCache[address]) {
+              const existingTxs = this.swTxCache[address].transactions as unknown as TxInfo[];
+              const newTxs = (constructTx ?? []).filter((tx: TxInfo) => !existingTxs.some(existing => existing?.tx === tx.tx));
+              this.swTxCache[address].transactions = [...existingTxs, ...newTxs];
+              setSwTx(prev => [...prev, ...newTxs]);
+            } else {
+              setSwTx(prev => {
+                const newTxs = (constructTx ?? []).filter((tx: TxInfo) => !prev.some(existing => existing?.tx === tx.tx));
+                return [...prev, ...newTxs];
+              });
+            }
+          }
+        } catch (e) {
+          console.log({ e });
+        }
+      }
 }
 
