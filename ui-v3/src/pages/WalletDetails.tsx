@@ -4,13 +4,31 @@ import { Button } from "@/components/ui/button";
 import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Settings, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { handleCCS } from "@/services/smartWalletContractService";
+import { BlockchainService } from "@/services/blockchainService";
 import GreenButton from "@/components/ui/green-button";
 import PrimaryButton from "@/components/ui/primary-button";
 
+type WalletInfo = {
+  smart_contract?: {
+    contract_id?: string;
+    tx_sender?: string;
+  };
+  balance?: string | number;
+  block_time_iso?: string;
+};
+
+
 const WalletDetails = () => {
-  const { walletId } = useParams();
+   const { walletId } = useParams<{walletId:`${string}.${string}`}>()
+  const [searchParams] = useSearchParams();
+
+  const [walletInfo, setWalletInfo] = useState<WalletInfo | null>(null);
+  const [owner, setOwner] = useState("");
+  const [adminInput, setAdminInput] = useState("");
+  const [txStatus, setTxStatus] = useState("");
   const [activeExtensions, setActiveExtensions] = useState([
     { id: "multisig", name: "Multi-Signature", status: "active" },
     { id: "timelock", name: "Time Lock", status: "active" }
@@ -23,14 +41,15 @@ const WalletDetails = () => {
     { id: "limit", name: "Spending Limits", description: "Set transaction limits" }
   ];
 
-  const walletInfo = {
-    name: "Personal Wallet",
-    contractId: walletId || "SP1ABC...XYZ123.smart-wallet-v1",
-    owner: "SP1ABC...XYZ123",
-    balance: "1,234.56 STX",
-    createdAt: "2024-01-15",
-    version: "1.0.0"
-  };
+  useEffect(() => {
+    const fetchWalletInfo = async () => {
+      if (!walletId) return;
+      const info = await handleCCS(walletId, walletId, true);
+      setWalletInfo(info);
+      setOwner(info?.smart_contract?.tx_sender || "");
+    };
+    fetchWalletInfo();
+  }, [walletId, searchParams]);
 
   const handleAddExtension = (extensionId: string) => {
     const extension = availableExtensions.find(ext => ext.id === extensionId);
@@ -47,6 +66,25 @@ const WalletDetails = () => {
     setActiveExtensions(activeExtensions.filter(ext => ext.id !== extensionId));
   };
 
+  // Placeholder for contract call to transfer ownership
+  const handleTransferOwnership = async () => {
+    setTxStatus("Transferring ownership...");
+    // TODO: Replace with actual contract call
+    const blockchainService = new BlockchainService();
+    // Example: await blockchainService.callContractFunction({ ... })
+    setTimeout(() => setTxStatus("Ownership transferred (mock)!"), 1500);
+  };
+
+  // Placeholder for contract call to add admin
+  const handleAddAdmin = async () => {
+    setTxStatus("Adding admin...");
+    // TODO: Replace with actual contract call
+    const blockchainService = new BlockchainService();
+    // Example: await blockchainService.callContractFunction({ ... })
+    setTimeout(() => setTxStatus(`Admin ${adminInput} added (mock)!`), 1500);
+    setAdminInput("");
+  };
+
   return (
     <WalletLayout>
       <div className="space-y-6">
@@ -60,7 +98,7 @@ const WalletDetails = () => {
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <Wallet className="mr-2 h-5 w-5 text-purple-400" />
-              {walletInfo.name}
+              {walletInfo?.smart_contract?.contract_id || walletId || "Smart Wallet"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -68,25 +106,26 @@ const WalletDetails = () => {
               <div>
                 <label className="text-slate-300 text-sm">Contract ID</label>
                 <div className="text-white font-mono text-sm bg-slate-700/50 p-2 rounded mt-1">
-                  {walletInfo.contractId}
+                  {walletInfo?.smart_contract?.contract_id || walletId}
                 </div>
               </div>
               <div>
                 <label className="text-slate-300 text-sm">Owner</label>
                 <div className="text-white font-mono text-sm bg-slate-700/50 p-2 rounded mt-1">
-                  {walletInfo.owner}
+                  {owner}
                 </div>
               </div>
               <div>
                 <label className="text-slate-300 text-sm">Balance</label>
                 <div className="text-white font-semibold bg-slate-700/50 p-2 rounded mt-1">
-                  {walletInfo.balance}
+                  {/* TODO: Fetch and display real balance */}
+                  {walletInfo?.balance || "-"}
                 </div>
               </div>
               <div>
                 <label className="text-slate-300 text-sm">Created</label>
                 <div className="text-white bg-slate-700/50 p-2 rounded mt-1">
-                  {walletInfo.createdAt}
+                  {walletInfo?.block_time_iso || "-"}
                 </div>
               </div>
             </div>
@@ -181,16 +220,31 @@ const WalletDetails = () => {
             <CardTitle className="text-white">Wallet Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <GreenButton >
-                Open Dashboard
+            <div className="flex flex-wrap gap-4 items-center">
+              <GreenButton asChild>
+                <a href={`/dashboard/${walletId}`}>
+                  Open Dashboard
+                </a>
               </GreenButton>
               <SecondaryButton>
                 Export Configuration
               </SecondaryButton>
-              <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-600/20">
+              <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-600/20" onClick={handleTransferOwnership}>
                 Transfer Ownership
               </Button>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Admin principal..."
+                  value={adminInput}
+                  onChange={e => setAdminInput(e.target.value)}
+                  className="bg-slate-700/50 text-white px-2 py-1 rounded border border-slate-600 focus:outline-none"
+                />
+                <Button variant="outline" onClick={handleAddAdmin} disabled={!adminInput}>
+                  Add Admin
+                </Button>
+              </div>
+              {txStatus && <span className="text-xs text-slate-400 ml-2">{txStatus}</span>}
             </div>
           </CardContent>
         </Card>

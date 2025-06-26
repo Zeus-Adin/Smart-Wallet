@@ -1,7 +1,7 @@
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, TrendingUp, Activity, DollarSign } from "lucide-react";
+import { ArrowUpRight, TrendingUp, Activity, DollarSign, Settings } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import ActiveExtensions from "@/components/dashboard/ActiveExtensions";
@@ -144,6 +144,12 @@ const Dashboard = () => {
               <Link to={`/history/${walletId}`}>
                 <Activity className="h-6 w-6 mb-2" />
                 History
+              </Link>
+            </SecondaryButton>
+            <SecondaryButton asChild variant={undefined} className="h-20 flex-col">
+              <Link to={`/wallet-details/${walletId}`}>
+                <Settings className="h-6 w-6 mb-2" />
+                Settings
               </Link>
             </SecondaryButton>
           </CardContent>

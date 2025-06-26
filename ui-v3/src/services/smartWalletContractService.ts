@@ -1,7 +1,7 @@
 import { ContractTypes } from "@/lib/const";
+import { getClientConfig } from "@/utils/chain-config";
 import { defaultUrlFromNetwork, StacksNetworkName } from "@stacks/network";
 import axios from "axios";
-import { useSearchParams } from "react-router-dom";
 
 export interface SmartWallet {
   label: string
@@ -36,30 +36,29 @@ export type WalletType = {
 };
 
 export const smartWalletName = "smart-wallet";
-export const handleGetClientConfig = (
-  address: string | undefined,
-  searchParams: URLSearchParams
-) => {
-  const network: StacksNetworkName =
-    searchParams.get("network") || address?.startsWith("SP")
-      ? "mainnet"
-      : "testnet";
-  const api: string | undefined =
-    searchParams.get("api") || defaultUrlFromNetwork(network);
-  const chain: string | undefined = searchParams.get("chain") || network;
-  const explorer: string | undefined =
-    searchParams.get("explorer") || "https://explorer.hiro.so/";
-  return { network, chain, api, explorer };
-};
+// export const handleGetClientConfig = (
+//   address: string | undefined,
+//   searchParams: URLSearchParams
+// ) => {
+//   const network: StacksNetworkName =
+//     searchParams.get("network") || address?.startsWith("SP")
+//       ? "mainnet"
+//       : "testnet";
+//   const api: string | undefined =
+//     searchParams.get("api") || defaultUrlFromNetwork(network);
+//   const chain: string | undefined = searchParams.get("chain") || network;
+//   const explorer: string | undefined =
+//     searchParams.get("explorer") || "https://explorer.hiro.so/";
+//   return { network, chain, api, explorer };
+// };
 export const handleCCS = async (
-  address: string | undefined,
+  address: string,
   contractId: string,
   txinfo: boolean,
-  searchParams: URLSearchParams
 ) => {
   let contractInfo;
   try {
-    const { api } = handleGetClientConfig(address, searchParams);
+    const { api } = getClientConfig(address);
     contractInfo = (
       await axios.get(
         `${api}/extended/v2/smart-contracts/status?contract_id=${contractId}`

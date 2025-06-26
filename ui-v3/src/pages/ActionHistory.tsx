@@ -125,6 +125,10 @@ const ActionHistory = () => {
     failed: transactions.filter(tx => tx.tx_status === 'failed').length
   }), [transactions]);
 
+  const txActions = useMemo(() =>
+    Array.from(new Set(transactions.map(tx => tx.action)))
+  , [transactions]);
+
 
   // Helper to get a user-friendly label for each transaction type/action
   const getTxLabel = (tx: TxInfo) => {
@@ -214,7 +218,9 @@ const ActionHistory = () => {
                         <label className="block text-xs text-slate-400 mb-1">Action</label>
                         <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className="w-full bg-slate-700 text-white rounded p-1 focus:ring-2 focus:ring-purple-400">
                           <option value="all">All</option>
-                          {/* {txActions.map(action => <option key={action} value={action}>{getTxLabel({action, assetType: undefined} as TxInfo)}</option>)} */}
+                          {txActions.map(action => (
+                            <option key={action} value={action}>{getTxLabel({action, assets: [], sender: '', stamp: '', time: '', tx: '', tx_status: ''} as TxInfo)}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
