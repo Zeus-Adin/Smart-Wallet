@@ -1,4 +1,4 @@
-import { ContractTypes } from "@/data/walletTypes";
+import { type ContractType, ContractTypes } from "@/data/walletTypes";
 import { getClientConfig } from "@/utils/chain-config";
 import type { Transaction } from '@stacks/stacks-blockchain-api-types';
 import axios from "axios";
@@ -79,7 +79,19 @@ export const handleCCS = async (
     console.log({ error });
   }
   return contractInfo;
-};
+}
+export const constructContractValues = (wr: any, wallets: ContractType) => {
+  const w: WalletType = {
+    id: wr.tx_index,
+    name: wr.smart_contract.contract_id.split(".")[1],
+    contractId: wr.smart_contract.contract_id,
+    stxHolding: 0,
+    btcHolding: 0,
+    ...wallets,
+    createdAt: wr.block_time_iso,
+  };
+  return w
+}
 
 export class SmartWalletContractService {
   async getSmartWallets(walletAddress: string): Promise<SmartWallet[]> {
@@ -88,16 +100,7 @@ export class SmartWalletContractService {
         ContractTypes.map(async (wallets) => {
           const wr = await handleCCS(walletAddress, `${walletAddress}.${wallets.name}`, true);
           if (!wr?.found) return null;
-          console.log({ wr })
-          const w: WalletType = {
-            id: wr.tx_index,
-            name: wr.smart_contract.contract_id.split(".")[1],
-            contractId: wr.smart_contract.contract_id,
-            stxHolding: 0,
-            btcHolding: 0,
-            ...wallets,
-            createdAt: wr.block_time_iso,
-          };
+          const w = constructContractValues(wr, wallets)
           return w;
         })
       )

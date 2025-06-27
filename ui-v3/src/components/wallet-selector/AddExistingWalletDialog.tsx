@@ -1,20 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Search, AlertCircle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import GreenButton from "../ui/green-button";
 import PrimaryButton from "../ui/primary-button";
+import { useNavigate } from "react-router-dom";
+import { constructContractValues, handleCCS } from "@/services/smartWalletContractService";
+import { ContractTypes } from "@/data/walletTypes";
 
 interface AddExistingWalletDialogProps {
   onWalletAdded: (wallet: any) => void;
@@ -38,33 +33,39 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
       });
       return;
     }
-
+    if (!walletAddress.includes('.')) {
+      toast({
+        title: "Invalid Contract Address",
+        description: "Please enter a valid contract address to verify.",
+        variant: "destructive",
+      })
+      return;
+    }
     setIsVerifying(true);
     setVerificationStatus('idle');
 
     try {
-      // Simulate contract verification
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock verification result
-      const mockWalletData = {
-        id: walletAddress,
-        name: "Imported Smart Wallet",
-        contractId: walletAddress,
-        balance: "0.00 STX",
-        usdValue: "$0.00",
-        extensions: ["Multi-sig"],
-        createdAt: new Date().toISOString().split('T')[0],
-        isImported: true
-      };
-
-      setWalletData(mockWalletData);
-      setVerificationStatus('success');
-
+      const found = await handleCCS(walletAddress, walletAddress, true)
+      if (!found?.found) {
+        toast({
+          title: "Contract Not Found",
+          description: "Please enter a valid contract address and try again!",
+          variant: "destructive",
+        })
+        setVerificationStatus('error');
+        setIsVerifying(false);
+        return
+      }
+      const contractInfo = ContractTypes.find(info => info?.name === walletAddress?.split('.')?.[1])
+      const data = constructContractValues(found, contractInfo)
+      setWalletData(data)
+      setVerificationStatus('success')
       toast({
         title: "Contract Verified",
         description: "Smart wallet contract verified successfully!",
       });
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsVerifying(false);
     } catch (error) {
       setVerificationStatus('error');
       toast({
@@ -72,23 +73,17 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
         description: "Could not verify the smart wallet contract. Please check the address.",
         variant: "destructive",
       });
-    } finally {
       setIsVerifying(false);
     }
   };
 
   const handleAddWallet = () => {
-    if (walletData && verificationStatus === 'success') {
-      onWalletAdded(walletData);
-      setOpen(false);
-      setWalletAddress("");
-      setWalletData(null);
-      setVerificationStatus('idle');
-
-      toast({
-        title: "Wallet Added",
-        description: "Smart wallet has been added to your list successfully!",
-      });
+    if (verificationStatus === 'success') {
+      onWalletAdded(walletData)
+      setOpen(false)
+      setWalletAddress("")
+      setWalletData(null)
+      setVerificationStatus('idle')
     }
   };
 
@@ -111,7 +106,7 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
           Add Existing Wallet
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-slate-800 border-slate-700 text-white">
+      <DialogContent className="w-full items-center justify-center sm:max-w-[425px] bg-slate-800 border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle>Add Existing Smart Wallet</DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -128,7 +123,11 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
               id="address"
               placeholder="SP1ABC...XYZ123.smart-wallet-v1"
               value={walletAddress}
-              onChange={(e) => setWalletAddress(e.target.value)}
+              onChange={(e) => {
+                const input = e.target.value
+                const sanitized = input.replace(/[^a-zA-Z0-9.-]/g, '') // Remove all except a-z, A-Z, 0-9, . and -
+                setWalletAddress(sanitized)
+              }}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
           </div>
@@ -156,9 +155,9 @@ const AddExistingWalletDialog = ({ onWalletAdded, isDemoMode }: AddExistingWalle
             <div className="bg-slate-700/50 p-3 rounded-md space-y-2">
               <div className="text-sm font-medium">Wallet Details:</div>
               <div className="text-sm text-slate-300">
-                <div>Name: {walletData.name}</div>
-                <div>Contract: {walletData.contractId}</div>
-                <div>Extensions: {walletData.extensions.join(', ')}</div>
+                <div>Name: {walletData?.name}</div>
+                <div>Contract: {walletData?.contractId}</div>
+                <div>Extensions: {walletData?.extensions.join(', ')}</div>
               </div>
             </div>
           )}

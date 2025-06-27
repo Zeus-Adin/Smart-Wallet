@@ -16,9 +16,7 @@ import { BlockchainService } from "@/services/blockchainService";
 import axios from "axios";
 
 const CreateWallet = () => {
-  const navigate = useNavigate()
   const { walletData } = useWalletConnection()
-  const [walletName, setWalletName] = useState("")
   const [description, setDescription] = useState("")
   const [selectedContract, setSelectedContract] = useState<ContractType>()
   const [isCreating, setIsCreating] = useState(false)
@@ -163,7 +161,6 @@ const CreateWallet = () => {
                   <Input
                     disabled
                     value={selectedContract?.name}
-                    onChange={(e) => setWalletName(e.target.value)}
                     placeholder="e.g., My Personal Wallet"
                     className="bg-slate-700/50 border-slate-600 text-white mt-1"
                   />
@@ -184,7 +181,7 @@ const CreateWallet = () => {
                 <div className="pt-4">
                   <PrimaryButton
                     onClick={handleCreateWallet}
-                    disabled={isCreating}
+                    disabled={isCreating || !selectedContract}
                     className="w-full"
                   >
                     {isCreating ? (
