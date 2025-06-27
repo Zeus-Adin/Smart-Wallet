@@ -182,14 +182,16 @@ const RecentActivity = ({ walletAddress, smartWalletAddress }: RecentActivityPro
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`font-medium ${activityColor}`}>
-                      {activity.action === 'sent' ? '-' : '+'}{formatAmount(amount, asset === 'SBTC' ? 8 : 6)} {asset}
-                      {asset === 'STX' && stxUsd && (
-                        <span className="text-xs text-slate-400 ml-2">
-                          (${((Number(amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
-                        </span>
-                      )}
-                    </div>
+                    {(activity.action === "sent" || activity.action === "receive" || (activity.tx_type !== "contract_call" && activity.tx_type !== "smart_contract")) ? (
+                      <div className={`font-medium ${activityColor}`}>
+                        {activity.action === "sent" ? '-' : activity.action === "receive" ? '+' : ''}{formatAmount(amount, asset === 'SBTC' ? 8 : 6)} {asset}
+                        {asset === 'STX' && stxUsd && (
+                          <span className="text-xs text-slate-400 ml-2">
+                            (${((Number(amount) / 1e6) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD)
+                          </span>
+                        )}
+                      </div>
+                    ) : null}
                     <div className={`text-sm capitalize ${statusColor}`}>
                       {activity.tx_status}
                     </div>
