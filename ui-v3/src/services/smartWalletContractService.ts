@@ -2,7 +2,6 @@ import { ContractTypes } from "@/data/walletTypes";
 import { getClientConfig } from "@/utils/chain-config";
 import { defaultUrlFromNetwork, StacksNetworkName } from "@stacks/network";
 import axios from "axios";
-import { useSearchParams } from "react-router-dom";
 
 export interface SmartWallet {
   label: string
@@ -37,7 +36,26 @@ export type WalletType = {
 };
 
 export const smartWalletName = "smart-wallet";
-export const handleCCS = async (address: string | undefined, contractId: string, txinfo: boolean) => {
+// export const handleGetClientConfig = (
+//   address: string | undefined,
+//   searchParams: URLSearchParams
+// ) => {
+//   const network: StacksNetworkName =
+//     searchParams.get("network") || address?.startsWith("SP")
+//       ? "mainnet"
+//       : "testnet";
+//   const api: string | undefined =
+//     searchParams.get("api") || defaultUrlFromNetwork(network);
+//   const chain: string | undefined = searchParams.get("chain") || network;
+//   const explorer: string | undefined =
+//     searchParams.get("explorer") || "https://explorer.hiro.so/";
+//   return { network, chain, api, explorer };
+// };
+export const handleCCS = async (
+  address: string,
+  contractId: string,
+  txinfo: boolean,
+) => {
   let contractInfo;
   try {
     const { api } = getClientConfig(address);
