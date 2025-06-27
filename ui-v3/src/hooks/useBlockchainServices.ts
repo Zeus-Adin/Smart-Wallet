@@ -40,6 +40,8 @@ export const useBlockchainServices = () => {
   return {
     sendTransaction,
     loadRecentData,
+    addAdmin: blockchainService.addAdmin,
+    transferOwnership: blockchainService.transferOwnership,
     transactions: blockchainService.transactions,
     recipients: blockchainService.recipients,
     isLoading: blockchainService.isLoading || isLoading,

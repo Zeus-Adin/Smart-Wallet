@@ -1,3 +1,4 @@
+import { getClientConfig } from "@/utils/chain-config";
 import { request } from "@stacks/connect";
 import { DeployContractParams, TransactionResult } from "@stacks/connect/dist/types/methods";
 import { Cl } from '@stacks/transactions'
@@ -35,6 +36,44 @@ export class BlockchainService {
          }
       );
 
+      return data;
+   }
+
+   async addAdmin(params: {
+      contractAddress: string;
+      adminAddress: string;
+   }): Promise<TransactionResult> {
+      const [address, contractName] = params.contractAddress.split(".");
+      const network = getClientConfig(address).network;
+      console.log("Adding admin:", params.adminAddress, "to contract:", `${address}.${contractName}`);
+      const data = await request(
+         "stx_callContract",
+         {
+            contract: `${address}.${contractName}`,
+            functionName: "enable-admin",
+            functionArgs: [Cl.principal(params.adminAddress), Cl.bool(true)],
+            network,
+         }
+      );
+      return data;
+   }
+
+   async transferOwnership(params: {
+      contractAddress: string; 
+      newOwnerAddress: string;
+   }): Promise<TransactionResult> {
+      const [address, contractName] = params.contractAddress.split(".");
+      const network = getClientConfig(address).network;
+      console.log("Transferring ownership of contract:", `${address}.${contractName}`, "to new owner:", params.newOwnerAddress);
+      const data = await request(
+         "stx_callContract",
+         {
+            contract: `${address}.${contractName}`,
+            functionName: "transfer-wallet",
+            functionArgs: [Cl.principal(params.newOwnerAddress)],
+            network,
+         }
+      );
       return data;
    }
 

@@ -10,6 +10,7 @@ import { MockAccountBalanceService } from '@/services/mockAccountBalanceService'
 import { SmartWalletContractService, SmartWallet, WalletActivity } from '@/services/smartWalletContractService';
 import { MockSmartWalletContractService } from '@/services/mockSmartWalletContractService';
 import { useSearchParams } from 'react-router-dom';
+import { add } from 'date-fns';
 
 export const useBlockchainService = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +117,8 @@ export const useBlockchainService = () => {
     smartWallets,
     walletActivity,
     isLoading,
+    addAdmin: blockchainService.addAdmin,
+    transferOwnership: blockchainService.transferOwnership,
     // isDemoMode
   };
 };

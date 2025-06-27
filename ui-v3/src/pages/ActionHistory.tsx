@@ -106,12 +106,12 @@ const ActionHistory = () => {
     return action === 'sent' ? "text-red-400" : "text-green-400";
   };
 
-  const getTransactionIcon = (action: string, assetType?: string) => {
+  const getTransactionIcon = (action: string, tx_type? :string, assetType?: string) => {
     if (action === "sent") return Send;
     if (assetType === "nft") return Wallet;
     if (action === "receive") return Send;
     if (action === "pending") return Clock;
-    if (action === "contract_call" || action === "smart_contract") return FileCode;
+    if (action === "contract_call" || action === "smart_contract" || tx_type === "contract_call" || tx_type === "smart_contract") return FileCode;
     if (action === "refresh") return RefreshCw;
     return History;
   };
@@ -134,12 +134,9 @@ const ActionHistory = () => {
   const getTxLabel = (tx: TxInfo) => {
     if (tx.action === 'sent') return 'Send';
     if (tx.action === 'receive') return 'Receive';
-    if (tx.action === 'contract_call') return 'Contract Call';
+    if (tx.action === 'contract_call' ) return 'Contract Call';
     if (tx.action === 'contract_deploy') return 'Contract Deploy';
-    if (tx.action?.toLowerCase().includes('airdrop')) return 'Airdrop';
-    if (tx.action?.toLowerCase().includes('send-many')) return 'Send-Many';
-    if (tx.action?.toLowerCase().includes('mint')) return 'Mint';
-    if (tx.action?.toLowerCase().includes('transfer')) return 'Token Transfer';
+    return tx.action?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Other';
     return tx.action?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Other';
   };
 
@@ -149,6 +146,7 @@ const ActionHistory = () => {
     return 6;
   };
 
+  console.log("Transaction:", transactions);
   return (
     <WalletLayout>
       <div className="space-y-6">
@@ -264,11 +262,11 @@ const ActionHistory = () => {
               ) : (
                 <div className="space-y-3">
                   {visibleTransactions.map((tx) => {
-                    const Icon = getTransactionIcon(tx.action);
+                    const Icon = getTransactionIcon(tx.action, tx.tx_type);
                     const amountPrefix = tx.action === 'sent' ? '-' : '+';
                     const asset = tx.assets[0]?.symbol || 'STX';
                     const amount = tx.assets[0]?.amount || '0';
-                    const isSmartContractCall = tx.action === 'contract_call' || tx.action === 'smart_contract';
+                    const isSmartContractCall = tx.tx_type === 'contract_call' || tx.tx_type === 'smart_contract';
                     const isContractDeploy = tx.action === 'contract_deploy';
                     const hideAmount = (isSmartContractCall && (!amount || amount === '0'));
                     return (

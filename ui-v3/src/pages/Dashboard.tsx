@@ -12,6 +12,10 @@ import PrimaryButton from "@/components/ui/primary-button";
 import { useAccountBalanceService } from "@/hooks/useAccountBalanceService";
 import { formatNumber } from "@/utils/numbers";
 import useGetRates from "@/hooks/useGetRates";
+import { useEffect, useState } from "react";
+import { TransactionDataService } from "@/services/transactionDataService";
+
+const service = new TransactionDataService();
 
 const Dashboard = () => {
    const { walletId } = useParams<{walletId:`${string}.${string}`}>()
@@ -19,6 +23,14 @@ const Dashboard = () => {
   const { stxBalance, nftBalance, ftBalance, loading, error } = useAccountBalanceService(walletId)
   const { rates: stxRate } = useGetRates("stx")
   const { rates: btcRate } = useGetRates("btc")
+
+  // Add state for transaction count
+  const [txCount, setTxCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!walletId) return;
+    service.getTransactionCount(walletId).then(setTxCount);
+  }, [walletId]);
 
   if (isLoading || loading) {
     return (
@@ -107,8 +119,8 @@ const Dashboard = () => {
               <Activity className="h-4 w-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">5</div>
-              <p className="text-xs text-slate-400">Recent transactions</p>
+              <div className="text-2xl font-bold text-white">{txCount !== null ? txCount : "-"}</div>
+              <p className="text-xs text-slate-400">Total transactions</p>
             </CardContent>
           </Card>
         </div>
