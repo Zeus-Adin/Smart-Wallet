@@ -1,6 +1,6 @@
 import { ContractTypes } from "@/data/walletTypes";
 import { getClientConfig } from "@/utils/chain-config";
-import { defaultUrlFromNetwork, StacksNetworkName } from "@stacks/network";
+import type { Transaction } from '@stacks/stacks-blockchain-api-types';
 import axios from "axios";
 
 export interface SmartWallet {
@@ -36,43 +36,46 @@ export type WalletType = {
 };
 
 export const smartWalletName = "smart-wallet";
-// export const handleGetClientConfig = (
-//   address: string | undefined,
-//   searchParams: URLSearchParams
-// ) => {
-//   const network: StacksNetworkName =
-//     searchParams.get("network") || address?.startsWith("SP")
-//       ? "mainnet"
-//       : "testnet";
-//   const api: string | undefined =
-//     searchParams.get("api") || defaultUrlFromNetwork(network);
-//   const chain: string | undefined = searchParams.get("chain") || network;
-//   const explorer: string | undefined =
-//     searchParams.get("explorer") || "https://explorer.hiro.so/";
-//   return { network, chain, api, explorer };
-// };
+
+// Define a type for the contractInfo returned by handleCCS
+export type SmartWalletContractInfo = {
+  found: boolean;
+  result?: ContractResult;
+  smart_contract?: {
+    contract_id: string;
+    tx_sender?: string;
+  };
+  tx_index?: number;
+  block_time_iso?: string;
+  tx_id?: string;
+  tx_info?: Transaction;
+};
+
 export const handleCCS = async (
   address: string,
   contractId: string,
   txinfo: boolean,
-) => {
-  let contractInfo;
+): Promise<SmartWalletContractInfo> => {
+  let contractInfo: SmartWalletContractInfo;
   try {
     const { api } = getClientConfig(address);
-    contractInfo = (
+    const statusData = (
       await axios.get(
         `${api}/extended/v2/smart-contracts/status?contract_id=${contractId}`
       )
     ).data;
-    contractInfo = contractInfo?.[contractId];
+    contractInfo = statusData?.[contractId];
+
+    console.log({ contractInfo });
     if (contractInfo?.result && txinfo) {
-      const tx_info = (
+      const tx_info: Transaction = (
         await axios.get(`${api}/extended/v1/tx/${contractInfo?.result?.tx_id}`)
       ).data;
       contractInfo = { ...contractInfo, ...tx_info };
+      console.log({ tx_info });
     }
   } catch (error) {
-    contractInfo = { found: false }
+    contractInfo = { found: false };
     console.log({ error });
   }
   return contractInfo;
@@ -133,4 +136,22 @@ export class SmartWalletContractService {
       },
     ];
   }
+}
+
+export interface ContractResult {
+  status: string;
+  tx_id: string;
+  contract_id: string;
+  block_height: number;
+}
+
+export interface ContractInfoEntry {
+  found: boolean;
+  result: ContractResult;
+}
+
+export interface ContractInfo {
+  contractInfo: {
+    [contractName: string]: ContractInfoEntry;
+  };
 }

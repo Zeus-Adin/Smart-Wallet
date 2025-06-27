@@ -1,33 +1,34 @@
-import axios from 'axios';
-import { formatDistanceToNow } from 'date-fns';
-import { getClientConfig } from '../utils/chain-config';
+import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
+import { getClientConfig } from "../utils/chain-config";
 
 export type TxAssetInfo = {
-    amount: string
-    name: string
-    asset: string
-    symbol: string
-}
+  amount: string;
+  name: string;
+  asset: string;
+  symbol: string;
+};
 
 export type TxInfo = {
-    action: string
-    sender: string
-    stamp: string
-    time: string
-    assets: TxAssetInfo[]
-    tx: string
-    tx_status: string
-}
+  action: string;
+  sender: string;
+  stamp: string;
+  time: string;
+  assets: TxAssetInfo[];
+  tx: string;
+  tx_status: string;
+  tx_type?: string;
+};
 export interface Transaction {
   id: string;
-  action: 'sent' | 'receive' | string;
+  action: "sent" | "receive" | string;
   from: string;
   to: string;
   amount: string;
   asset: string;
-  assetType: 'token' | 'nft';
+  assetType: "token" | "nft";
   timestamp: string;
-  status: 'pending' | 'confirmed' | 'failed';
+  status: "pending" | "confirmed" | "failed";
   txHash: string;
 }
 
@@ -108,60 +109,73 @@ export class TransactionDataService {
     const stxsent = Number(stx_sent);
     const stxreceived = Number(stx_received);
 
-    const pcAssetsAndAmounts: PostConditionAsset[] = txData?.post_conditions?.length > 0
-      ? txData.post_conditions.map((c) => ({
-          name: c?.asset?.asset_name ?? 'Stacks',
-          amount: c.amount ?? '0',
-          asset: c?.asset?.contract_address
-            ? `${c.asset.contract_address}.${c.asset.contract_name}`
-            : 'STX',
-          symbol: c?.asset?.asset_name?.replace('-token', '') ?? 'STX'
-        }))
-      : txData?.tx_type === "token_transfer" && txData.token_transfer
-        ? [{
-            name: 'Stacks',
-            amount: txData.token_transfer.amount,
-            asset: 'STX',
-            symbol: 'STX'
-          }]
-        : [];
+    const pcAssetsAndAmounts: PostConditionAsset[] =
+      txData?.post_conditions?.length > 0
+        ? txData.post_conditions.map((c) => ({
+            name: c?.asset?.asset_name ?? "Stacks",
+            amount: c.amount ?? "0",
+            asset: c?.asset?.contract_address
+              ? `${c.asset.contract_address}.${c.asset.contract_name}`
+              : "STX",
+            symbol: c?.asset?.asset_name?.replace("-token", "") ?? "STX",
+          }))
+        : txData?.tx_type === "token_transfer" && txData.token_transfer
+          ? [
+              {
+                name: "Stacks",
+                amount: txData.token_transfer.amount,
+                asset: "STX",
+                symbol: "STX",
+              },
+            ]
+          : [];
 
-    const pcSender = txData?.post_conditions?.[0]?.principal?.contract_name 
+    const pcSender = txData?.post_conditions?.[0]?.principal?.contract_name
       ? `${txData.post_conditions[0].principal.address}.${txData.post_conditions[0].principal.contract_name}`
       : txData.post_conditions?.[0]?.principal?.address;
-    
-    const txSender = txData?.contract_call?.function_args?.[1]?.repr?.replace("'", '') ?? txData.sender_address;
+
+    const txSender =
+      txData?.contract_call?.function_args?.[1]?.repr?.replace("'", "") ??
+      txData.sender_address;
 
     // Normalize status: treat 'success' as 'confirmed', and failed-like statuses as 'failed'
     let normalizedStatus = txData.tx_status;
-    if (normalizedStatus === 'success') normalizedStatus = 'confirmed';
+    if (normalizedStatus === "success") normalizedStatus = "confirmed";
     const failedStatuses = [
-      'abort_by_post_condition',
-      'abort_by_response',
-      'dropped',
-      'error',
-      'failed',
-      'rejected',
-      'abort',
+      "abort_by_post_condition",
+      "abort_by_response",
+      "dropped",
+      "error",
+      "failed",
+      "rejected",
+      "abort",
     ];
     if (failedStatuses.includes(normalizedStatus)) {
-      normalizedStatus = 'failed';
+      normalizedStatus = "failed";
     }
     return {
       id: txData.tx_id,
-      action: stxsent > 0 ? 'sent' : stxreceived > 0 ? 'receive' : txData?.contract_call?.function_name ?? txData.tx_type,
+      action:
+        stxsent > 0
+          ? "sent"
+          : stxreceived > 0
+            ? "receive"
+            : (txData?.contract_call?.function_name ?? txData.tx_type),
       from: txSender,
-      to: pcSender ?? '',
-      amount: pcAssetsAndAmounts[0]?.amount ?? '0',
-      asset: pcAssetsAndAmounts[0]?.symbol ?? 'STX',
-      assetType: 'token',
+      to: pcSender ?? "",
+      amount: pcAssetsAndAmounts[0]?.amount ?? "0",
+      asset: pcAssetsAndAmounts[0]?.symbol ?? "STX",
+      assetType: "token",
       timestamp: formatDistanceToNow(new Date(txData.block_time_iso)),
-      status: normalizedStatus as 'pending' | 'confirmed' | 'failed',
-      txHash: txData.tx_id
+      status: normalizedStatus as "pending" | "confirmed" | "failed",
+      txHash: txData.tx_id,
     };
   }
 
-  async getRecentTransactions(walletAddress: string, offset = 0): Promise<Transaction[]> {
+  async getRecentTransactions(
+    walletAddress: string,
+    offset = 0
+  ): Promise<Transaction[]> {
     if (this.isCacheValid(walletAddress) && offset === 0) {
       return this.cache[walletAddress].transactions;
     }
@@ -173,18 +187,20 @@ export class TransactionDataService {
       );
 
       if (response?.data?.results) {
-        const transactions = response.data.results.map(tx => this.processTransactionData(tx));
-        
+        const transactions = response.data.results.map((tx) =>
+          this.processTransactionData(tx)
+        );
+
         if (offset === 0) {
           this.cache[walletAddress] = {
             transactions,
-            lastFetched: Date.now()
+            lastFetched: Date.now(),
           };
         } else if (this.cache[walletAddress]) {
           // Append new transactions to cache if they don't already exist
           const existingTxs = this.cache[walletAddress].transactions;
           const newTxs = transactions.filter(
-            tx => !existingTxs.some(existing => existing.id === tx.id)
+            (tx) => !existingTxs.some((existing) => existing.id === tx.id)
           );
           this.cache[walletAddress].transactions = [...existingTxs, ...newTxs];
         }
@@ -193,7 +209,7 @@ export class TransactionDataService {
       }
       return [];
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      console.error("Error fetching transactions:", error);
       return [];
     }
   }
@@ -201,21 +217,24 @@ export class TransactionDataService {
   async getRecentRecipients(walletAddress: string): Promise<Recipient[]> {
     try {
       const transactions = await this.getRecentTransactions(walletAddress);
-      const recipientMap = new Map<string, { lastSent: string; frequency: number }>();
+      const recipientMap = new Map<
+        string,
+        { lastSent: string; frequency: number }
+      >();
 
       transactions
-        .filter(tx => tx.action === 'sent')
-        .forEach(tx => {
+        .filter((tx) => tx.action === "sent")
+        .forEach((tx) => {
           const existing = recipientMap.get(tx.to);
           if (existing) {
             recipientMap.set(tx.to, {
               lastSent: tx.timestamp,
-              frequency: existing.frequency + 1
+              frequency: existing.frequency + 1,
             });
           } else {
             recipientMap.set(tx.to, {
               lastSent: tx.timestamp,
-              frequency: 1
+              frequency: 1,
             });
           }
         });
@@ -223,134 +242,173 @@ export class TransactionDataService {
       return Array.from(recipientMap.entries()).map(([address, data]) => ({
         address,
         lastSent: data.lastSent,
-        frequency: data.frequency
+        frequency: data.frequency,
       }));
     } catch (error) {
-      console.error('Error fetching recipients:', error);
+      console.error("Error fetching recipients:", error);
       return [];
     }
   }
 
-   handleGetSwTx = async (address: string, offset: number, setSwTx: (cb: (prev: TxInfo[]) => TxInfo[]) => TxInfo[]) => {
-        if (this.isSwTxCacheValid(address) && offset === 0) {
-          setSwTx(() => this.swTxCache[address].transactions as unknown as TxInfo[]);
-          return;
-        }
-        const { api } = getClientConfig(address);
-        try {
-          const res = await axios.get(`${api}/extended/v2/addresses/${address}/transactions?limit=20&offset=${offset}`);
-          if (res?.data?.results) {
-            const { results } = res.data;
-            const constructTx = results.map((info: StacksTransactionEvent) => {
-              const { stx_sent, stx_received, tx } = info;
-              const stxsent = Number(stx_sent);
-              const stxreceived = Number(stx_received);
-              let normalizedStatus = tx.tx_status;
-              if (normalizedStatus === 'success') normalizedStatus = 'confirmed';
-              const failedStatuses = [
-                'abort_by_post_condition',
-                'abort_by_response',
-                'dropped',
-                'error',
-                'failed',
-                'rejected',
-                'abort',
-              ];
-              if (failedStatuses.includes(normalizedStatus)) {
-                normalizedStatus = 'failed';
-              }
-              const pcAssetsAndAmounts = tx?.post_conditions?.length > 0
-                ? tx?.post_conditions.map((c) => {
-                    const asset = c?.asset?.contract_address
-                      ? `${c?.asset?.contract_address}.${c?.asset?.contract_name}`
-                      : 'STX';
-                    const symbol = c?.asset?.asset_name?.replace('-token', '');
-                    return {
-                      name: c?.asset?.asset_name ?? 'Stacks',
-                      amount: c.amount ?? '0',
-                      asset,
-                      symbol: symbol ?? 'STX',
-                    };
-                  })
-                : tx?.tx_type === 'token_transfer'
+  handleGetSwTx = async (
+    address: string,
+    offset: number,
+    setSwTx: (cb: (prev: TxInfo[]) => TxInfo[]) => TxInfo[]
+  ) => {
+    if (this.isSwTxCacheValid(address) && offset === 0) {
+      setSwTx(
+        () => this.swTxCache[address].transactions as unknown as TxInfo[]
+      );
+      return;
+    }
+    const { api } = getClientConfig(address);
+    try {
+      const res = await axios.get(
+        `${api}/extended/v2/addresses/${address}/transactions?limit=20&offset=${offset}`
+      );
+      if (res?.data?.results) {
+        const { results } = res.data;
+        const constructTx = results.map((info: StacksTransactionEvent) => {
+          const { stx_sent, stx_received, tx } = info;
+          const stxsent = Number(stx_sent);
+          const stxreceived = Number(stx_received);
+          let normalizedStatus = tx.tx_status;
+          if (normalizedStatus === "success") normalizedStatus = "confirmed";
+          const failedStatuses = [
+            "abort_by_post_condition",
+            "abort_by_response",
+            "dropped",
+            "error",
+            "failed",
+            "rejected",
+            "abort",
+          ];
+          if (failedStatuses.includes(normalizedStatus)) {
+            normalizedStatus = "failed";
+          }
+          const pcAssetsAndAmounts =
+            tx?.post_conditions?.length > 0
+              ? tx?.post_conditions.map((c) => {
+                  const asset = c?.asset?.contract_address
+                    ? `${c?.asset?.contract_address}.${c?.asset?.contract_name}`
+                    : "STX";
+                  const symbol = c?.asset?.asset_name?.replace("-token", "");
+                  return {
+                    name: c?.asset?.asset_name ?? "Stacks",
+                    amount: c.amount ?? "0",
+                    asset,
+                    symbol: symbol ?? "STX",
+                  };
+                })
+              : tx?.tx_type === "token_transfer"
                 ? [
                     {
-                      name: 'Stacks',
-                      amount: tx?.token_transfer?.amount ?? '0',
-                      asset: 'STX',
-                      symbol: 'STX',
+                      name: "Stacks",
+                      amount: tx?.token_transfer?.amount ?? "0",
+                      asset: "STX",
+                      symbol: "STX",
                     },
                   ]
                 : [];
-              const pcSender = tx?.post_conditions?.[0]?.principal?.contract_name
-                ? `${tx?.post_conditions?.[0]?.principal?.address}.${tx?.post_conditions?.[0]?.principal?.contract_name}`
-                : tx?.post_conditions?.[0]?.principal?.address;
-              const txSender = tx?.contract_call?.function_args[1]?.repr?.replace("'", '') ?? tx?.sender_address;
-              const isStx = stxsent > 0 || stxreceived > 0;
-              // Special handling for contract_deploy
-              if (tx.tx_type === 'contract_deploy') {
-                if (normalizedStatus !== 'confirmed') {
-                  console.log('Contract deploy not successful:', tx.tx_id, 'status:', normalizedStatus);
-                  return {
-                    action: tx?.contract_call?.function_name ?? tx.tx_type,
-                    sender: txSender,
-                    stamp: formatDistanceToNow(tx?.block_time_iso),
-                    time: tx?.block_time_iso,
-                    assets: [],
-                    tx: tx?.tx_id,
-                    tx_status: normalizedStatus,
-                  };
-                }
-              }
-              if (isStx) {
-                return {
-                  action: stxsent > 0 ? 'sent' : 'receive',
-                  sender: stxreceived > 0 ? txSender : stxsent > 0 ? txSender : pcSender,
-                  stamp: formatDistanceToNow(tx?.block_time_iso),
-                  assets: pcAssetsAndAmounts,
-                  tx: tx?.tx_id,
-                  tx_status: normalizedStatus,
-                };
-              } else {
-                return {
-                  action:
-                    tx?.post_conditions?.length === 0
-                      ? tx?.contract_call?.function_name
-                        ? tx?.contract_call?.function_name
-                        : tx?.tx_type
-                      : pcSender === address
-                      ? 'sent'
-                      : 'receive',
-                  sender: tx?.post_conditions?.length > 0 ? pcSender : txSender,
-                  stamp: formatDistanceToNow(tx?.block_time_iso),
-                  time: tx?.block_time_iso,
-                  assets: pcAssetsAndAmounts,
-                  tx: tx?.tx_id,
-                  tx_status: normalizedStatus,
-                };
-              }
-            });
-            if (offset === 0) {
-              this.swTxCache[address] = {
-                transactions: constructTx,
-                lastFetched: Date.now(),
+          const pcSender = tx?.post_conditions?.[0]?.principal?.contract_name
+            ? `${tx?.post_conditions?.[0]?.principal?.address}.${tx?.post_conditions?.[0]?.principal?.contract_name}`
+            : tx?.post_conditions?.[0]?.principal?.address;
+          const txSender =
+            tx?.contract_call?.function_args[1]?.repr?.replace("'", "") ??
+            tx?.sender_address;
+          const isStx = stxsent > 0 || stxreceived > 0;
+          // Special handling for contract_deploy
+          if (tx.tx_type === "contract_deploy") {
+            if (normalizedStatus !== "confirmed") {
+              console.log(
+                "Contract deploy not successful:",
+                tx.tx_id,
+                "status:",
+                normalizedStatus
+              );
+              return {
+                action: tx?.contract_call?.function_name ?? tx.tx_type,
+                sender: txSender,
+                stamp: formatDistanceToNow(tx?.block_time_iso),
+                time: tx?.block_time_iso,
+                assets: [],
+                tx: tx?.tx_id,
+                tx_status: normalizedStatus,
+                tx_type: tx.tx_type,
               };
-              setSwTx(() => constructTx);
-            } else if (this.swTxCache[address]) {
-              const existingTxs = this.swTxCache[address].transactions as unknown as TxInfo[];
-              const newTxs = (constructTx ?? []).filter((tx: TxInfo) => !existingTxs.some(existing => existing?.tx === tx.tx));
-              this.swTxCache[address].transactions = [...existingTxs, ...newTxs];
-              setSwTx(prev => [...prev, ...newTxs]);
-            } else {
-              setSwTx(prev => {
-                const newTxs = (constructTx ?? []).filter((tx: TxInfo) => !prev.some(existing => existing?.tx === tx.tx));
-                return [...prev, ...newTxs];
-              });
             }
           }
-        } catch (e) {
-          console.log({ e });
+          if (isStx) {
+            return {
+              action: stxsent > 0 ? "sent" : "receive",
+              sender:
+                stxreceived > 0 ? txSender : stxsent > 0 ? txSender : pcSender,
+              stamp: formatDistanceToNow(tx?.block_time_iso),
+              assets: pcAssetsAndAmounts,
+              tx: tx?.tx_id,
+              tx_status: normalizedStatus,
+              tx_type: tx.tx_type,
+            };
+          } else {
+            return {
+              action:
+                tx?.post_conditions?.length === 0
+                  ? tx?.contract_call?.function_name
+                    ? tx?.contract_call?.function_name
+                    : tx?.tx_type
+                  : pcSender === address
+                    ? "sent"
+                    : "receive",
+              sender: tx?.post_conditions?.length > 0 ? pcSender : txSender,
+              stamp: formatDistanceToNow(tx?.block_time_iso),
+              time: tx?.block_time_iso,
+              assets: pcAssetsAndAmounts,
+              tx: tx?.tx_id,
+              tx_status: normalizedStatus,
+              tx_type: tx.tx_type,
+            };
+          }
+        });
+        if (offset === 0) {
+          this.swTxCache[address] = {
+            transactions: constructTx,
+            lastFetched: Date.now(),
+          };
+          setSwTx(() => constructTx);
+        } else if (this.swTxCache[address]) {
+          const existingTxs = this.swTxCache[address]
+            .transactions as unknown as TxInfo[];
+          const newTxs = (constructTx ?? []).filter(
+            (tx: TxInfo) =>
+              !existingTxs.some((existing) => existing?.tx === tx.tx)
+          );
+          this.swTxCache[address].transactions = [...existingTxs, ...newTxs];
+          setSwTx((prev) => [...prev, ...newTxs]);
+        } else {
+          setSwTx((prev) => {
+            const newTxs = (constructTx ?? []).filter(
+              (tx: TxInfo) => !prev.some((existing) => existing?.tx === tx.tx)
+            );
+            return [...prev, ...newTxs];
+          });
         }
       }
-}
+    } catch (e) {
+      console.log({ e });
+    }
+  };
 
+  async getTransactionCount(walletAddress: string): Promise<number> {
+    try {
+      const { api } = getClientConfig(walletAddress);
+      const response = await axios.get<{ total: number }>(
+        `${api}/extended/v2/addresses/${walletAddress}/transactions?limit=1`
+      );
+      // Hiro API returns total count in response.data.total
+      return response?.data?.total ?? 0;
+    } catch (error) {
+      console.error("Error fetching transaction count:", error);
+      return 0;
+    }
+  }
+}
