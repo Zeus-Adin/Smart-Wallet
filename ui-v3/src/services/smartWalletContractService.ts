@@ -1,4 +1,4 @@
-import { ContractTypes } from "@/data/walletTypes";
+import { type ContractType, ContractTypes } from "@/data/walletTypes";
 import { getClientConfig } from "@/utils/chain-config";
 import { defaultUrlFromNetwork, StacksNetworkName } from "@stacks/network";
 import axios from "axios";
@@ -36,21 +36,6 @@ export type WalletType = {
 };
 
 export const smartWalletName = "smart-wallet";
-// export const handleGetClientConfig = (
-//   address: string | undefined,
-//   searchParams: URLSearchParams
-// ) => {
-//   const network: StacksNetworkName =
-//     searchParams.get("network") || address?.startsWith("SP")
-//       ? "mainnet"
-//       : "testnet";
-//   const api: string | undefined =
-//     searchParams.get("api") || defaultUrlFromNetwork(network);
-//   const chain: string | undefined = searchParams.get("chain") || network;
-//   const explorer: string | undefined =
-//     searchParams.get("explorer") || "https://explorer.hiro.so/";
-//   return { network, chain, api, explorer };
-// };
 export const handleCCS = async (
   address: string,
   contractId: string,
@@ -76,7 +61,19 @@ export const handleCCS = async (
     console.log({ error });
   }
   return contractInfo;
-};
+}
+export const constructContractValues = (wr: any, wallets: ContractType) => {
+  const w: WalletType = {
+    id: wr.tx_index,
+    name: wr.smart_contract.contract_id.split(".")[1],
+    contractId: wr.smart_contract.contract_id,
+    stxHolding: 0,
+    btcHolding: 0,
+    ...wallets,
+    createdAt: wr.block_time_iso,
+  };
+  return w
+}
 
 export class SmartWalletContractService {
   async getSmartWallets(walletAddress: string): Promise<SmartWallet[]> {
@@ -85,16 +82,7 @@ export class SmartWalletContractService {
         ContractTypes.map(async (wallets) => {
           const wr = await handleCCS(walletAddress, `${walletAddress}.${wallets.name}`, true);
           if (!wr?.found) return null;
-          console.log({ wr })
-          const w: WalletType = {
-            id: wr.tx_index,
-            name: wr.smart_contract.contract_id.split(".")[1],
-            contractId: wr.smart_contract.contract_id,
-            stxHolding: 0,
-            btcHolding: 0,
-            ...wallets,
-            createdAt: wr.block_time_iso,
-          };
+          const w = constructContractValues(wr, wallets)
           return w;
         })
       )

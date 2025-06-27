@@ -42,6 +42,7 @@
     "@stacks/connect": "^8.1.9",
     "@stacks/network": "^7.0.2",
     "@stacks/stacks-blockchain-api-types": "^7.14.1",
+    "@stacks/transactions": "^7.1.0",
     "@tanstack/react-query": "^5.56.2",
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
