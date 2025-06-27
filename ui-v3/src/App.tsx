@@ -20,6 +20,7 @@ import Terms from "./pages/Terms";
 import About from "./pages/About";
 import Products from "./pages/Products";
 import NotFound from "./pages/NotFound";
+import NftCollections from "./pages/NftCollections";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/actions/:walletId?" element={<GenericActions />} />
           <Route path="/contract-actions/:walletId?" element={<ContractActions />} />
           <Route path="/contract-details/:walletId?" element={<ContractDetails />} />
+          <Route path="/nfts/:walletId?" element={<NftCollections />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

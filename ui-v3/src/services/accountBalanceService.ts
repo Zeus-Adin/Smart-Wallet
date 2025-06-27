@@ -54,7 +54,7 @@ export class AccountBalanceService {
          } else {
             response = (
                await axios.get(
-                  `${api}/metadata/v1/${asset}/${asset_identifiers}/${id}`
+                  `${api}/metadata/v1/${asset_identifiers.split(".")[0]}/${asset_identifiers.split(".")[1]}`
                )
             ).data?.metadata;
          }
@@ -122,9 +122,10 @@ export class AccountBalanceService {
             nftBalanceResponse.map(async (res: nftResponseBalanceValues) => {
                const id = res?.value?.repr?.replace("u", "");
                const asset = res?.asset_identifier;
+					console.log("asset", asset)
                const tokenMeta = await this.handleGetMeta(
                   walletAddress,
-                  asset?.split("::")[0],
+                  asset,
                   Number(id),
                   "nft"
                );

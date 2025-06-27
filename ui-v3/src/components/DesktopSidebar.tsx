@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, Send, History, ArrowDown, ArrowUp } from "lucide-react";
+import { Wallet, Send, History, ArrowDown, ArrowUp, Image } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface DesktopSidebarProps {
@@ -31,6 +31,7 @@ const DesktopSidebar = ({ currentWallet, walletId }: DesktopSidebarProps) => {
     { path: `/contract-actions/${walletId}`, label: "Contract Actions", icon: Wallet },
     { path: `/history/${walletId}`, label: "History", icon: History },
     { path: `/contract-details/${walletId}`, label: "Contract Details", icon: Wallet },
+    { path: `/nfts/${walletId}`, label: "NFT Collections", icon: Image },
   ];
 
   // Add stacking item only if extension is active

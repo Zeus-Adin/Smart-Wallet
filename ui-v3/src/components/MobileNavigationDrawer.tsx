@@ -7,7 +7,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Wallet, Send, History, ArrowDown, ArrowUp, X } from "lucide-react";
+import { Wallet, Send, History, ArrowDown, ArrowUp, X, Image } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface MobileNavigationDrawerProps {
@@ -44,6 +44,7 @@ const MobileNavigationDrawer = ({
     { path: `/contract-actions/${walletId}`, label: "Contract Actions", icon: Wallet },
     { path: `/history/${walletId}`, label: "History", icon: History },
     { path: `/contract-details/${walletId}`, label: "Contract Details", icon: Wallet },
+    { path: `/nfts/${walletId}`, label: "NFT Collections", icon: Image },
   ];
 
   // Add stacking item only if extension is active

@@ -6,6 +6,7 @@ import { NFTBalanceResponse } from "../send/NFTSelectionStep";
 import { TokenBalanceInfo } from "../send/TokenSelectionStep";
 import { formatNumber } from "@/utils/numbers";
 import { TokenMarketData } from "@/hooks/useGetRates";
+import { Link, useParams } from "react-router-dom";
 
 interface Asset {
   name: string;
@@ -16,6 +17,7 @@ interface Asset {
 }
 
 const AssetOverview = ({ assets = [], stx, nfts, fts, stxRate, btcRate }: { assets: Asset[], stx: StxBalance, nfts: NFTBalanceResponse[], fts: TokenBalanceInfo[], stxRate: { [key: string]: TokenMarketData } | TokenMarketData, btcRate: { [key: string]: TokenMarketData } | TokenMarketData }) => {
+	const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
 
   const getAssetIcon = (type: string) => {
     return type === 'nft' ? Image : Coins;
@@ -79,25 +81,28 @@ const AssetOverview = ({ assets = [], stx, nfts, fts, stxRate, btcRate }: { asse
 				</div>
 			</div>)}
 
-			<div className="space-y-3">
-				<div
-					className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
-				>
-					<div className="flex items-center space-x-3">
-					<div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center">
-						<NftIcon className="h-4 w-4 text-purple-400" />
-					</div>
-					<div>
-						<div className="text-white font-medium">NFTs</div>
-						{/* <div className="text-slate-400 text-sm">Nft</div> */}
-					</div>
-					</div>
-					<div className="text-right">
-					<div className="text-white font-medium">{nfts.length}</div>
-					{/* <div className="text-slate-400 text-sm">{asset.usdValue}</div> */}
+			<Link to={`/nfts/${walletId}`}>
+				<div className="space-y-3">
+					<div
+						className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+					>
+						<div className="flex items-center space-x-3">
+						<div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center">
+							<NftIcon className="h-4 w-4 text-purple-400" />
+						</div>
+						<div>
+							<div className="text-white font-medium">NFTs</div>
+							{/* <div className="text-slate-400 text-sm">Nft</div> */}
+						</div>
+						</div>
+						<div className="text-right">
+						<div className="text-white font-medium">{nfts.length}</div>
+						</div>
 					</div>
 				</div>
-			</div>
+			</Link>
+
+			
       </CardContent>
     </Card>
   );
