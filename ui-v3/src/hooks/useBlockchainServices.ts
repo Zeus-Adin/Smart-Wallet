@@ -45,5 +45,6 @@ export const useBlockchainServices = () => {
     transactions: blockchainService.transactions,
     recipients: blockchainService.recipients,
     isLoading: blockchainService.isLoading || isLoading,
+    depositSTX: blockchainService.depositSTX,
   };
 };

@@ -1,18 +1,58 @@
-
 import WalletLayout from "@/components/WalletLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowDown, Wallet } from "lucide-react";
+import { ArrowDown, Wallet, Download } from "lucide-react";
 import QRCode from 'react-qr-code';
 import { useParams } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
+import { Copy, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useBlockchainServices } from "@/hooks/useBlockchainServices";
+import { getClientConfig } from "@/utils/chain-config";
+import { fetchStxUsdPrice } from "@/lib/stxPrice";
 
 const ReceiveAssets = () => {
   const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
+  const { depositSTX } = useBlockchainServices();
+  const { toast } = useToast();
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [isDepositing, setIsDepositing] = useState(false);
+  const [depositSuccess, setDepositSuccess] = useState<{txid:string, network:string}|null>(null);
+  const [copied, setCopied] = useState(false);
+  const [stxUsd, setStxUsd] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchStxUsdPrice().then(setStxUsd);
+  }, []);
 
   const copyToClipboard = () => {
     if (walletId) {
       navigator.clipboard.writeText(walletId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!walletId || !depositAmount) return;
+    setIsDepositing(true);
+    try {
+      // Convert to micro-STX (blockchain decimals)
+      const microStxAmount = (Number(depositAmount) * 1e6).toFixed(0);
+      const result = await depositSTX({ to: walletId, amount: microStxAmount });
+      setDepositSuccess(result);
+      toast({
+        title: "Deposit Successful",
+        description: `Transaction ID: ${result.txid}`,
+        variant: "default",
+      });
+    } catch (e) {
+      toast({ title: "Deposit Failed", description: String(e), variant: "destructive" });
+    } finally {
+      setIsDepositing(false);
     }
   };
 
@@ -39,7 +79,6 @@ const ReceiveAssets = () => {
                   <QRCode value={walletId} size={150} />
                 </div>
               </div>
-
               <div className="space-y-2">
                 <p className="text-slate-400 text-sm">Your Smart Wallet Address:</p>
                 <div className="flex items-center space-x-2">
@@ -53,10 +92,14 @@ const ReceiveAssets = () => {
                     className="bg-purple-600 hover:bg-purple-700"
                     disabled={!walletId}
                   >
-                    Copy
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
+              <Button className="bg-green-600 hover:bg-green-700 w-full flex items-center justify-center gap-2" onClick={() => setShowDepositModal(true)} disabled={!walletId}>
+                <Download className="w-4 h-4" />
+                Deposit
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -124,6 +167,63 @@ const ReceiveAssets = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Dialog open={showDepositModal} onOpenChange={setShowDepositModal}>
+          <DialogContent className="bg-slate-800/90 border text-white border-slate-700 shadow-xl">
+            <DialogHeader>
+              <DialogTitle>Deposit to Smart Wallet</DialogTitle>
+            </DialogHeader>
+            {depositSuccess ? (
+              <div className="flex flex-col gap-4 items-center">
+                <div className="text-green-400 font-bold text-lg">Deposit Successful!</div>
+                <div className="text-white text-sm break-all">TxID: {depositSuccess.txid}</div>
+                <a
+                  href={getClientConfig(walletId).explorer(`txid/${depositSuccess.txid}`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline mt-2"
+                >
+                  View on Explorer
+                </a>
+                <Button onClick={() => { setShowDepositModal(false); setDepositSuccess(null); setDepositAmount(""); }}>Close</Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-4">
+                  <label className="text-slate-300 text-sm">Asset</label>
+                  <Input value="STX" readOnly className="bg-slate-700/50 border-slate-600 text-white" />
+                  <label className="text-slate-300 text-sm">Amount</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Enter amount"
+                    value={depositAmount}
+                    onChange={e => setDepositAmount(e.target.value)}
+                    className="bg-slate-700/50 border-slate-600 text-white"
+                    disabled={isDepositing}
+                  />
+                  {depositAmount && stxUsd && (
+                    <div className="text-xs text-slate-400 mt-1">
+                      ≈ ${(Number(depositAmount) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD
+                    </div>
+                  )}
+                  <label className="text-slate-300 text-sm">To Wallet</label>
+                  <div className="flex items-center space-x-2">
+                    <Input value={walletId || "Loading..."} readOnly className="bg-slate-700/50 border-slate-600 text-white text-center" />
+                    <Button onClick={copyToClipboard} className="bg-purple-600 hover:bg-purple-700" disabled={!walletId}>
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleDeposit} disabled={!depositAmount || isDepositing} className="bg-green-600 hover:bg-green-700 w-full">
+                    {isDepositing ? "Depositing..." : `Deposit ${(Number(depositAmount)).toLocaleString(undefined, { maximumFractionDigits: 6 })} STX`}
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </WalletLayout>
   );
