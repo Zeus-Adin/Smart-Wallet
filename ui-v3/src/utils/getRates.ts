@@ -12,5 +12,5 @@ export async function getRates(symbol?: string) {
 	if (formattedData) {
 		if (symbol) return formattedData[symbol]
 		return formattedData
-	} else return {}
+	}
 }

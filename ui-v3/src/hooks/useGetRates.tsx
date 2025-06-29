@@ -32,22 +32,38 @@ export type TokenMarketData = {
 	symbol: string
 	total_supply: number
 	total_volume: number
- }
- 
+}
 
 export default function useGetRates(symbol?: string) {
 	const [rates, setRates] = useState<{ [key: string]: TokenMarketData } | TokenMarketData>()
+	const [loading, setLoading] = useState(false)
+
+	const storageKey = `rates-cache-${symbol ? symbol : ""}`
 
 	useEffect(() => {
-		(async () => {
-			const res = await getRates(symbol)
-			if (symbol) {
-				setRates(res as TokenMarketData)
-			} else {
-				setRates(res)
-			}
-		})()
-	}, [])
+		async function fetchData() {
+			setLoading(true)
 
-	return { rates }
+			const cached = localStorage.getItem(storageKey)
+
+			if (cached) {
+				try {
+					const parsed = JSON.parse(cached)
+					setRates(parsed)
+					setLoading(false)
+				} catch (error) {
+					localStorage.removeItem(storageKey)
+				}					
+			}
+
+			const res = await getRates(symbol)
+			localStorage.setItem(storageKey, JSON.stringify(res))
+			
+			setRates(res)
+			setLoading(false)
+		}
+		fetchData()
+	}, [symbol])
+
+	return { rates, loading }
 }
