@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { useBlockchainServices } from "@/hooks/useBlockchainServices";
 import { getClientConfig } from "@/utils/chain-config";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
+import PrimaryButton from "@/components/ui/primary-button";
 
 const ReceiveAssets = () => {
   const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
@@ -96,10 +97,10 @@ const ReceiveAssets = () => {
                   </Button>
                 </div>
               </div>
-              <Button className="bg-green-600 hover:bg-green-700 w-full flex items-center justify-center gap-2" onClick={() => setShowDepositModal(true)} disabled={!walletId}>
-                <Download className="w-4 h-4" />
+              <PrimaryButton className="mx-auto w-1/3 flex items-center justify-center gap-2 text-base font-semibold" onClick={() => setShowDepositModal(true)} disabled={!walletId}>
+                <Download className="w-4 h-4 mr-1" />
                 Deposit
-              </Button>
+              </PrimaryButton>
             </div>
           </CardContent>
         </Card>
