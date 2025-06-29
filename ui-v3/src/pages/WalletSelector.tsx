@@ -12,6 +12,7 @@ import LoadingState from "@/components/wallet-selector/LoadingState";
 import AddExistingWalletDialog from "@/components/wallet-selector/AddExistingWalletDialog";
 import { SmartWallet, WalletType } from "@/services/smartWalletContractService";
 import Notice from "@/components/wallet-selector/Notice";
+import { useToast } from "@/hooks/use-toast";
 
 const WalletSelector = () => {
   const [isDemoMode, setIsDemo] = useState<boolean>(false)
@@ -20,6 +21,7 @@ const WalletSelector = () => {
   const [importedWallets, setImportedWallets] = useState<SmartWallet[]>([]);
   const { walletData, isWalletConnected } = useWalletConnection();
   const { loadSmartWallets, smartWallets, isLoading } = useBlockchainService();
+  const { toast } = useToast()
   const nav = useNavigate()
 
   useEffect(() => {
@@ -54,7 +56,22 @@ const WalletSelector = () => {
   }, [smartWallets, importedWallets]);
 
   const handleWalletAdded = (newWallet: SmartWallet) => {
-    setImportedWallets(prev => [...prev, newWallet]);
+    const alreadyExistsImported = importedWallets.some(contract => contract.contractId === newWallet.contractId);
+    const alreadyExistsWalletsToShow = walletsToShow.some(contract => contract.contractId === newWallet.contractId);
+
+    if (!alreadyExistsImported && !alreadyExistsWalletsToShow) {
+      setImportedWallets(prev => [...prev, newWallet])
+      toast({
+        title: "Wallet Added",
+        description: "Smart wallet has been added to your list successfully!",
+      });
+    } else {
+      toast({
+        title: "Wallet Already Exists",
+        description: "Smart wallet was not added due to same contractId's exists",
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
@@ -97,9 +114,9 @@ const WalletSelector = () => {
             <EmptyWalletState />
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {walletsToShow.map((wallet) => (
+              {walletsToShow.map((wallet, id) => (
                 <WalletCard
-                  key={wallet.id}
+                  key={id}
                   wallet={wallet}
                   isDemoMode={isDemoMode}
                 />
