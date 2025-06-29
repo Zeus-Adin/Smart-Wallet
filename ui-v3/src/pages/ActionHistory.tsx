@@ -9,7 +9,7 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import { TxInfo, TransactionDataService } from "@/services/transactionDataService";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
 import { Skeleton } from "@/components/ui/skeleton";
-import{ formatAddressField, formatAmount } from "@/lib/txFormatUtils"
+import{ formatAmount } from "@/lib/txFormatUtils"
 import { useParams } from "react-router-dom";
 import { getClientConfig } from "@/utils/chain-config"
 
@@ -62,11 +62,6 @@ const ActionHistory = () => {
     fetchStxUsdPrice().then(setStxUsd);
   }, []);
 
-  // const loadMore = () => {
-  //   const newOffset = offset + 20;
-  //   setOffset(newOffset);
-  //   fetchTransactions(newOffset);
-  // };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -136,7 +131,6 @@ const ActionHistory = () => {
     if (tx.action === 'receive') return 'Receive';
     if (tx.action === 'contract_call' ) return 'Contract Call';
     if (tx.action === 'contract_deploy') return 'Contract Deploy';
-    return tx.action?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Other';
     return tx.action?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Other';
   };
 

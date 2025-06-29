@@ -26,17 +26,29 @@ export class BlockchainService {
    ): Promise<TransactionResult> {
 		const [address, contractName] = params.contractAddress.split(".")
 
-      const data = await request(
-         {},
-         "stx_callContract",
-         {
-            contract: `${address}.${contractName}`,
-				functionName: "sip009-transfer",
-				functionArgs: [Cl.uint(params.tokenId), Cl.principal(params.to), Cl.contractPrincipal(address, contractName)]
-         }
-      );
-
-      return data;
+		if (params.assetType === "nft") {
+			const txData = await request(
+				{},
+				"stx_callContract",
+				{
+					contract: `${address}.${contractName}`,
+					functionName: "sip009-transfer",
+					functionArgs: [Cl.uint(params.tokenId), Cl.principal(params.to), Cl.contractPrincipal(address, contractName)]
+				}
+			);
+			return txData
+		} else {
+			const txData = await request(
+				{},
+				"stx_callContract",
+				{
+					contract: `${address}.${contractName}`,
+					functionName: "sip010-transfer",
+					functionArgs: [Cl.uint(+params.amount * 1000000), Cl.principal(params.to), Cl.some(Cl.stringUtf8("")), Cl.contractPrincipal(address, contractName)]
+				}
+			);
+			return txData
+		}
    }
 
    async addAdmin(params: {
@@ -89,5 +101,24 @@ export class BlockchainService {
             resolve(randomStatus);
          }, 1000);
       });
+   }
+
+   async depositSTX(params: {
+      to: string;
+      amount: string;
+   }): Promise<{ txid: string; network: string }> {
+
+      const { network } = getClientConfig(params.to);
+
+      const data = await request(
+         "stx_transferStx",
+         {
+            recipient: params.to,
+            amount: Number(params.amount),
+            network,
+         }
+      );
+      // Assume data.txid and network are returned
+      return { txid: data.txid, network };
    }
 }

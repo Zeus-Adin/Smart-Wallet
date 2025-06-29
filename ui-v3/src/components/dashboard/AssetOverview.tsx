@@ -60,7 +60,7 @@ const AssetOverview = ({ assets = [], stx, nfts, fts, stxRate, btcRate }: { asse
 				</div>
 			</div>
 
-			{fts.map(ft => <div className="space-y-3">
+			{fts.map(ft => <div className="space-y-3" key={ft.tx_id}>
 				<div
 					className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
 				>
@@ -74,7 +74,7 @@ const AssetOverview = ({ assets = [], stx, nfts, fts, stxRate, btcRate }: { asse
 					</div>
 					</div>
 					<div className="text-right">
-						<div className="text-white text-sm font-medium">${formatNumber(Number(ft.actual_balance) * Number(btcRate.current_price), 2)}</div>
+						<div className="text-white text-sm font-medium">{btcRate && `$${formatNumber(Number(ft.actual_balance) * Number(btcRate.current_price), 2)}`}</div>
 					</div>
 				</div>
 			</div>)}

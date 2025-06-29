@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TokenMarketData } from "@/hooks/useGetRates";
 import axios from "axios";
 
@@ -12,5 +13,5 @@ export async function getRates(symbol?: string) {
 	if (formattedData) {
 		if (symbol) return formattedData[symbol]
 		return formattedData
-	} else return {}
+	}
 }

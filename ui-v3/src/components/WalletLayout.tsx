@@ -23,7 +23,7 @@ const WalletLayout = ({ children }: WalletLayoutProps) => {
    const [networkParams, setNetworkParams] = useSearchParams();
 
 	const { stxBalance, loading, error } = useAccountBalanceService(walletId)
-  const { rates: stxRate } = useGetRates("stx")
+  const { rates: stxRate, loading: loadingStxRate } = useGetRates("stx")
 
    const handleNetworkSwitch = (network: "mainnet" | "testnet") => {
       setSelectedNetwork(network);
@@ -57,7 +57,7 @@ const WalletLayout = ({ children }: WalletLayoutProps) => {
       name: selectedWallet.name,
       contractId: selectedWallet.contractId,
       balance: stxBalance ? `${formatNumber(+stxBalance.actual_balance, 2)} STX` : "0.00",
-      usdValue: stxBalance && stxRate ? `$${formatNumber(+stxBalance.actual_balance * +stxRate.current_price, 2)}` : "$0.00",
+      usdValue: stxBalance && stxRate ? `$${formatNumber(+stxBalance.actual_balance * +stxRate.current_price, 2)}` : "..."
    };
 
    return (
