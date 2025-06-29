@@ -4,36 +4,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button"; // Add this import if not present
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import { Wallet } from "lucide-react";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 const GenericActions = () => {
-  const [actionType, setActionType] = useState("");
-  const [parameters, setParameters] = useState("");
-  const { selectedWallet } = useSelectedWallet();
+  const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
+  const [action, setAction] = useState<"delegate" | "revoke">("delegate")
+  const [amount, setAmount] = useState<number>(0)
+  const [recipient, setRecipient] = useState<string>("")
+  const [cycles, setCycles] = useState<number>(1)
 
   const handleExecuteAction = () => {
-    if (!selectedWallet) return;
 
-    console.log("Executing action:", {
-      wallet: selectedWallet.address,
-      actionType,
-      parameters: JSON.parse(parameters || "{}")
-    });
-    // Here you would implement the actual action execution logic
   };
 
   return (
     <WalletLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Generic Actions</h1>
-          <p className="text-slate-400">Execute custom actions with your smart wallet.</p>
-          {selectedWallet && (
+          <h1 className="text-3xl font-bold text-white mb-2">Extension</h1>
+          <p className="text-slate-400">Execute actions from deployed extension contracts using your Smart Wallet.</p>
+          {walletId && (
             <p className="text-sm text-purple-300 mt-2">
-              Wallet: {selectedWallet.address}
+              Wallet: {walletId}
             </p>
           )}
         </div>
@@ -47,30 +44,56 @@ const GenericActions = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="action" className="text-slate-300">Action Type</Label>
+              <Label htmlFor="action" className="text-slate-300">Action</Label>
+              <Select value={action} onValueChange={(e: "delegate" | "revoke") => setAction(e)}>
+                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                  <SelectValue placeholder="Select action type" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-600">
+                  <SelectItem value="delegate">Delegate</SelectItem>
+                  <SelectItem value="revoke">Revoke</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="action" className="text-slate-300">Amount</Label>
               <Input
                 id="action"
-                value={actionType}
-                onChange={(e) => setActionType(e.target.value)}
-                placeholder="e.g., transfer, approve, delegate"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+                placeholder={`Enter ${action} amount`}
                 className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="parameters" className="text-slate-300">Parameters (JSON)</Label>
-              <Textarea
-                id="parameters"
-                value={parameters}
-                onChange={(e) => setParameters(e.target.value)}
-                placeholder='{"recipient": "SP1ABC...", "amount": 100}'
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 min-h-24"
+              <Label htmlFor="action" className="text-slate-300">Recipient</Label>
+              <Input
+                id="action"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder={`e.g ${walletId}`}
+                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="action" className="text-slate-300">Cycles</Label>
+              <Input
+                id="action"
+                min={1}
+                value={cycles}
+                onChange={(e) => setCycles(Number(e.target.value))}
+                placeholder="e.g., transfer, approve, delegate"
+                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
               />
             </div>
 
             <PrimaryButton
               className="w-full"
-              disabled={!actionType || !parameters || !selectedWallet}
+              disabled={!amount || !recipient || !walletId}
               onClick={handleExecuteAction}
             >
               Execute Action
@@ -78,34 +101,35 @@ const GenericActions = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700">
+        {/* This will be updated later for extensoins */}
+        <Card className="hidden bg-slate-800/50 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white">Pre-defined Actions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
-              <SecondaryButton className="h-auto p-4 text-left">
+              <SecondaryButton disabled className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Approve Token</div>
                   <div className="text-slate-400 text-sm">Grant spending permission</div>
                 </div>
               </SecondaryButton>
 
-              <SecondaryButton className="h-auto p-4 text-left">
+              <SecondaryButton disabled className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Delegate Voting</div>
                   <div className="text-slate-400 text-sm">Delegate governance power</div>
                 </div>
               </SecondaryButton>
 
-              <SecondaryButton className="h-auto p-4 text-left">
+              <SecondaryButton disabled className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Update Metadata</div>
                   <div className="text-slate-400 text-sm">Change wallet metadata</div>
                 </div>
               </SecondaryButton>
 
-              <SecondaryButton className="h-auto p-4 text-left">
+              <SecondaryButton disabled className="h-auto p-4 text-left">
                 <div>
                   <div className="text-white font-medium">Batch Transfer</div>
                   <div className="text-slate-400 text-sm">Send to multiple recipients</div>

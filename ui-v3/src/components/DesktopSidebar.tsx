@@ -27,7 +27,7 @@ const DesktopSidebar = ({ currentWallet, walletId }: DesktopSidebarProps) => {
     { path: `/dashboard/${walletId}`, label: "Dashboard", icon: Wallet },
     { path: `/send/${walletId}`, label: "Send", icon: Send },
     { path: `/receive/${walletId}`, label: "Receive", icon: ArrowDown },
-    { path: `/actions/${walletId}`, label: "Actions", icon: Wallet },
+    { path: `/actions/${walletId}`, label: "Extensions", icon: Wallet },
     { path: `/contract-actions/${walletId}`, label: "Contract Actions", icon: Wallet },
     { path: `/history/${walletId}`, label: "History", icon: History },
     { path: `/contract-details/${walletId}`, label: "Contract Details", icon: Wallet },
