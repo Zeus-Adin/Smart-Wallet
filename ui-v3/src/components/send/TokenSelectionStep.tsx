@@ -21,8 +21,10 @@ interface SelectedWallet {
 interface TokenSelectionStepProps {
    asset: string;
    amount: string;
+	contractAddress: string;
    selectedWallet: SelectedWallet | null;
    onAssetChange: (asset: string) => void;
+	onContractAddressChange: (address: string) => void;
    onAmountChange: (amount: string) => void;
    onNext: () => void;
    onBack: () => void;
@@ -51,25 +53,27 @@ const TokenSelectionStep = ({
    asset,
    amount,
    selectedWallet,
+	contractAddress,
    onAssetChange,
+	onContractAddressChange,
    onAmountChange,
    onNext,
    onBack,
 }: TokenSelectionStepProps) => {
    const isValid = asset && amount;
 
-   const [FTBalance, setFTBalance] = useState<TokenBalanceInfo[]>([]);
+   const [ftBalance, setFtBalance] = useState<TokenBalanceInfo[]>([]);
    const [selectedFt, setSelectedFt] = useState<TokenBalanceInfo>();
-   const { walletId } = useParams<{ walletId: string }>();
+	const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
 
    useEffect(() => {
       async function fetchNFTBalance() {
-         return await new AccountBalanceService().getFTBalance(walletId, 0);
+         return await new AccountBalanceService().getFtBalance(walletId, 0);
       }
 
       (async () => {
          const balance = await fetchNFTBalance();
-         setFTBalance(balance);
+         setFtBalance(balance);
       })();
    }, [walletId]);
 
@@ -86,11 +90,12 @@ const TokenSelectionStep = ({
             <Select
                value={asset}
                onValueChange={(value) => {
-                  const ft = FTBalance.find((ft) => ft.symbol === value);
+                  const ft = ftBalance.find((ft) => ft.symbol === value);
 
                   if (!ft) return;
 
                   setSelectedFt(ft);
+						onContractAddressChange(walletId)
                   onAssetChange(value);
                }}
                required
@@ -99,7 +104,7 @@ const TokenSelectionStep = ({
                   <SelectValue placeholder="Choose a token to send" />
                </SelectTrigger>
                <SelectContent className="bg-slate-700 border-slate-600">
-                  {FTBalance.map((ft) => (
+                  {ftBalance.map((ft) => (
                      <SelectItem
                         value={ft.symbol}
                         key={ft.symbol}
