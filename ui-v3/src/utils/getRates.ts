@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TokenMarketData } from "@/hooks/useGetRates";
 import axios from "axios";
 

@@ -102,4 +102,23 @@ export class BlockchainService {
          }, 1000);
       });
    }
+
+   async depositSTX(params: {
+      to: string;
+      amount: string;
+   }): Promise<{ txid: string; network: string }> {
+
+      const { network } = getClientConfig(params.to);
+
+      const data = await request(
+         "stx_transferStx",
+         {
+            recipient: params.to,
+            amount: Number(params.amount),
+            network,
+         }
+      );
+      // Assume data.txid and network are returned
+      return { txid: data.txid, network };
+   }
 }
