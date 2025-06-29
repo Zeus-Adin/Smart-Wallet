@@ -6,6 +6,7 @@ import TransactionSummaryStep from "@/components/send/TransactionSummaryStep";
 import PrimaryButton from "@/components/ui/primary-button";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
+import { useParams } from "react-router-dom";
 
 type WizardStep = "assetType" | "assetDetails" | "recipient" | "summary";
 
@@ -81,18 +82,12 @@ const WizardStepRenderer = ({
                <TokenSelectionStep
                   asset={asset}
                   amount={amount}
+                  contractAddress={contractAddress}
                   selectedWallet={selectedWallet}
                   onAssetChange={onAssetChange}
+                  onContractAddressChange={onContractAddressChange}
                   onAmountChange={onAmountChange}
                   onNext={() => {
-                     if (!asset) {
-                        toast({
-                           title: "No selected token",
-                           description: "Select a token to send",
-                           variant: "destructive",
-                        });
-                        return;
-                     }
                      onStepChange("recipient");
                   }}
                   onBack={() => onStepChange("assetType")}
@@ -109,14 +104,6 @@ const WizardStepRenderer = ({
                   onTokenIdChange={onTokenIdChange}
                   onContractAddressChange={onContractAddressChange}
                   onNext={() => {
-                     if (!asset) {
-                        toast({
-                           title: "No selected NFT",
-                           description: "Select an NFT to send",
-                           variant: "destructive",
-                        });
-                        return;
-                     }
                      onStepChange("recipient");
                   }}
                   onBack={() => onStepChange("assetType")}

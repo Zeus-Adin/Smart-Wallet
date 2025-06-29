@@ -3,6 +3,7 @@ import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 import { useBlockchainService } from "@/hooks/useBlockchainService";
 import { TransactionParams } from "@/services/blockchainService";
 import { useToast } from "@/hooks/use-toast";
+import { useParams } from "react-router-dom";
 
 type WizardStep = "assetType" | "assetDetails" | "recipient" | "summary";
 
@@ -14,14 +15,8 @@ export const useSendAssetsWizard = () => {
    const [assetType, setAssetType] = useState<"token" | "nft">("token");
    const [tokenId, setTokenId] = useState("");
    const [contractAddress, setContractAddress] = useState("");
+	const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
 
-   // console.log({
-   //    asset,
-   //    assetType,
-   //    tokenId,
-   //    contractAddress,
-   //    currentStep,
-   // });
 
    const { selectedWallet } = useSelectedWallet();
    const {
@@ -65,14 +60,15 @@ export const useSendAssetsWizard = () => {
          amount: assetType === "nft" ? "1" : amount,
          asset: asset,
          assetType: assetType,
-         ...(assetType === "nft" && { tokenId, contractAddress }),
+			contractAddress: contractAddress || walletId,
+         ...(assetType === "nft" && { tokenId }),
       };
 
       try {
          const result = await sendTransaction(transactionParams);
          toast({
             title: isDemoMode ? "Demo Transaction Sent" : "Transaction Sent",
-            description: `Transaction hash: ${result.txHash}`,
+            description: `Transaction hash: ${result.transaction}`,
          });
 
          resetForm();
