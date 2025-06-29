@@ -62,7 +62,7 @@ export default function useGetRates(symbol?: string) {
 			}
 
 			const res = await getRates(symbol)
-			localStorage.setItem(storageKey, JSON.stringify({ timestamp: now, ...res }))
+			localStorage.setItem(storageKey, JSON.stringify({ timestamp: Date.now(), ...res }))
 			
 			setRates(res)
 			setLoading(false)
