@@ -13,8 +13,11 @@ import { useBlockchainServices } from "@/hooks/useBlockchainServices";
 import { getClientConfig } from "@/utils/chain-config";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
 import PrimaryButton from "@/components/ui/primary-button";
+import { useAccountBalanceService } from "@/hooks/useAccountBalanceService";
+import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 
 const ReceiveAssets = () => {
+  const { selectedWallet } = useSelectedWallet();
   const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
   const { depositSTX } = useBlockchainServices();
   const { toast } = useToast();
@@ -24,6 +27,10 @@ const ReceiveAssets = () => {
   const [depositSuccess, setDepositSuccess] = useState<{txid:string, network:string}|null>(null);
   const [copied, setCopied] = useState(false);
   const [stxUsd, setStxUsd] = useState<number | null>(null);
+  const userWalletAddress = selectedWallet?.address || "";
+  const { stxBalance, loading: balanceLoading, error: balanceError, ftBalance } = useAccountBalanceService(userWalletAddress);
+  const [showMaxWarning, setShowMaxWarning] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<'STX' | string>('STX');
 
   useEffect(() => {
     fetchStxUsdPrice().then(setStxUsd);
@@ -57,6 +64,40 @@ const ReceiveAssets = () => {
     }
   };
 
+  // Helper to get available balance for selected asset
+  const getAvailableBalance = () => {
+    if (selectedAsset === 'STX') {
+      return stxBalance?.balance ? Number(stxBalance.balance) / 1e6 : 0;
+    }
+    const ft = ftBalance?.find(ft => ft.symbol === selectedAsset);
+    return ft ? Number(ft.balance) / Math.pow(10, ft.decimals || 6) : 0;
+  };
+  const available = getAvailableBalance();
+
+  // Handler for Max button
+  const handleMax = () => {
+    if (available > 0) {
+      setDepositAmount(available.toFixed(6));
+      setShowMaxWarning(true);
+    }
+  };
+
+  // Handler for input change (prevent exceeding balance)
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (!val || isNaN(Number(val))) {
+      setDepositAmount(val);
+      return;
+    }
+    if (Number(val) > available) {
+      setDepositAmount(available.toFixed(6));
+    } else {
+      setDepositAmount(val);
+    }
+    setShowMaxWarning(false);
+  };
+
+  console.log("ftBalance:", ftBalance);
   return (
     <WalletLayout>
       <div className="space-y-6">
@@ -192,18 +233,48 @@ const ReceiveAssets = () => {
               <>
                 <div className="flex flex-col gap-4">
                   <label className="text-slate-300 text-sm">Asset</label>
-                  <Input value="STX" readOnly className="bg-slate-700/50 border-slate-600 text-white" />
-                  <label className="text-slate-300 text-sm">Amount</label>
+                  <select
+                    value={selectedAsset}
+                    onChange={e => {
+                      setSelectedAsset(e.target.value);
+                      setDepositAmount("");
+                      setShowMaxWarning(false);
+                    }}
+                    className="bg-slate-700/50 border-slate-600 text-white rounded p-2"
+                    disabled={isDepositing || balanceLoading}
+                  >
+                    <option value="STX">STX (Available: {stxBalance?.balance ? (Number(stxBalance.balance) / 1e6).toLocaleString(undefined, { maximumFractionDigits: 6 }) : 0})</option>
+                    {ftBalance && ftBalance.map(ft => (
+                      <option key={ft.symbol} value={ft.symbol}>
+                        {ft.symbol} (Available: {Number(ft.balance) / Math.pow(10, ft.decimals || 6)})
+                      </option>
+                    ))}
+                  </select>
+                  <label className="text-slate-300 text-sm flex items-center justify-between">
+                    Amount
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="ml-2 bg-slate-600 hover:bg-slate-700 text-xs px-2 py-1"
+                      onClick={handleMax}
+                      disabled={balanceLoading || available === 0}
+                    >
+                      Max
+                    </Button>
+                  </label>
                   <Input
                     type="number"
                     min="0"
-                    placeholder="Enter amount"
+                    placeholder={balanceLoading ? "Loading..." : `Max: ${available.toFixed(6)}`}
                     value={depositAmount}
-                    onChange={e => setDepositAmount(e.target.value)}
+                    onChange={handleAmountChange}
                     className="bg-slate-700/50 border-slate-600 text-white"
-                    disabled={isDepositing}
+                    disabled={isDepositing || balanceLoading}
                   />
-                  {depositAmount && stxUsd && (
+                  {showMaxWarning && (
+                    <div className="text-xs text-yellow-400 mt-1">Warning: You are about to deposit your entire {selectedAsset} balance.</div>
+                  )}
+                  {depositAmount && stxUsd && selectedAsset === 'STX' && (
                     <div className="text-xs text-slate-400 mt-1">
                       ≈ ${(Number(depositAmount) * stxUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD
                     </div>
@@ -215,10 +286,18 @@ const ReceiveAssets = () => {
                       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
+                  {balanceError && (
+                    <div className="text-xs text-red-400 mt-1">Error loading balance.</div>
+                  )}
+                  <div className="text-xs text-slate-400 mt-1">Available: {balanceLoading ? "Loading..." : `${available.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${selectedAsset}`}</div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleDeposit} disabled={!depositAmount || isDepositing} className="bg-green-600 hover:bg-green-700 w-full">
-                    {isDepositing ? "Depositing..." : `Deposit ${(Number(depositAmount)).toLocaleString(undefined, { maximumFractionDigits: 6 })} STX`}
+                  <Button
+                    onClick={handleDeposit}
+                    disabled={!depositAmount || isDepositing || Number(depositAmount) > available || Number(depositAmount) <= 0 || balanceLoading}
+                    className="bg-green-600 hover:bg-green-700 w-full"
+                  >
+                    {isDepositing ? `Depositing...` : `Deposit ${(Number(depositAmount)).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${selectedAsset}`}
                   </Button>
                 </DialogFooter>
               </>
