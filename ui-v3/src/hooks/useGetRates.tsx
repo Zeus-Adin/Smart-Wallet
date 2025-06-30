@@ -45,19 +45,24 @@ export default function useGetRates(symbol?: string) {
 			setLoading(true)
 
 			const cached = localStorage.getItem(storageKey)
+			const now = Date.now()
 
 			if (cached) {
 				try {
 					const parsed = JSON.parse(cached)
-					setRates(parsed)
-					setLoading(false)
+
+					if(now - parsed.timestamp < 5 * 60 * 1000) {
+						setRates(parsed)
+						setLoading(false)
+						return
+					}
 				} catch (error) {
 					localStorage.removeItem(storageKey)
 				}					
 			}
 
 			const res = await getRates(symbol)
-			localStorage.setItem(storageKey, JSON.stringify(res))
+			localStorage.setItem(storageKey, JSON.stringify({ timestamp: Date.now(), ...res }))
 			
 			setRates(res)
 			setLoading(false)
