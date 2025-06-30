@@ -1,28 +1,26 @@
+# netlify.toml
+
 [build]
-  publish = "dist"        # or "build" or "public", depending on your project
+  publish = "dist"
   command = "pnpm run build"
 
 [dev]
   command = "pnpm run dev"
   port = 8888
-  targetPort = 3000       # The port your local dev server runs on
+  targetPort = 3000
 
-[redirects]
-  # Redirect all requests to index.html (for single-page apps)
-  [[redirects]]
-    from = "/*"
-    to = "/index.html"
-    status = 200
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-[headers]
-  # Example: add security headers
-  [[headers]]
-    for = "/*"
-    [headers.values]
-      X-Frame-Options = "DENY"
-      X-XSS-Protection = "1; mode=block"
-      Referrer-Policy = "strict-origin-when-cross-origin"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
