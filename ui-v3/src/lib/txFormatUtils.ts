@@ -1,5 +1,3 @@
-// src/lib/txFormatUtils.ts
-
 export const formatAmount = (amount: string, decimals: number = 6) => {
   if (!amount) return '';
   const num = Number(amount) / Math.pow(10, decimals);
