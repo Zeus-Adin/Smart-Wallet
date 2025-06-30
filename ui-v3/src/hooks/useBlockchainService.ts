@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useWalletConnection } from './useWalletConnection';
 import { BlockchainService, TransactionParams } from '@/services/blockchainService';
@@ -120,6 +119,7 @@ export const useBlockchainService = () => {
     addAdmin: blockchainService.addAdmin,
     transferOwnership: blockchainService.transferOwnership,
     depositSTX: blockchainService.depositSTX,
+    depositFT: blockchainService.depositFT,
     // isDemoMode
   };
 };

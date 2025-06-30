@@ -19,7 +19,7 @@ import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 const ReceiveAssets = () => {
   const { selectedWallet } = useSelectedWallet();
   const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
-  const { depositSTX } = useBlockchainServices();
+  const { depositSTX, depositFT } = useBlockchainServices();
   const { toast } = useToast();
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
@@ -48,9 +48,19 @@ const ReceiveAssets = () => {
     if (!walletId || !depositAmount) return;
     setIsDepositing(true);
     try {
-      // Convert to micro-STX (blockchain decimals)
-      const microStxAmount = (Number(depositAmount) * 1e6).toFixed(0);
-      const result = await depositSTX({ to: walletId, amount: microStxAmount });
+      let result;
+      if (selectedAsset === 'STX') {
+        
+        const microStxAmount = (Number(depositAmount) * 1e6).toFixed(0);
+        result = await depositSTX({ to: walletId, amount: microStxAmount });
+      } else {
+        
+        const ft = ftBalance?.find(ft => ft.symbol === selectedAsset);
+        if (!ft) throw new Error('Token not found');
+        
+        const baseAmount = (Number(depositAmount) * Math.pow(10, ft.decimals || 6)).toFixed(0);
+        result = await depositFT({ token: ft.token, to: walletId, amount: baseAmount, decimals: ft.decimals || 6, sender: selectedWallet?.address});
+      }
       setDepositSuccess(result);
       toast({
         title: "Deposit Successful",
