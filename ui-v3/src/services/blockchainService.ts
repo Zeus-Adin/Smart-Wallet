@@ -37,7 +37,7 @@ export class BlockchainService {
          Pc.principal(walletId).willSendLte(1).ft(walletId, 'ect')
       ]
 
-      let serializedPayload
+      let serializedPayload: any
       if (params?.["pox-addr"]?.version && params?.["pox-addr"]?.hashbytes) {
          serializedPayload = hexToBytes(serializeCV(
             Cl.tuple({
