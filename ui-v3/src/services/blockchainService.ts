@@ -1,7 +1,10 @@
 import { getClientConfig } from "@/utils/chain-config";
-import { request } from "@stacks/connect";
-import { DeployContractParams, TransactionResult } from "@stacks/connect/dist/types/methods";
-import { Cl } from '@stacks/transactions'
+import { formatDecimals } from "@/utils/numbers";
+import { ContractCallArgument, request } from "@stacks/connect";
+import { CallContractParams, DeployContractParams, TransactionResult } from "@stacks/connect/dist/types/methods";
+import { Cl, Pc, serializeCV } from '@stacks/transactions'
+import { hexToBytes } from '@noble/hashes/utils';
+
 
 export interface TransactionParams {
    from: string;
@@ -13,7 +16,64 @@ export interface TransactionParams {
    contractAddress?: string;
 }
 
+export type ExtensionCallParams = {
+   action: string
+   extension: string
+   "amount-ustx": number,
+   decimal: number,
+   "delegate-to": string,
+   "until-burn-ht": number,
+   "pox-addr": {
+      version: string,
+      hashbytes: string
+   }
+}
+
 export class BlockchainService {
+   async callExtensionContract(walletId: `${string}.${string}`, params: ExtensionCallParams) {
+      const delegateAmount = formatDecimals(params["amount-ustx"], params.decimal, true)
+      const postConditions = [
+         Pc.principal(walletId).willSendLte(delegateAmount).ustx(),
+         Pc.principal(walletId).willSendLte(1).ft(walletId, 'ect')
+      ]
+
+      let serializedPayload
+      if (params?.["pox-addr"]?.version && params?.["pox-addr"]?.hashbytes) {
+         serializedPayload = hexToBytes(serializeCV(
+            Cl.tuple({
+               "action": Cl.stringAscii(params.action),
+               "amount-ustx": Cl.uint(delegateAmount),
+               "delegate-to": Cl.principal(params["delegate-to"]),
+               "until-burn-ht": Cl.none(),
+               "pox-addr": Cl.tuple({
+                  'version': Cl.bufferFromAscii(params["pox-addr"].version),
+                  'hashbytes': Cl.bufferFromAscii(params["pox-addr"].hashbytes)
+               })
+            })
+         ))
+      } else {
+         serializedPayload = hexToBytes(serializeCV(
+            Cl.tuple({
+               "action": Cl.stringAscii(params.action),
+               "amount-ustx": Cl.uint(delegateAmount),
+               "delegate-to": Cl.principal(params["delegate-to"]),
+               "until-burn-ht": Cl.none(),
+               "pox-addr": Cl.none(),
+            })
+         ))
+      }
+      const txoptions: CallContractParams = {
+         contract: walletId,
+         functionName: 'extension-call',
+         functionArgs: [
+            Cl.principal(params.extension),
+            Cl.buffer(serializedPayload)
+         ]
+      }
+      await request('stx_callContract', txoptions)
+         .then((tx) => tx)
+         .catch((e) => { console.log({ e }) })
+   }
    // Handles contract deploys
    async deployContract(params: DeployContractParams) {
       await request('stx_deployContract', params)
@@ -24,31 +84,31 @@ export class BlockchainService {
    async sendTransaction(
       params: TransactionParams
    ): Promise<TransactionResult> {
-		const [address, contractName] = params.contractAddress.split(".")
+      const [address, contractName] = params.contractAddress.split(".")
 
-		if (params.assetType === "nft") {
-			const txData = await request(
-				{},
-				"stx_callContract",
-				{
-					contract: `${address}.${contractName}`,
-					functionName: "sip009-transfer",
-					functionArgs: [Cl.uint(params.tokenId), Cl.principal(params.to), Cl.contractPrincipal(address, contractName)]
-				}
-			);
-			return txData
-		} else {
-			const txData = await request(
-				{},
-				"stx_callContract",
-				{
-					contract: `${address}.${contractName}`,
-					functionName: "sip010-transfer",
-					functionArgs: [Cl.uint(+params.amount * 1000000), Cl.principal(params.to), Cl.some(Cl.stringUtf8("")), Cl.contractPrincipal(address, contractName)]
-				}
-			);
-			return txData
-		}
+      if (params.assetType === "nft") {
+         const txData = await request(
+            {},
+            "stx_callContract",
+            {
+               contract: `${address}.${contractName}`,
+               functionName: "sip009-transfer",
+               functionArgs: [Cl.uint(params.tokenId), Cl.principal(params.to), Cl.contractPrincipal(address, contractName)]
+            }
+         );
+         return txData
+      } else {
+         const txData = await request(
+            {},
+            "stx_callContract",
+            {
+               contract: `${address}.${contractName}`,
+               functionName: "sip010-transfer",
+               functionArgs: [Cl.uint(+params.amount * 1000000), Cl.principal(params.to), Cl.some(Cl.stringUtf8("")), Cl.contractPrincipal(address, contractName)]
+            }
+         );
+         return txData
+      }
    }
 
    async addAdmin(params: {
@@ -71,7 +131,7 @@ export class BlockchainService {
    }
 
    async transferOwnership(params: {
-      contractAddress: string; 
+      contractAddress: string;
       newOwnerAddress: string;
    }): Promise<TransactionResult> {
       const [address, contractName] = params.contractAddress.split(".");

@@ -7,6 +7,16 @@ export const formatAmount = (amount: string, decimals: number = 6) => {
   return num.toLocaleString(undefined, { maximumFractionDigits: decimals });
 };
 
+export const formatDecimals = (value: number | string, decimals: number, isUmicro: boolean): string => {
+  let result: any
+  if (isUmicro) {
+    result = (Number(value) * 10 ** decimals).toFixed(0);
+  } else {
+    result = (Number(value) / 10 ** decimals).toFixed(4);
+  }
+  return result
+}
+
 export const formatAddressField = (value: string | undefined, lineLength = 48, maxLines = 3) => {
   if (!value) return '';
   const clean = value.replace(/^(\(list |\[|\]|'|\))/g, '').replace(/'/g, '').trim();
