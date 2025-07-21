@@ -7,7 +7,7 @@ import { Wallet, Settings, Plus, Trash2, Copy, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { handleCCS } from "@/services/smartWalletContractService";
-import { useBlockchainServices } from "@/hooks/useBlockchainServices";
+import { useBlockchainService } from "@/hooks/useBlockchainService";
 import GreenButton from "@/components/ui/green-button";
 import PrimaryButton from "@/components/ui/primary-button";
 import { useAccountBalanceService } from "@/hooks/useAccountBalanceService";
@@ -34,7 +34,7 @@ type WalletInfo = {
 const WalletDetails = () => {
   const { walletId } = useParams<{ walletId: `${string}.${string}` }>();
   const [searchParams] = useSearchParams();
-  const { addAdmin, transferOwnership } = useBlockchainServices();
+  const { addAdmin, transferOwnership } = useBlockchainService();
   const { toast } = useToast();
 
   const [walletInfo, setWalletInfo] = useState<WalletInfo | null>(null);
@@ -211,8 +211,8 @@ const WalletDetails = () => {
                     onClick={() =>
                       handleCopy(
                         walletInfo?.smart_contract?.contract_id ||
-                          walletId ||
-                          "",
+                        walletId ||
+                        "",
                         "contractId"
                       )
                     }
@@ -362,13 +362,13 @@ const WalletDetails = () => {
                   (ext) =>
                     !activeExtensions.find((active) => active.id === ext.id)
                 ).length === 0 && (
-                  <div className="text-center py-8">
-                    <Plus className="h-12 w-12 text-slate-500 mx-auto mb-3" />
-                    <p className="text-slate-400">
-                      All available extensions are installed
-                    </p>
-                  </div>
-                )}
+                    <div className="text-center py-8">
+                      <Plus className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                      <p className="text-slate-400">
+                        All available extensions are installed
+                      </p>
+                    </div>
+                  )}
               </div>
             </CardContent>
           </Card>

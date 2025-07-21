@@ -1,11 +1,11 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useContext, createContext } from 'react';
 import { useWalletConnection } from './useWalletConnection';
 import { BlockchainService, TransactionParams } from '@/services/blockchainService';
 import { MockBlockchainService } from '@/services/mockBlockchainService';
 import { TransactionDataService, Transaction, Recipient } from '@/services/transactionDataService';
 import { MockTransactionDataService } from '@/services/mockTransactionDataService';
-import { AccountBalanceService, AccountBalance } from '@/services/accountBalanceService';
+import { AccountBalanceService, AccountBalanceType } from '@/services/accountBalanceService';
 import { MockAccountBalanceService } from '@/services/mockAccountBalanceService';
 import { SmartWalletContractService, SmartWallet, WalletActivity } from '@/services/smartWalletContractService';
 import { MockSmartWalletContractService } from '@/services/mockSmartWalletContractService';
@@ -16,7 +16,7 @@ export const useBlockchainService = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [accountBalances, setAccountBalances] = useState<AccountBalance>();
+  const [accountBalances, setAccountBalances] = useState<AccountBalanceType>();
   const [smartWallets, setSmartWallets] = useState<SmartWallet[]>([]);
   const [walletActivity, setWalletActivity] = useState<WalletActivity[]>([]);
   const [searchParams] = useSearchParams();
@@ -62,7 +62,8 @@ export const useBlockchainService = () => {
   const loadAccountBalances = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
     try {
-      const balances = await accountBalanceService.getAccountBalances(walletAddress, '');
+      const balances = await accountBalanceService.getAccountBalances(walletAddress);
+      console.log({ balances })
       setAccountBalances(balances);
     } catch (error) {
       console.error('Failed to load account balances:', error);

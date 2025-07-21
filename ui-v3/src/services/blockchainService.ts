@@ -19,12 +19,12 @@ export interface TransactionParams {
 export type ExtensionCallParams = {
    action: string
    extension: string
-   "amount-ustx": number,
-   decimal: number,
-   "delegate-to": string,
-   "until-burn-ht": number,
+   "amount-ustx": number
+   decimal: number
+   "delegate-to": string
+   "until-burn-ht": number
    "pox-addr": {
-      version: string,
+      version: string
       hashbytes: string
    }
 }

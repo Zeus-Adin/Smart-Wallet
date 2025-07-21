@@ -13,6 +13,8 @@ import AddExistingWalletDialog from "@/components/wallet-selector/AddExistingWal
 import { SmartWallet, WalletType } from "@/services/smartWalletContractService";
 import Notice from "@/components/wallet-selector/Notice";
 import { useToast } from "@/hooks/use-toast";
+import { useAccountBalanceService } from "@/hooks/useAccountBalanceService";
+import useGetRates from "@/hooks/useGetRates";
 
 const WalletSelector = () => {
   const [isDemoMode, setIsDemo] = useState<boolean>(false)
@@ -20,7 +22,10 @@ const WalletSelector = () => {
   const [walletsToShow, setWalletsToShow] = useState<SmartWallet[]>([]);
   const [importedWallets, setImportedWallets] = useState<SmartWallet[]>([]);
   const { walletData, isWalletConnected } = useWalletConnection();
-  const { loadSmartWallets, smartWallets, isLoading } = useBlockchainService();
+  const { loadAccountBalances, loadSmartWallets, smartWallets, isLoading } = useBlockchainService();
+  const { stxBalance, loading: balanceLoading } = useAccountBalanceService(walletData?.addresses.stx?.[0]?.address)
+  const { rates, loading: rateLoading } = useGetRates('stx')
+
   const { toast } = useToast()
   const nav = useNavigate()
 
@@ -29,9 +34,7 @@ const WalletSelector = () => {
       if (isWalletConnected) {
         try {
           await loadSmartWallets(walletData.addresses.stx[0].address)
-        } catch (error) {
-          console.error('Failed to fetch wallet data:', error)
-        }
+        } catch (error) { console.error('Failed to fetch wallet data:', error) }
       }
     }
 
@@ -49,9 +52,12 @@ const WalletSelector = () => {
   }, [isPageLoading, walletData, isWalletConnected, loadSmartWallets, nav]);
 
   useEffect(() => {
+    console.log('look here', { walletData, stxBalance, balanceLoading })
+  }, [walletData, stxBalance, balanceLoading])
+
+  useEffect(() => {
     // Combine detected wallets with imported wallets
     const allWallets = [...smartWallets, ...importedWallets];
-    console.log({ allWallets })
     setWalletsToShow(allWallets);
   }, [smartWallets, importedWallets]);
 
@@ -77,10 +83,9 @@ const WalletSelector = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <WalletSelectorHeader
-        totalBalance="1,234.56 STX"
-        usdValue="$2,469.12"
+        totalBalance={Number(stxBalance?.balance ?? 0)?.toFixed(4)}
+        usdValue={(Number(stxBalance?.balance ?? 0) * Number(rates?.current_price ?? 0))?.toFixed(4)}
       />
-
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div className="flex items-center justify-between">

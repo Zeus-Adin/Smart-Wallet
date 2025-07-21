@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { AccountBalanceService, StxBalance } from "@/services/accountBalanceService";
+import { AccountBalanceService, FungibleType, NftResponseBalance, FtResponseBalance } from "@/services/accountBalanceService";
 import { NFTBalanceResponse } from "@/components/send/NFTSelectionStep";
 import { TokenBalanceInfo } from "@/components/send/TokenSelectionStep";
+import { toast } from "./use-toast";
 
 export function useAccountBalanceService(walletAddress: string) {
-  const [stxBalance, setStxBalance] = useState<StxBalance>(null);
-  const [nftBalance, setNftBalance] = useState<NFTBalanceResponse[]>(null);
-  const [ftBalance, setFtBalance] = useState<TokenBalanceInfo[]>(null);
+  const [stxBalance, setStxBalance] = useState<FungibleType>(null);
+  const [sBtcBalance, setSBtcBalance] = useState<FungibleType>(null);
+  const [nftBalance, setNftBalance] = useState<NftResponseBalance[]>(null);
+  const [ftBalance, setFtBalance] = useState<FtResponseBalance[]>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -16,20 +18,20 @@ export function useAccountBalanceService(walletAddress: string) {
     setLoading(true);
     setError(null);
 
-    // Fetch balances in parallel
-    Promise.all([
-      balancesService.getStxBalance(walletAddress, 0),
-      balancesService.getNftBalance(walletAddress, "", 0),
-      balancesService.getFtBalance(walletAddress, 0),
-    ])
-      .then(([stx, nft, ft]) => {
-        setStxBalance(stx);
-        setNftBalance(nft);
-        setFtBalance(ft);
+    balancesService.getAccountBalances(walletAddress)
+      .then((result) => {
+        setStxBalance(result.stx);
+        setSBtcBalance(result.sbtc);
+        setNftBalance(result.nft);
+        setFtBalance(result.ft);
       })
-      .catch(setError)
+      .catch((e) => {
+        toast({ title: "Error", description: e.message, });
+      })
       .finally(() => setLoading(false));
   }, [walletAddress]);
 
-  return { stxBalance, nftBalance, ftBalance, loading, error };
+  console.log({ walletAddress, loading, error })
+
+  return { stxBalance, sBtcBalance, nftBalance, ftBalance, loading, error };
 }

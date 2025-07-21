@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/components/ui/use-toast";
 import { Copy, Check } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useBlockchainServices } from "@/hooks/useBlockchainServices";
+import { useBlockchainService } from "@/hooks/useBlockchainService";
 import { getClientConfig } from "@/utils/chain-config";
 import { fetchStxUsdPrice } from "@/lib/stxPrice";
 import PrimaryButton from "@/components/ui/primary-button";
@@ -19,12 +19,12 @@ import { useSelectedWallet } from "@/hooks/useSelectedWallet";
 const ReceiveAssets = () => {
   const { selectedWallet } = useSelectedWallet();
   const { walletId } = useParams<{ walletId: `${string}.${string}` }>()
-  const { depositSTX } = useBlockchainServices();
+  const { depositSTX } = useBlockchainService();
   const { toast } = useToast();
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
-  const [depositSuccess, setDepositSuccess] = useState<{txid:string, network:string}|null>(null);
+  const [depositSuccess, setDepositSuccess] = useState<{ txid: string, network: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [stxUsd, setStxUsd] = useState<number | null>(null);
   const userWalletAddress = selectedWallet?.address || "";
